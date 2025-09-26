@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="NewFolder\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\BlogAPI.Domain\BlogAPI.Domain.csproj" />
     <ProjectReference Include="..\BlogAPI.Infrastructure\BlogAPI.Infrastructure.csproj" />
   </ItemGroup>
