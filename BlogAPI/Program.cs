@@ -1,12 +1,12 @@
 using BlogAPI.Application.DependencyInjection;
-using BlogAPI.Infrastructure;
+using BlogAPI.Infrastructure.DependencyInjection;
 using BlogAPI.Web.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddWeb(builder.Configuration);
+builder.Services.AddPresentation(builder.Configuration);
 builder.Services.AddApplication();
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddInfrastructure();
 
 var app = builder.Build();
 

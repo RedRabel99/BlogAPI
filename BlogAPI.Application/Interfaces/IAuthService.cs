@@ -1,6 +1,5 @@
 ﻿using BlogAPI.Application.DTOs;
 using BlogAPI.Domain.Abstractions;
-using BlogAPI.Domain.Models;
 
 namespace BlogAPI.Application.Interfaces
 {

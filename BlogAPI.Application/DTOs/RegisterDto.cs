@@ -1,6 +1,6 @@
 ﻿namespace BlogAPI.Application.DTOs;
 
-public class RegisterDto
+public record RegisterDto
 {
     public string UserName { get; set; }
     public string Password { get; set; }

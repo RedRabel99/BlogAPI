@@ -9,7 +9,7 @@ namespace BlogAPI.Web.DependencyInjection;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddWeb(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddPresentation(this IServiceCollection services, IConfiguration configuration)
     {
         //keep it false till confirmation and email service is implemented 
         services.Configure<IdentityOptions>(options =>
@@ -45,7 +45,7 @@ public static class DependencyInjection
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(options =>
         {
-            options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo()
+            options.SwaggerDoc("v1", new OpenApiInfo()
             {
                 Title = "Blog Api",
                 Version = "v1"

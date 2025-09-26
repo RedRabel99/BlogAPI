@@ -1,6 +1,4 @@
-﻿using BlogAPI.Domain.Interfaces;
-
-namespace BlogAPI.Domain.Interfaces
+﻿namespace BlogAPI.Domain.Interfaces
 {
     public interface IUserContext
     {

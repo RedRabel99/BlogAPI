@@ -2,21 +2,15 @@
 using BlogAPI.Infrastructure.Identity;
 using BlogAPI.Infrastructure.Repositories;
 using BlogAPI.Infrastructure.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 
-namespace BlogAPI.Infrastructure;
+namespace BlogAPI.Infrastructure.DependencyInjection;
 
 public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(
-        this IServiceCollection services,
-        IConfiguration configuration)
+        this IServiceCollection services)
     {
         services.AddDbContext<AppDbContext>(options => {
             options.UseInMemoryDatabase("AppDb");

@@ -27,6 +27,7 @@ public class AuthService : IAuthService
 
     public async Task<Result<UserProfileDto>> GetCurrentUserProfileAsync(string userId)
     {
+        //rewrite is authenticated logic 
         if (!_userContext.IsAuthenticated)
         {
             return null;
