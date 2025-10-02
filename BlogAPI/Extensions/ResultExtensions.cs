@@ -1,6 +1,4 @@
 ﻿using BlogAPI.Domain.Abstractions;
-using System.Security.Cryptography.X509Certificates;
-using static System.Net.WebRequestMethods;
 
 namespace BlogAPI.Web.Extensions;
 
