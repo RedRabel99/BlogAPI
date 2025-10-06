@@ -1,6 +1,6 @@
 ﻿using BlogAPI.Domain;
 using BlogAPI.Domain.Abstractions;
-using BlogAPI.Domain.Interfaces;
+using BlogAPI.Domain.Interfaces.Auth;
 using Microsoft.AspNetCore.Identity;
 
 namespace BlogAPI.Infrastructure.Identity;

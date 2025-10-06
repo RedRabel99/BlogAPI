@@ -1,4 +1,5 @@
 ﻿using BlogAPI.Application.Interfaces;
+using BlogAPI.Application.Mapping;
 using BlogAPI.Application.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -9,7 +10,8 @@ namespace BlogAPI.Application.DependencyInjection
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
             services.AddScoped<IAuthService, AuthService>();
-
+            services.AddScoped<IUserProfileService, UserProfileService>();
+            services.AddAutoMapper(cfg => { }, typeof(MappingProfile));
             return services;
         }
     }

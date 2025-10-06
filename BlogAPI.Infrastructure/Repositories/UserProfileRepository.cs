@@ -1,5 +1,5 @@
-﻿using BlogAPI.Domain.Interfaces;
-using BlogAPI.Domain.Models;
+﻿using BlogAPI.Domain.Interfaces.UserProfiles;
+using BlogAPI.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace BlogAPI.Infrastructure.Repositories;
@@ -13,11 +13,11 @@ public class UserProfileRepository : IUserProfileRepository
         _appDbContext = appDbContext;
     }
 
-    public async Task<UserProfile> CreateAsync(UserProfile profile)
+    public async Task<Guid> CreateAsync(UserProfile profile)
     {
         _appDbContext.UserProfiles.Add(profile);
         await _appDbContext.SaveChangesAsync();
-        return profile;
+        return profile.Id;
     }
 
     public async Task DeleteAsync(Guid id)
@@ -28,17 +28,24 @@ public class UserProfileRepository : IUserProfileRepository
         await _appDbContext.SaveChangesAsync();
     }
 
-    public async Task<UserProfile> GetByIdAsync(Guid id)
+    public async Task<UserProfile?> GetByIdAsync(Guid id)
     {
-        return await _appDbContext.UserProfiles.FirstOrDefaultAsync(x => x.Id == id);
+        return await _appDbContext.UserProfiles
+            .FirstOrDefaultAsync(x => x.Id == id);
     }
 
-    public async Task<UserProfile> GetByIdentityUserIdAsync(string identityUserId)
+    public async Task<UserProfile?> GetByApplicationUserIdAsync(string identityUserId)
     {
-        return await _appDbContext.UserProfiles.FirstOrDefaultAsync(x => x.ApplicationUserId == identityUserId);
+        return await _appDbContext.UserProfiles
+            .FirstOrDefaultAsync(x => x.ApplicationUserId == identityUserId);
     }
 
-    public async Task<UserProfile> UpdateAsync(UserProfile profile)
+    public IQueryable<UserProfile> GetAll()
+    {
+        return _appDbContext.UserProfiles;
+    }
+
+    public async Task<UserProfile?> UpdateAsync(UserProfile profile)
     {
         _appDbContext.UserProfiles.Update(profile);
         await _appDbContext.SaveChangesAsync();

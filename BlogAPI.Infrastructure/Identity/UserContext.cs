@@ -1,4 +1,4 @@
-﻿using BlogAPI.Domain.Interfaces;
+﻿using BlogAPI.Domain.Interfaces.Auth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;

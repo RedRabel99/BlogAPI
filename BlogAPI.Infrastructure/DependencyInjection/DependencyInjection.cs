@@ -1,4 +1,5 @@
-﻿using BlogAPI.Domain.Interfaces;
+﻿using BlogAPI.Domain.Interfaces.Auth;
+using BlogAPI.Domain.Interfaces.UserProfiles;
 using BlogAPI.Infrastructure.Identity;
 using BlogAPI.Infrastructure.Repositories;
 using BlogAPI.Infrastructure.Services;

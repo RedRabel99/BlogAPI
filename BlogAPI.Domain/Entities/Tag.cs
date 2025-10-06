@@ -1,4 +1,4 @@
-﻿namespace BlogAPI.Domain.Models;
+﻿namespace BlogAPI.Domain.Entities;
 
 public class Tag : BaseEntity
 {

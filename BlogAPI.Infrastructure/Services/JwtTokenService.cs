@@ -1,4 +1,4 @@
-﻿using BlogAPI.Domain.Interfaces;
+﻿using BlogAPI.Domain.Interfaces.Auth;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
