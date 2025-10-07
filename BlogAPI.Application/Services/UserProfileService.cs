@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using BlogAPI.Application.DTOs;
+using BlogAPI.Application.Extensions;
 using BlogAPI.Application.Interfaces;
 using BlogAPI.Application.Shared;
 using BlogAPI.Domain;
@@ -60,39 +61,15 @@ public class UserProfileService : IUserProfileService
 
     public async Task<Result<PagedList<UserProfileDto>>> GetUserProfiles(UserProfileQueryParameters queryParameters)
     {
-        var query = _userProfileRepository.GetAll();
+        var query = _userProfileRepository
+            .GetAll()
+            .ApplyFiltering(queryParameters)
+            .ApplySorting(queryParameters)
+            .ProjectTo<UserProfileDto>(_mapper.ConfigurationProvider);
 
-        if (!string.IsNullOrEmpty(queryParameters.UserName))
-        {
-            query = query.Where(u => u.UserName.Contains(queryParameters.UserName));
-        }
-
-        if (!string.IsNullOrEmpty(queryParameters.DisplayName))
-        {
-            query = query.Where(u => u.DisplayName.Contains(queryParameters.DisplayName));
-        }
-
-        Expression<Func<UserProfile, object>> keySelector = queryParameters.SortColumn?.ToLower() switch
-        {
-            "username" => userProfile => userProfile.UserName,
-            "displayname" => userProfile => userProfile.DisplayName,
-            _ => userProfile => userProfile.Id
-        };
-        if (!string.IsNullOrEmpty(queryParameters.SortColumn))
-        {
-            query = queryParameters.SortingOrder == SortingOrder.Ascending ?
-                query.OrderBy(keySelector) : query.OrderByDescending(keySelector);
-        }
-
-        return Result<PagedList<UserProfileDto>>
-            .Success(
-                await PagedList<UserProfileDto>
-                .CreateAsync(
-                    query.ProjectTo<UserProfileDto>(_mapper.ConfigurationProvider),
-                    queryParameters.Page,
-                    queryParameters.PageSize
-                    ));
+        var result = await PagedList<UserProfileDto>.CreateAsync(query, queryParameters.Page, queryParameters.PageSize);
         
+        return Result<PagedList<UserProfileDto>>.Success(result);
     }
 
     public async Task<Result<UserProfileDto>> UpdateUserProfile(Guid id, UpdateUserProfileDto profile)
@@ -108,7 +85,7 @@ public class UserProfileService : IUserProfileService
         {
             return Result<UserProfileDto>.Failure(UserProfileErrors.Forbidden);
         }
-        //var entity = _mapper.Map<UserProfile>(profile);
+
         entity.UserName = profile.UserName;
         entity.DisplayName = profile.DisplayName;
 
