@@ -25,7 +25,7 @@ public class UserProfileController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IResult> GetUserProfiles([FromQuery] UserProfileQueryParameters queryParameters)
+    public async Task<IResult> GetUserProfiles([FromQuery] UserProfileQueryParametersDto queryParameters)
     {
         var result = await _userProfileService.GetUserProfiles(queryParameters);
         //I'm keeping the result as returned type in case enpoint is expanded to feature filtering

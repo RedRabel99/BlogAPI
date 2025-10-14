@@ -1,13 +1,8 @@
 ﻿using BlogAPI.Application.Shared;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BlogAPI.Application.DTOs;
 
-public class UserProfileQueryParameters
+public class UserProfileQueryParametersDto
 {
     public string? UserName { get; set; } 
     public string? DisplayName{ get; set; }

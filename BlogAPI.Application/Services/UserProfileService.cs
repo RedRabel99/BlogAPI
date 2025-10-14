@@ -6,11 +6,8 @@ using BlogAPI.Application.Interfaces;
 using BlogAPI.Application.Shared;
 using BlogAPI.Domain;
 using BlogAPI.Domain.Abstractions;
-using BlogAPI.Domain.Entities;
 using BlogAPI.Domain.Interfaces.Auth;
 using BlogAPI.Domain.Interfaces.UserProfiles;
-using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace BlogAPI.Application.Services;
 
@@ -59,7 +56,7 @@ public class UserProfileService : IUserProfileService
         return Result<UserProfileDto>.Success(resutUserProfile);
     }
 
-    public async Task<Result<PagedList<UserProfileDto>>> GetUserProfiles(UserProfileQueryParameters queryParameters)
+    public async Task<Result<PagedList<UserProfileDto>>> GetUserProfiles(UserProfileQueryParametersDto queryParameters)
     {
         var query = _userProfileRepository
             .GetAll()

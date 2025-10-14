@@ -9,7 +9,7 @@ public static class UserProfileQueryExtensions
 {
     public static IQueryable<UserProfile> ApplyFiltering(
         this IQueryable<UserProfile> query,
-        UserProfileQueryParameters queryParameters)
+        UserProfileQueryParametersDto queryParameters)
     {
         if (!string.IsNullOrWhiteSpace(queryParameters.UserName))
         {
@@ -32,7 +32,7 @@ public static class UserProfileQueryExtensions
 
     public static IQueryable<UserProfile> ApplySorting(
         this IQueryable<UserProfile> query,
-        UserProfileQueryParameters queryParameters)
+        UserProfileQueryParametersDto queryParameters)
     {
         if (string.IsNullOrEmpty(queryParameters.SortColumn))
         {
@@ -46,7 +46,7 @@ public static class UserProfileQueryExtensions
             : query.OrderByDescending(keySelector);
     }
 
-    private static Expression<Func<UserProfile, object>> GetSortProperty(UserProfileQueryParameters queryParameters)
+    private static Expression<Func<UserProfile, object>> GetSortProperty(UserProfileQueryParametersDto queryParameters)
     {
         return queryParameters.SortColumn?.ToLower() switch
         {
