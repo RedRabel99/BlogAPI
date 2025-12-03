@@ -22,6 +22,16 @@ public class IdentityUserManager : IUserManager
             Email = email
         };
         var result = await _userManager.CreateAsync(user, password);
+        if(result is null)
+        {
+            return Result<IUserInfo>.Failure(AuthErrors.AuthFailure);
+        }
+        if(result.Succeeded is false)
+        {
+            //TODO: implement corect auth errors
+            return Result<IUserInfo>.Failure(AuthErrors.AuthFailure);
+        }
+
         return Result<IUserInfo>.Success(new UserInfoAdapter(user));
 }
 

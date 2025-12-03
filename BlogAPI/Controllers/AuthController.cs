@@ -1,6 +1,7 @@
 ﻿using BlogAPI.Application;
 using BlogAPI.Application.DTOs;
 using BlogAPI.Application.Interfaces;
+using BlogAPI.Web.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -20,45 +21,24 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register(RegisterDto registerDto)
+    public async Task<IResult> Register(RegisterDto registerDto)
     {
-        var registerResult = await _authService.RegisterAsync(registerDto);
-
-        if (registerResult.IsError is true)
-        {
-            return BadRequest(new { errors = new { registerResult.Error } });
-        }
-
-        return Ok(new
-        {
-            //TODO:later, change the registrations endpoint not to generate and return the token
-            token = registerResult.Value,
-            message = "Registration succesful"
-        });
+        var result = await _authService.RegisterAsync(registerDto);
+        return result.IsSuccess ? Results.Ok(result.Value) : result.ToProblemDetails();
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login(LoginDto loginDto)
+    public async Task<IResult> Login(LoginDto loginDto)
     {
         var result = await _authService.LoginAsync(loginDto);
-
-        if (result.IsError is true)
-        {
-            return Unauthorized(new { errors = new { result.Error } });
-        }
-
-        return Ok(new
-        {
-            token = result.Value,
-            message = "Login successful"
-        });
+        return result.IsSuccess ? Results.Ok(result.Value) : result.ToProblemDetails();
     }
 
     [Authorize]
     [HttpGet("test")]
-    public async Task<IActionResult> Test()
+    public async Task<IResult> Test()
     {
-        return Ok(new
+        return Results.Ok(new
         {
             result = "it works"
         });

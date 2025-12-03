@@ -11,4 +11,7 @@ public static class AuthErrors
 
     public static readonly Error InvalidCredentials =
         Error.Forbidden("AuthErrors.InvalidCredentials", "Given credentials are invalid");
+
+    public static readonly Error AuthFailure =
+        Error.Internal("AuthErrors.AuthFailure", "Something went wrong while authenticating");
 }

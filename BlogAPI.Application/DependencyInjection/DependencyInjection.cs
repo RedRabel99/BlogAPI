@@ -1,6 +1,8 @@
 ﻿using BlogAPI.Application.Interfaces;
 using BlogAPI.Application.Mapping;
 using BlogAPI.Application.Services;
+using BlogAPI.Application.Validators.UserProfile;
+using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BlogAPI.Application.DependencyInjection
@@ -11,6 +13,7 @@ namespace BlogAPI.Application.DependencyInjection
         {
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IUserProfileService, UserProfileService>();
+            services.AddValidatorsFromAssemblyContaining<UpdateUserProfileDtoValidator>(ServiceLifetime.Transient);
             services.AddAutoMapper(cfg => { }, typeof(MappingProfile));
             return services;
         }

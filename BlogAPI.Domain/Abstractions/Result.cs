@@ -2,7 +2,7 @@
 
 public class Result
 {
-    protected Result(bool isSuccess, Error error)
+    protected Result(bool isSuccess, Error error, IReadOnlyList<Error> subErrors = null)
     {
         if ((isSuccess && error != Error.None) ||
             !isSuccess && error == Error.None)
@@ -11,12 +11,14 @@ public class Result
         }
         IsSuccess = isSuccess;
         Error = error;
+        SubErrors = subErrors;
     }
 
     public bool IsSuccess { get; }
     public bool IsError => !IsSuccess;
 
     public Error Error { get; }
+    public IReadOnlyList<Error>? SubErrors { get; }
 
     public static Result Success() => new(true, Error.None);
     public static Result Failure(Error error) => new(false, error);
