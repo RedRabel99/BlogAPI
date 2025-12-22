@@ -6,6 +6,7 @@ using BlogAPI.Domain.Interfaces.UserProfiles;
 using BlogAPI.Domain.Entities;
 using BlogAPI.Domain;
 using AutoMapper;
+using FluentValidation;
 
 namespace BlogAPI.Application.Services;
 
@@ -16,6 +17,7 @@ public class AuthService : IAuthService
     private readonly IUserProfileRepository _userProfileRepository;
     private readonly IUserContext _userContext;
     private readonly IMapper _mapper;
+    private readonly IValidator<RegisterDto> _validator;
 
     public AuthService(
         IUserManager userManager,
@@ -63,6 +65,13 @@ public class AuthService : IAuthService
 
     public async Task<Result<Guid>> RegisterAsync(RegisterDto registerDto)
     {
+        var validationResult = _validator.Validate(registerDto);
+
+        if (validationResult.IsValid is false)
+        {
+          //  return Result<Guid>.Failure()
+        }
+
         var authResult = await _userManager
             .CreateUserAsync(registerDto.Email, registerDto.Password);
 

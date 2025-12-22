@@ -17,7 +17,8 @@ public static class ResultExtensions
             type: GetType(result.Error.Type),
             extensions: new Dictionary<string, object?>
             {
-                {"errors", new[]{result.Error} }
+                {"errors", new[]{result.Error}
+                            .Concat(result.SubErrors ?? Enumerable.Empty<Error>()).ToArray()}
             }
             );
     }

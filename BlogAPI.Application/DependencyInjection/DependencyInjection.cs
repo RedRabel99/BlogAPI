@@ -1,6 +1,7 @@
 ﻿using BlogAPI.Application.Interfaces;
 using BlogAPI.Application.Mapping;
 using BlogAPI.Application.Services;
+using BlogAPI.Application.Validators.Auth;
 using BlogAPI.Application.Validators.UserProfile;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;

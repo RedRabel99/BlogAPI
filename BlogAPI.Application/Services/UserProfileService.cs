@@ -14,7 +14,7 @@ namespace BlogAPI.Application.Services;
 public class UserProfileService : IUserProfileService
 {
     private readonly IUserProfileRepository _userProfileRepository;
-    private readonly IMapper _mapper;
+    private readonly IMapper _mapper;   
     private readonly IUserContext _userContext;
 
     public UserProfileService(
