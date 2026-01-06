@@ -14,7 +14,7 @@ namespace BlogAPI.Application.DependencyInjection
         {
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IUserProfileService, UserProfileService>();
-            services.AddValidatorsFromAssemblyContaining<UpdateUserProfileDtoValidator>(ServiceLifetime.Transient);
+            services.AddValidatorsFromAssemblyContaining<RegisterDtoValidator>(ServiceLifetime.Transient);
             services.AddAutoMapper(cfg => { }, typeof(MappingProfile));
             return services;
         }

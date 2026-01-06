@@ -22,11 +22,13 @@ public class Result
 
     public static Result Success() => new(true, Error.None);
     public static Result Failure(Error error) => new(false, error);
+    public static Result ValidationFailure(string code, IReadOnlyList<Error> validationErrors) =>
+        new(false, Error.Validation(code,"One or more validation errors occured"), validationErrors);
 }
 
 public class Result<T> : Result
 {
-    private Result(bool isSuccess, T value, Error error) : base(isSuccess, error)
+    private Result(bool isSuccess, T value, Error error, IReadOnlyList<Error> subErrors = null) : base(isSuccess, error, subErrors)
     {
         Value = value;
     }
@@ -34,4 +36,6 @@ public class Result<T> : Result
 
     public static Result<T> Success(T value) => new(true, value, Error.None);
     public static new Result<T> Failure(Error error) => new(false, default!, error);
+    public static Result<T> ValidationFailure(string code, IReadOnlyList<Error> validationErrors) =>
+        new(false, default!, Error.Validation(code, "One or more validation errors occured"), validationErrors);
 }

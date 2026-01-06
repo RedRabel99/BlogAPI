@@ -7,6 +7,7 @@ using BlogAPI.Domain.Entities;
 using BlogAPI.Domain;
 using AutoMapper;
 using FluentValidation;
+using BlogAPI.Application.Extentions;
 
 namespace BlogAPI.Application.Services;
 
@@ -24,13 +25,15 @@ public class AuthService : IAuthService
         ITokenService tokenService,
         IUserProfileRepository userProfileRepository,
         IUserContext userContext,
-        IMapper mapper)
+        IMapper mapper,
+        IValidator<RegisterDto> validator)
     {
         _userManager = userManager;
         _tokenService = tokenService;
         _userProfileRepository = userProfileRepository;
         _userContext = userContext;
         _mapper = mapper;
+        _validator = validator;
     }
 
     public async Task<Result<UserProfileDto>> GetCurrentUserProfileAsync(string userId)
@@ -70,6 +73,7 @@ public class AuthService : IAuthService
         if (validationResult.IsValid is false)
         {
           //  return Result<Guid>.Failure()
+          return validationResult.ToValidationFailure<Guid>();
         }
 
         var authResult = await _userManager

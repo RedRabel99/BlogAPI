@@ -10,6 +10,15 @@ public static class ResultExtensions
         {
             throw new InvalidOperationException();
         }
+        if(result.Error.Type == ErrorType.Validation && result.SubErrors?.Any() is true)
+        {
+            return Results.ValidationProblem(
+                statusCode: StatusCodes.Status400BadRequest,
+                errors: result.SubErrors.ToValidationErrors(),
+                title: "Bad request",
+                type: "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1"
+                );
+        }
 
         return Results.Problem(
             statusCode: GetStatusCode(result.Error.Type),
@@ -17,11 +26,13 @@ public static class ResultExtensions
             type: GetType(result.Error.Type),
             extensions: new Dictionary<string, object?>
             {
-                {"errors", new[]{result.Error}
-                            .Concat(result.SubErrors ?? Enumerable.Empty<Error>()).ToArray()}
+                {"errors", new[]{result.Error}}
             }
             );
     }
+
+    private static IDictionary<string, string[]> ToValidationErrors(this IReadOnlyList<Error> subErrors) =>
+        subErrors.Where(e => !String.IsNullOrEmpty(e.PropertyName)).GroupBy(e => e.PropertyName!).ToDictionary(g => g.Key, g => g.Select(e => e.Description).ToArray());
 
     private static string? GetType(ErrorType errorType) =>
         errorType switch
