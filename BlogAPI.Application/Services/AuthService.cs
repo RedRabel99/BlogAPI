@@ -72,7 +72,6 @@ public class AuthService : IAuthService
 
         if (validationResult.IsValid is false)
         {
-          //  return Result<Guid>.Failure()
           return validationResult.ToValidationFailure<Guid>();
         }
 
