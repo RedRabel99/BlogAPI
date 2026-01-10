@@ -10,29 +10,16 @@ public static class ResultExtensions
         {
             throw new InvalidOperationException();
         }
-        if(result.Error.Type == ErrorType.Validation && result.SubErrors?.Any() is true)
+        if (result.Error.Type == ErrorType.Validation && result.SubErrors?.Any() is true)
         {
-            return Results.ValidationProblem(
-                statusCode: StatusCodes.Status400BadRequest,
-                errors: result.SubErrors.ToValidationErrors(),
-                title: "Bad request",
-                type: "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1"
-                );
+            return GetValidationProblemDetailsAsResult(result);
         }
 
-        return Results.Problem(
-            statusCode: GetStatusCode(result.Error.Type),
-            title: GetTitle(result.Error.Type),
-            type: GetType(result.Error.Type),
-            extensions: new Dictionary<string, object?>
-            {
-                {"errors", new[]{result.Error}}
-            }
-            );
+        return GetProblemDetailsAsResult(result);
     }
 
-    private static IDictionary<string, string[]> ToValidationErrors(this IReadOnlyList<Error> subErrors) =>
-        subErrors.Where(e => !String.IsNullOrEmpty(e.PropertyName)).GroupBy(e => e.PropertyName!).ToDictionary(g => g.Key, g => g.Select(e => e.Description).ToArray());
+    private static IDictionary<string, string[]> ToValidationErrors(this IReadOnlyList<SubError> subErrors) =>
+        subErrors.Where(e => !String.IsNullOrEmpty(e.Name)).GroupBy(e => e.Name!).ToDictionary(g => g.Key, g => g.Select(e => e.Description).ToArray());
 
     private static string? GetType(ErrorType errorType) =>
         errorType switch
@@ -65,4 +52,27 @@ public static class ResultExtensions
             ErrorType.Forbidden => "Forbidden",
             _ => "Server Error"
         };
+
+    private static IResult GetValidationProblemDetailsAsResult(Result result)
+    {
+        return Results.ValidationProblem(
+                statusCode: StatusCodes.Status400BadRequest,
+                errors: result.SubErrors.ToValidationErrors(),
+                title: "Bad request",
+                type: "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1"
+                );
+    }
+
+    private static IResult GetProblemDetailsAsResult(Result result)
+    {
+        return Results.Problem(
+            statusCode: GetStatusCode(result.Error.Type),
+            title: GetTitle(result.Error.Type),
+            type: GetType(result.Error.Type),
+            extensions: new Dictionary<string, object?>
+            {
+                {"errors", new[]{result.Error}}
+            }
+            );
+    }
 }
