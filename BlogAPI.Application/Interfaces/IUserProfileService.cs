@@ -1,5 +1,5 @@
 ﻿using BlogAPI.Application.DTOs;
-using BlogAPI.Application.Shared;
+using BlogAPI.Application.Shared.Pagination;
 using BlogAPI.Domain.Abstractions;
 
 namespace BlogAPI.Application.Interfaces

@@ -1,4 +1,5 @@
 ﻿using BlogAPI.Domain.Abstractions;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace BlogAPI.Web.Extensions;
 
@@ -59,6 +60,7 @@ public static class ResultExtensions
                 statusCode: StatusCodes.Status400BadRequest,
                 errors: result.SubErrors.ToValidationErrors(),
                 title: "Bad request",
+
                 type: "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1"
                 );
     }
@@ -69,10 +71,10 @@ public static class ResultExtensions
             statusCode: GetStatusCode(result.Error.Type),
             title: GetTitle(result.Error.Type),
             type: GetType(result.Error.Type),
+            detail: result.Error.Description,
             extensions: new Dictionary<string, object?>
             {
-                {"errors", new[]{result.Error}}
-            }
+                { "reasons", result.SubErrors.ToDictionary(x => x.Name, x => x.Description)} }
             );
     }
 }
