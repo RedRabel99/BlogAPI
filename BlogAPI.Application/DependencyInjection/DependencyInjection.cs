@@ -1,6 +1,7 @@
 ﻿using BlogAPI.Application.Interfaces;
 using BlogAPI.Application.Mapping;
 using BlogAPI.Application.Services;
+using BlogAPI.Application.Shared.Pagination;
 using BlogAPI.Application.Validators.Auth;
 using BlogAPI.Application.Validators.UserProfile;
 using FluentValidation;
@@ -14,6 +15,7 @@ namespace BlogAPI.Application.DependencyInjection
         {
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IUserProfileService, UserProfileService>();
+            services.AddSingleton<IPagedListFactory, PagedListFactory>();
             services.AddValidatorsFromAssemblyContaining<RegisterDtoValidator>(ServiceLifetime.Transient);
             services.AddAutoMapper(cfg => { }, typeof(MappingProfile));
             return services;

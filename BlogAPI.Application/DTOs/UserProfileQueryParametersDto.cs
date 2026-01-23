@@ -7,8 +7,8 @@ public class UserProfileQueryParametersDto
     public string? UserName { get; set; } 
     public string? DisplayName{ get; set; }
     public string? SortColumn { get; set; } = "UserName";
-    public SortingOrder SortingOrder { get; set; } = SortingOrder.Ascending;
+    public string SortingOrder { get; set; } = "asc";
 
-    public int Page { get; set; } = 1;
-    public int PageSize { get; set; } = 50;
+    public int? Page { get; set; }
+    public int? PageSize { get; set; }
 }

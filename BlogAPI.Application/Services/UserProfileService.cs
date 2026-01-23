@@ -3,11 +3,14 @@ using AutoMapper.QueryableExtensions;
 using BlogAPI.Application.DTOs;
 using BlogAPI.Application.Extensions;
 using BlogAPI.Application.Interfaces;
-using BlogAPI.Application.Shared;
+using BlogAPI.Application.Shared.Pagination;
+using BlogAPI.Application.Shared.UserProfile;
 using BlogAPI.Domain;
 using BlogAPI.Domain.Abstractions;
 using BlogAPI.Domain.Interfaces.Auth;
 using BlogAPI.Domain.Interfaces.UserProfiles;
+using FluentValidation;
+using Microsoft.Extensions.Options;
 
 namespace BlogAPI.Application.Services;
 
@@ -16,15 +19,25 @@ public class UserProfileService : IUserProfileService
     private readonly IUserProfileRepository _userProfileRepository;
     private readonly IMapper _mapper;   
     private readonly IUserContext _userContext;
+    private readonly IValidator<UpdateUserProfileDto> _updateValidator;
+    private readonly IValidator<UserProfileQueryParametersDto> _queryParametersValidation;
+    private readonly IPagedListFactory _pagedListFactory;
 
     public UserProfileService(
         IUserProfileRepository userProfileRepository,
         IMapper mapper,
-        IUserContext userContext)
+        IUserContext userContext,
+        IValidator<UpdateUserProfileDto> updateValidation,
+        IValidator<UserProfileQueryParametersDto> queryParametersValidation,
+        IPagedListFactory pagedListFactory
+        )
     {
         _userProfileRepository = userProfileRepository;
         _mapper = mapper;
         _userContext = userContext;
+        _updateValidator = updateValidation;
+        _queryParametersValidation = queryParametersValidation;
+        _pagedListFactory = pagedListFactory;
     }
 
     public async Task<Result> DeleteUserProfileById(Guid id)
@@ -58,19 +71,37 @@ public class UserProfileService : IUserProfileService
 
     public async Task<Result<PagedList<UserProfileDto>>> GetUserProfiles(UserProfileQueryParametersDto queryParameters)
     {
+        var validationResult = _queryParametersValidation.Validate(queryParameters);
+
+        if (validationResult.IsValid is false)
+        {
+            return validationResult.ToValidationFailure<PagedList<UserProfileDto>>();
+        }
+
+        var queryFilters = new UserProfileQueryFiltering(queryParameters.UserName, queryParameters.DisplayName);
+        var sortingParams = new UserProfileQuerySorting(queryParameters.SortingOrder, queryParameters.SortColumn);
+        
         var query = _userProfileRepository
             .GetAll()
-            .ApplyFiltering(queryParameters)
-            .ApplySorting(queryParameters)
+            .ApplyFiltering(queryFilters)
+            .ApplySorting(sortingParams)
+
             .ProjectTo<UserProfileDto>(_mapper.ConfigurationProvider);
 
-        var result = await PagedList<UserProfileDto>.CreateAsync(query, queryParameters.Page, queryParameters.PageSize);
+        var result = await _pagedListFactory.CreateAsync(query, queryParameters.Page, queryParameters.PageSize);
         
         return Result<PagedList<UserProfileDto>>.Success(result);
     }
 
     public async Task<Result<UserProfileDto>> UpdateUserProfile(Guid id, UpdateUserProfileDto profile)
     {
+        var validationResult = _updateValidator.Validate(profile);
+
+        if (validationResult.IsValid is false)
+        {
+            return validationResult.ToValidationFailure<UserProfileDto>();
+        }
+
         var entity = await _userProfileRepository.GetByIdAsync(id);
 
         if(entity is null)

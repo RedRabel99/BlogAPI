@@ -11,3 +11,12 @@ public enum SortingOrder
     [EnumMember(Value = "dsc")]
     Descending,
 }
+
+public static class SortingOrderMapper
+{
+    public static SortingOrder MapToSortingOrder(string? sortingOrder)
+    {
+        return string.IsNullOrEmpty(sortingOrder) && sortingOrder == "asc" ?
+            SortingOrder.Ascending : SortingOrder.Descending;
+    }
+}

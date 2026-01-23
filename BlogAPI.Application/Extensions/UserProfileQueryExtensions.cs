@@ -1,5 +1,5 @@
-﻿using BlogAPI.Application.DTOs;
-using BlogAPI.Application.Shared;
+﻿using BlogAPI.Application.Shared;
+using BlogAPI.Application.Shared.UserProfile;
 using BlogAPI.Domain.Entities;
 using System.Linq.Expressions;
 
@@ -9,22 +9,20 @@ public static class UserProfileQueryExtensions
 {
     public static IQueryable<UserProfile> ApplyFiltering(
         this IQueryable<UserProfile> query,
-        UserProfileQueryParametersDto queryParameters)
+        UserProfileQueryFiltering queryFilters)
     {
-        if (!string.IsNullOrWhiteSpace(queryParameters.UserName))
+        if (!string.IsNullOrWhiteSpace(queryFilters.UserName))
         {
             query = query.Where(u =>
                 u.UserName.Contains(
-                    queryParameters.UserName,
-                    StringComparison.InvariantCultureIgnoreCase));
+                    queryFilters.UserName));
         }
 
-        if (!string.IsNullOrWhiteSpace(queryParameters.DisplayName))
+        if (!string.IsNullOrWhiteSpace(queryFilters.DisplayName))
         {
             query = query.Where(u =>
                 u.DisplayName.Contains(
-                    queryParameters.DisplayName,
-                    StringComparison.InvariantCultureIgnoreCase));
+                    queryFilters.DisplayName));
         }
 
         return query;
@@ -32,21 +30,21 @@ public static class UserProfileQueryExtensions
 
     public static IQueryable<UserProfile> ApplySorting(
         this IQueryable<UserProfile> query,
-        UserProfileQueryParametersDto queryParameters)
+        UserProfileQuerySorting querySortingParameters)
     {
-        if (string.IsNullOrEmpty(queryParameters.SortColumn))
+        if (string.IsNullOrEmpty(querySortingParameters.SortColumn))
         {
             return query;
         }
 
-        var keySelector = GetSortProperty(queryParameters);
+        var keySelector = GetSortProperty(querySortingParameters);
 
-        return queryParameters.SortingOrder == SortingOrder.Ascending
+        return querySortingParameters.SortingOrder == SortingOrder.Ascending
             ? query.OrderBy(keySelector)
             : query.OrderByDescending(keySelector);
     }
 
-    private static Expression<Func<UserProfile, object>> GetSortProperty(UserProfileQueryParametersDto queryParameters)
+    private static Expression<Func<UserProfile, object>> GetSortProperty(UserProfileQuerySorting queryParameters)
     {
         return queryParameters.SortColumn?.ToLower() switch
         {

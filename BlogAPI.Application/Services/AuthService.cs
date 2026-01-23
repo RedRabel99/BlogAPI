@@ -7,7 +7,7 @@ using BlogAPI.Domain.Entities;
 using BlogAPI.Domain;
 using AutoMapper;
 using FluentValidation;
-using BlogAPI.Application.Extentions;
+using BlogAPI.Application.Extensions;
 
 namespace BlogAPI.Application.Services;
 
@@ -18,7 +18,8 @@ public class AuthService : IAuthService
     private readonly IUserProfileRepository _userProfileRepository;
     private readonly IUserContext _userContext;
     private readonly IMapper _mapper;
-    private readonly IValidator<RegisterDto> _validator;
+    private readonly IValidator<RegisterDto> _registerValidator;
+    private readonly IValidator<LoginDto> _loginValidator;
 
     public AuthService(
         IUserManager userManager,
@@ -26,14 +27,17 @@ public class AuthService : IAuthService
         IUserProfileRepository userProfileRepository,
         IUserContext userContext,
         IMapper mapper,
-        IValidator<RegisterDto> validator)
+        IValidator<RegisterDto> registerValidator,
+        IValidator<LoginDto> loginValidator)
     {
         _userManager = userManager;
         _tokenService = tokenService;
         _userProfileRepository = userProfileRepository;
         _userContext = userContext;
         _mapper = mapper;
-        _validator = validator;
+        _registerValidator = registerValidator;
+        _loginValidator = loginValidator;
+
     }
 
     public async Task<Result<UserProfileDto>> GetCurrentUserProfileAsync(string userId)
@@ -55,6 +59,13 @@ public class AuthService : IAuthService
 
     public async Task<Result<string>>LoginAsync(LoginDto loginDto)
     {
+        var validationResult = _loginValidator.Validate(loginDto);
+
+        if (validationResult.IsValid is false)
+        {
+            return validationResult.ToValidationFailure<string>();
+        }
+
         var authResult = await _userManager
             .ValidateUserAsync(loginDto.Email, loginDto.Password);
         if (authResult.IsError is true)
@@ -68,7 +79,7 @@ public class AuthService : IAuthService
 
     public async Task<Result<Guid>> RegisterAsync(RegisterDto registerDto)
     {
-        var validationResult = _validator.Validate(registerDto);
+        var validationResult = _registerValidator.Validate(registerDto);
 
         if (validationResult.IsValid is false)
         {
@@ -94,16 +105,5 @@ public class AuthService : IAuthService
         var id = await _userProfileRepository.CreateAsync(userProfile);
 
         return Result<Guid>.Success(id);
-    }
-
-    private UserProfileDto MapToDto(UserProfile userProfile)
-    {
-        return new UserProfileDto
-        {
-            Id = userProfile.Id,
-            ApplicationUserId = userProfile.ApplicationUserId,
-            UserName = userProfile.UserName,
-            DisplayName = userProfile.DisplayName,
-        };
     }
 }

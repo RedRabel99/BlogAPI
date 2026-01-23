@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace BlogAPI.Application.Shared;
+namespace BlogAPI.Application.Shared.Pagination;
 
 public class PagedList<TValue>
 {
