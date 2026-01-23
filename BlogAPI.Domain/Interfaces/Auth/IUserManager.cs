@@ -1,5 +1,5 @@
 ﻿using BlogAPI.Domain.Abstractions;
-using BlogAPI.Domain.Interfaces;
+using BlogAPI.Domain.Interfaces.Auth;
 
 public interface IUserManager
 {

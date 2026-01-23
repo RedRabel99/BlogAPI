@@ -1,8 +1,10 @@
-﻿using BlogAPI.Domain.Interfaces;
+﻿using BlogAPI.Domain.Interfaces.Auth;
+using BlogAPI.Domain.Interfaces.UserProfiles;
 using BlogAPI.Infrastructure.Identity;
 using BlogAPI.Infrastructure.Repositories;
 using BlogAPI.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BlogAPI.Infrastructure.DependencyInjection;
@@ -10,10 +12,10 @@ namespace BlogAPI.Infrastructure.DependencyInjection;
 public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(
-        this IServiceCollection services)
+        this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<AppDbContext>(options => {
-            options.UseInMemoryDatabase("AppDb");
+            options.UseSqlServer(configuration["ConnectionStrings:DefaultConnection"]);
         });
         services.AddIdentityCore<ApplicationUser>(opt =>
         {

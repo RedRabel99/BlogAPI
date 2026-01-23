@@ -1,8 +1,13 @@
 ﻿using BlogAPI.Application.DTOs;
 using BlogAPI.Application.Interfaces;
 using BlogAPI.Domain.Abstractions;
-using BlogAPI.Domain.Interfaces;
-using BlogAPI.Domain.Models;
+using BlogAPI.Domain.Interfaces.Auth;
+using BlogAPI.Domain.Interfaces.UserProfiles;
+using BlogAPI.Domain.Entities;
+using BlogAPI.Domain;
+using AutoMapper;
+using FluentValidation;
+using BlogAPI.Application.Extensions;
 
 namespace BlogAPI.Application.Services;
 
@@ -12,40 +17,58 @@ public class AuthService : IAuthService
     private readonly ITokenService _tokenService;
     private readonly IUserProfileRepository _userProfileRepository;
     private readonly IUserContext _userContext;
+    private readonly IMapper _mapper;
+    private readonly IValidator<RegisterDto> _registerValidator;
+    private readonly IValidator<LoginDto> _loginValidator;
 
     public AuthService(
         IUserManager userManager,
         ITokenService tokenService,
         IUserProfileRepository userProfileRepository,
-        IUserContext userContext)
+        IUserContext userContext,
+        IMapper mapper,
+        IValidator<RegisterDto> registerValidator,
+        IValidator<LoginDto> loginValidator)
     {
         _userManager = userManager;
         _tokenService = tokenService;
         _userProfileRepository = userProfileRepository;
         _userContext = userContext;
+        _mapper = mapper;
+        _registerValidator = registerValidator;
+        _loginValidator = loginValidator;
+
     }
 
     public async Task<Result<UserProfileDto>> GetCurrentUserProfileAsync(string userId)
     {
         //rewrite is authenticated logic 
-        if (!_userContext.IsAuthenticated)
+        if (_userContext.IsAuthenticated is false)
         {
-            return null;
+            return Result<UserProfileDto>.Failure(AuthErrors.NoAuthenticatedUser);
         }
         var userProfile = await _userProfileRepository
-            .GetByIdentityUserIdAsync(_userContext.UserId);
-        if(userProfile == null)
+            .GetByApplicationUserIdAsync(_userContext.UserId);
+
+        if(userProfile is null)
         {
-            return null;
+            return Result<UserProfileDto>.Failure(AuthErrors.UserNotFound);
         }
-        return Result<UserProfileDto>.Success(MapToDto(userProfile));
+        return Result<UserProfileDto>.Success(_mapper.Map<UserProfileDto>(userProfile));
     }
 
     public async Task<Result<string>>LoginAsync(LoginDto loginDto)
     {
+        var validationResult = _loginValidator.Validate(loginDto);
+
+        if (validationResult.IsValid is false)
+        {
+            return validationResult.ToValidationFailure<string>();
+        }
+
         var authResult = await _userManager
             .ValidateUserAsync(loginDto.Email, loginDto.Password);
-        if (authResult.IsSuccess is false)
+        if (authResult.IsError is true)
         {
             return Result<string>.Failure(authResult.Error);
         }
@@ -54,14 +77,21 @@ public class AuthService : IAuthService
         return Result<string>.Success(token);
     }
 
-    public async Task<Result<string>> RegisterAsync(RegisterDto registerDto)
+    public async Task<Result<Guid>> RegisterAsync(RegisterDto registerDto)
     {
+        var validationResult = _registerValidator.Validate(registerDto);
+
+        if (validationResult.IsValid is false)
+        {
+          return validationResult.ToValidationFailure<Guid>();
+        }
+
         var authResult = await _userManager
             .CreateUserAsync(registerDto.Email, registerDto.Password);
 
         if (authResult.IsError is true)
         {
-            return Result<string>.Failure(authResult.Error);
+            return Result<Guid>.Failure(authResult.Error);
         }
 
         var userProfile = new UserProfile()
@@ -71,21 +101,9 @@ public class AuthService : IAuthService
             UserName = registerDto.UserName,
             DisplayName = registerDto.DisplayName
         };
-        await _userProfileRepository.CreateAsync(userProfile);
+        //need to check wether it was created
+        var id = await _userProfileRepository.CreateAsync(userProfile);
 
-        var token = await _tokenService.GenerateTokenAsync(authResult.Value);
-
-        return Result<string>.Success(token);
-    }
-
-    private UserProfileDto MapToDto(UserProfile userProfile)
-    {
-        return new UserProfileDto
-        {
-            Id = userProfile.Id,
-            IdentityUserId = userProfile.ApplicationUserId,
-            UserName = userProfile.UserName,
-            DisplayName = userProfile.DisplayName,
-        };
+        return Result<Guid>.Success(id);
     }
 }

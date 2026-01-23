@@ -2,11 +2,16 @@
 
 namespace BlogAPI.Domain;
 
-public static class AuthErrors
+public static class AuthErrors  
 {
     public static readonly Error UserNotFound =
-        new Error("Given user was not found");
+        Error.NotFound("AuthErrors.NotFound", "Given user was not found");
+    public static readonly Error NoAuthenticatedUser =
+        Error.NotFound("AuthErrors.NoAuthenticatedIser", "There is no user authenticated currently");
 
     public static readonly Error InvalidCredentials =
-        new Error("Invalid credentials");
+        Error.Forbidden("AuthErrors.InvalidCredentials", "Given credentials are invalid");
+
+    public static readonly Error AuthFailure =
+        Error.Internal("AuthErrors.AuthFailure", "Something went wrong while authenticating");
 }

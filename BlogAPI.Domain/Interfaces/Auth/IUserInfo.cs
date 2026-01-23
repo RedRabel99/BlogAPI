@@ -1,4 +1,4 @@
-﻿namespace BlogAPI.Domain.Interfaces;
+﻿namespace BlogAPI.Domain.Interfaces.Auth;
 
 public interface IUserInfo
 {

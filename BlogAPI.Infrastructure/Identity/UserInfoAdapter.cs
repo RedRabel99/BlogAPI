@@ -1,4 +1,4 @@
-﻿using BlogAPI.Domain.Interfaces;
+﻿using BlogAPI.Domain.Interfaces.Auth;
 
 namespace BlogAPI.Infrastructure.Identity;
 

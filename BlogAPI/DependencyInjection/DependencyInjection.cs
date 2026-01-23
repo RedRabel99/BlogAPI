@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using BlogAPI.Application.Shared.Pagination;
+using BlogAPI.Web.Middleware;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -75,6 +77,12 @@ public static class DependencyInjection
                 }
             });
         });
+
+        services.AddExceptionHandler<GlobalExceptionHandler>();
+
+        //Pagination config
+        services.Configure<PaginationOptions>(configuration.GetSection("Pagination"));
+
         return services;
     }
 }
