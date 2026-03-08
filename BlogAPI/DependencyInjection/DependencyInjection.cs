@@ -3,7 +3,7 @@ using BlogAPI.Web.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using System.Security.Claims;
 using System.Text;
 
@@ -47,36 +47,55 @@ public static class DependencyInjection
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(options =>
         {
-            options.SwaggerDoc("v1", new OpenApiInfo()
+            options.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
             {
-                Title = "Blog Api",
-                Version = "v1"
-            });
-            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
-            {
-                In = ParameterLocation.Header,
-                Description = "Enter a bearer token",
-                Name = "Authorization",
                 Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
                 BearerFormat = "JWT",
-                Scheme = "bearer"
+                Description = "JWT Authorization header using the Bearer scheme."
             });
-
-            options.AddSecurityRequirement(new OpenApiSecurityRequirement
+            options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
             {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        }
-                    },
-                    []
-                }
+                [new OpenApiSecuritySchemeReference("bearer", document)] = []
             });
         });
+        //services.AddSwaggerGen(options =>
+        //{
+        //    options.SwaggerDoc("v1", new OpenApiInfo()
+        //    {
+        //        Title = "Blog Api",
+        //        Version = "v1"
+        //    });
+        //    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+        //    {
+        //        In = ParameterLocation.Header,
+        //        Description = "Enter a bearer token",
+        //        Name = "Authorization",
+        //        Type = SecuritySchemeType.Http,
+        //        BearerFormat = "JWT",
+        //        Scheme = "bearer",
+        //        Flows= new OpenApiOAuthFlow
+        //        {
+        //            Authoriza
+        //        }
+        //    });
+
+        //options.AddSecurityRequirement(new OpenApiSecurityRequirement
+        //{
+        //    {
+        //        new OpenApiSecurityScheme
+        //        {
+        //            Reference = new OpenApiReference
+        //            {
+        //                Type = ReferenceType.SecurityScheme,
+        //                Id = "Bearer"
+        //            }
+        //        },
+        //        []
+        //    }
+        //}
+        //);
+    //});
 
         services.AddExceptionHandler<GlobalExceptionHandler>();
 

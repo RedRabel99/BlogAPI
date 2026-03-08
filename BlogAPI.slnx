@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/Application/">
+    <Project Path="BlogAPI.Application/BlogAPI.Application.csproj" />
+  </Folder>
+  <Folder Name="/Domain/">
+    <Project Path="BlogAPI.Domain/BlogAPI.Domain.csproj" />
+  </Folder>
+  <Folder Name="/Infrastructure/">
+    <Project Path="BlogAPI.Infrastructure/BlogAPI.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/Web/">
+    <Project Path="BlogAPI/BlogAPI.Web.csproj" />
+  </Folder>
+</Solution>
