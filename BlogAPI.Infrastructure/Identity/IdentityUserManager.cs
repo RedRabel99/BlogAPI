@@ -21,6 +21,7 @@ public class IdentityUserManager : IUserManager
             UserName = email,
             Email = email
         };
+
         var result = await _userManager.CreateAsync(user, password);
         if(result is null)
         {
@@ -28,8 +29,9 @@ public class IdentityUserManager : IUserManager
         }
         if(result.Succeeded is false)
         {
-            //TODO: implement corect auth errors
-            return Result<IUserInfo>.Failure(AuthErrors.AuthFailure);
+            return result.Errors.Any(x => x.Code.Equals("DuplicateEmail")) ? 
+                Result<IUserInfo>.Failure(AuthErrors.UserAlreadyExists) : 
+                Result<IUserInfo>.Failure(AuthErrors.AuthFailure);
         }
 
         return Result<IUserInfo>.Success(new UserInfoAdapter(user));
@@ -70,5 +72,13 @@ public class IdentityUserManager : IUserManager
             return Result<IUserInfo>.Failure(AuthErrors.InvalidCredentials);
         }
         return Result<IUserInfo>.Success(new UserInfoAdapter(user));
+    }
+
+    public async Task RemoveByIdAsync(string userId)
+    {
+        if (string.IsNullOrWhiteSpace(userId)) return;
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null) return;
+        await _userManager.DeleteAsync(user);
     }
 }

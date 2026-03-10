@@ -7,4 +7,5 @@ public interface IUserManager
     Task<Result<IUserInfo>> ValidateUserAsync(string email, string password);
     Task<Result<IUserInfo>> FindByEmailAsync(string email);
     Task<Result<IUserInfo>> FindByIdAsync(string userId);
+    Task RemoveByIdAsync(string userId);
 }

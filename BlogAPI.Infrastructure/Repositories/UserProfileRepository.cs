@@ -1,6 +1,9 @@
 ﻿using BlogAPI.Domain.Interfaces.UserProfiles;
 using BlogAPI.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
+using BlogAPI.Domain.Exceptions;
+using BlogAPI.Infrastructure.Helper;
 
 namespace BlogAPI.Infrastructure.Repositories;
 
@@ -15,8 +18,30 @@ public class UserProfileRepository : IUserProfileRepository
 
     public async Task<Guid> CreateAsync(UserProfile profile)
     {
-        _appDbContext.UserProfiles.Add(profile);
-        await _appDbContext.SaveChangesAsync();
+        if (profile == null)
+        {
+            return Guid.Empty;
+        }
+        try
+        {
+            _appDbContext.UserProfiles.Add(profile);
+            await _appDbContext.SaveChangesAsync();
+        }catch(DbUpdateException ex)
+        {
+            _appDbContext.ChangeTracker.Clear();
+            if (DatabaseExceptionHelper.IsUniqueConstraintViolation(ex, "IX_UserProfile_UserName"))
+            {
+
+                throw new DuplicateUserNameException(profile.UserName);
+            }
+
+            throw;
+        }catch (Exception)
+        {
+            _appDbContext.ChangeTracker.Clear();
+            throw;
+        }
+        
         return profile.Id;
     }
 

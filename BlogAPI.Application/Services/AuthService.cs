@@ -8,6 +8,7 @@ using BlogAPI.Domain;
 using AutoMapper;
 using FluentValidation;
 using BlogAPI.Application.Extensions;
+using BlogAPI.Domain.Exceptions;
 
 namespace BlogAPI.Application.Services;
 
@@ -96,14 +97,26 @@ public class AuthService : IAuthService
 
         var userProfile = new UserProfile()
         {
-            Id = Guid.NewGuid(),
             ApplicationUserId = authResult.Value.Id,
             UserName = registerDto.UserName,
             DisplayName = registerDto.DisplayName
         };
-        //need to check wether it was created
-        var id = await _userProfileRepository.CreateAsync(userProfile);
 
-        return Result<Guid>.Success(id);
-    }
+        Guid createdProfileId;
+        try
+        {
+            createdProfileId = await _userProfileRepository.CreateAsync(userProfile);
+        }
+        catch (DuplicateUserNameException)
+        {
+            await _userManager.RemoveByIdAsync(authResult.Value.Id);
+            return Result<Guid>.Failure(UserProfileErrors.UsernameAlreadyExists);
+        }catch (Exception)
+        {
+            await _userManager.RemoveByIdAsync(authResult.Value.Id);
+            throw;
+        }
+
+        return Result<Guid>.Success(createdProfileId);
+    }   
 }
