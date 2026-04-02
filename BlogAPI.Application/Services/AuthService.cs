@@ -41,7 +41,7 @@ public class AuthService : IAuthService
 
     }
 
-    public async Task<Result<UserProfileDto>> GetCurrentUserProfileAsync(string userId)
+    public async Task<Result<UserProfileDto>> GetCurrentUserProfileAsync()
     {
         //rewrite is authenticated logic 
         if (_userContext.IsAuthenticated is false)
@@ -78,45 +78,24 @@ public class AuthService : IAuthService
         return Result<string>.Success(token);
     }
 
-    public async Task<Result<Guid>> RegisterAsync(RegisterDto registerDto)
+    public async Task<Result<string>> RegisterAsync(RegisterDto registerDto)
     {
         var validationResult = _registerValidator.Validate(registerDto);
 
         if (validationResult.IsValid is false)
         {
-          return validationResult.ToValidationFailure<Guid>();
+          return validationResult.ToValidationFailure<string>();
         }
 
         var authResult = await _userManager
-            .CreateUserAsync(registerDto.Email, registerDto.Password);
+            .CreateUserAsync(registerDto);
 
         if (authResult.IsError is true)
         {
-            return Result<Guid>.Failure(authResult.Error);
+            return Result<string>.Failure(authResult.Error);
         }
+      
 
-        var userProfile = new UserProfile()
-        {
-            ApplicationUserId = authResult.Value.Id,
-            UserName = registerDto.UserName,
-            DisplayName = registerDto.DisplayName
-        };
-
-        Guid createdProfileId;
-        try
-        {
-            createdProfileId = await _userProfileRepository.CreateAsync(userProfile);
-        }
-        catch (DuplicateUserNameException)
-        {
-            await _userManager.RemoveByIdAsync(authResult.Value.Id);
-            return Result<Guid>.Failure(UserProfileErrors.UsernameAlreadyExists);
-        }catch (Exception)
-        {
-            await _userManager.RemoveByIdAsync(authResult.Value.Id);
-            throw;
-        }
-
-        return Result<Guid>.Success(createdProfileId);
+        return Result<string>.Success(authResult.Value);
     }   
 }

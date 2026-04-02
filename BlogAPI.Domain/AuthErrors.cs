@@ -15,5 +15,7 @@ public static class AuthErrors
     public static readonly Error AuthFailure =
         Error.Internal("AuthErrors.AuthFailure", "Something went wrong while authenticating");
     public static readonly Error UserAlreadyExists =
-        Error.Conflict("AuthErrors.UserAlreadyExists", "User with given email already exists");
+        Error.Conflict("AuthErrors.UserAlreadyExists", "User with given username already exists");
+    public static readonly Error UserWithEmailAlreadyExists =
+        Error.Conflict("AuthErrors.UserWithEmailAlreadyExists", "User with given email already exists");
 }

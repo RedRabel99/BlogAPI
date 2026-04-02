@@ -2,13 +2,14 @@
 using BlogAPI.Application.Validators.Shared;
 using FluentValidation;
 
-namespace BlogAPI.Application.Validators.Auth;
+namespace BlogAPI.Application.Validators.Auth; 
 
 public class RegisterDtoValidator : AbstractValidator<RegisterDto>
 {
     public RegisterDtoValidator()
     {
-        RuleFor(x => x.UserName)
+        RuleFor(x => x.Email).EmailAddress().WithMessage("Given value is not a valid email");
+        RuleFor(x => x.Username)
             .CommonNameRules()
             .Matches("^[a-zA-Z0-9-_]+$").WithMessage("Only letters, numbers, -, _ are allowed")
             .Must(x => !x.StartsWith('-') || !x.StartsWith('_')).WithMessage("Cannot start with - or _ characters");

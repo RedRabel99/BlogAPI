@@ -32,7 +32,7 @@ public class UserProfileRepository : IUserProfileRepository
             if (DatabaseExceptionHelper.IsUniqueConstraintViolation(ex, "IX_UserProfile_UserName"))
             {
 
-                throw new DuplicateUserNameException(profile.UserName);
+                throw new DuplicateUserNameException(profile.Username);
             }
 
             throw;

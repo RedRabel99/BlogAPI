@@ -14,7 +14,7 @@ public static class UserProfileQueryExtensions
         if (!string.IsNullOrWhiteSpace(queryFilters.UserName))
         {
             query = query.Where(u =>
-                u.UserName.Contains(
+                u.Username.Contains(
                     queryFilters.UserName));
         }
 
@@ -48,7 +48,7 @@ public static class UserProfileQueryExtensions
     {
         return queryParameters.SortColumn?.ToLower() switch
         {
-            "username" => userProfile => userProfile.UserName,
+            "username" => userProfile => userProfile.Username,
             "displayname" => userProfile => userProfile.DisplayName,
             _ => userProfile => userProfile.Id
         };

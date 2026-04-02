@@ -57,6 +57,16 @@ public class UserProfileService : IUserProfileService
         return Result.Success();
     }
 
+    public Task<Result<UserProfileDto>> GetCurrentUserProfileAsync()
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Result<UserProfileDto>> GetUserProfileByApplicationUserId(string id)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task<Result<UserProfileDto>> GetUserProfileById(Guid id)
     {
         var userProfile = await _userProfileRepository.GetByIdAsync(id);
@@ -67,6 +77,11 @@ public class UserProfileService : IUserProfileService
         }
         var resutUserProfile = _mapper.Map<UserProfileDto>(userProfile);
         return Result<UserProfileDto>.Success(resutUserProfile);
+    }
+
+    public Task<Result<UserProfileDto>> GetUserProfileByUsername(string username)
+    {
+        throw new NotImplementedException();
     }
 
     public async Task<Result<PagedList<UserProfileDto>>> GetUserProfiles(UserProfileQueryParametersDto queryParameters)
@@ -114,7 +129,7 @@ public class UserProfileService : IUserProfileService
             return Result<UserProfileDto>.Failure(UserProfileErrors.Forbidden);
         }
 
-        entity.UserName = profile.UserName;
+        entity.Username = profile.UserName;
         entity.DisplayName = profile.DisplayName;
 
         var result = await _userProfileRepository.UpdateAsync(entity);
