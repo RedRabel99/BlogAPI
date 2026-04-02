@@ -78,7 +78,7 @@ public class AuthService : IAuthService
         return Result<string>.Success(token);
     }
 
-    public async Task<Result<string>> RegisterAsync(RegisterDto registerDto)
+    public async Task<Result> RegisterAsync(RegisterDto registerDto)
     {
         var validationResult = _registerValidator.Validate(registerDto);
 
@@ -92,10 +92,9 @@ public class AuthService : IAuthService
 
         if (authResult.IsError is true)
         {
-            return Result<string>.Failure(authResult.Error);
+            return Result.Failure(authResult.Error);
         }
-      
 
-        return Result<string>.Success(authResult.Value);
+        return Result.Success();
     }   
 }

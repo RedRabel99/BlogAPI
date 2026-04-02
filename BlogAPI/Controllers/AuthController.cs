@@ -24,7 +24,7 @@ public class AuthController : ControllerBase
     public async Task<IResult> Register(RegisterDto registerDto)
     {
         var result = await _authService.RegisterAsync(registerDto);
-        return result.IsSuccess ? Results.Ok(result.Value) : result.ToProblemDetails();
+        return result.IsSuccess ? Results.Created() : result.ToProblemDetails();
     }
 
     [HttpPost("login")]

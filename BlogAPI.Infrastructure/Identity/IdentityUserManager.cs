@@ -18,7 +18,7 @@ public class IdentityUserManager : IUserManager
         _appDbContext = appDbContext;
     }
 
-    public async Task<Result<string>> CreateUserAsync(RegisterDto registerUserDto)
+    public async Task<Result> CreateUserAsync(RegisterDto registerUserDto)
     {
         await _appDbContext.Database.BeginTransactionAsync();
 
@@ -32,22 +32,22 @@ public class IdentityUserManager : IUserManager
 
         if(result is null)
         {
-            return Result<string>.Failure(AuthErrors.AuthFailure);
+            return Result.Failure(AuthErrors.AuthFailure);
         }
 
         if(result.Succeeded is false)
         {
             if(result.Errors.Any(x => x.Code.Contains("DuplicateUserName")))
             {
-                return Result<string>.Failure(AuthErrors.UserAlreadyExists);
+                return Result.Failure(AuthErrors.UserAlreadyExists);
             }
 
             if(result.Errors.Any(x => x.Code.Equals("DuplicateEmail")))
             {
-                return Result<string>.Failure(AuthErrors.UserAlreadyExists);
+                return Result.Failure(AuthErrors.UserAlreadyExists);
             } 
 
-            return Result<string>.Failure(AuthErrors.AuthFailure);
+            return Result.Failure(AuthErrors.AuthFailure);
         }
 
         var userProfile = new UserProfile
@@ -61,7 +61,7 @@ public class IdentityUserManager : IUserManager
         await _appDbContext.SaveChangesAsync();
 
         await _appDbContext.Database.CommitTransactionAsync();
-        return Result<string>.Success(user.Id);
+        return Result.Success();
 }
 
     public async Task<Result<IUserInfo>> FindByEmailAsync(string email)
