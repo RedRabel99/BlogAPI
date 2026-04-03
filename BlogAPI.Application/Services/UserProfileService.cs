@@ -57,14 +57,17 @@ public class UserProfileService : IUserProfileService
         return Result.Success();
     }
 
-    public Task<Result<UserProfileDto>> GetCurrentUserProfileAsync()
+    public async Task<Result<UserProfileDto>> GetCurrentUserProfileAsync()
     {
-        throw new NotImplementedException();
-    }
+        if (_userContext is null || string.IsNullOrEmpty(_userContext.UserId))
+        {
+            return Result<UserProfileDto>.Failure(UserProfileErrors.NotFound);
+        }
 
-    public Task<Result<UserProfileDto>> GetUserProfileByApplicationUserId(string id)
-    {
-        throw new NotImplementedException();
+        var userProfile = await _userProfileRepository.GetByApplicationUserIdAsync(_userContext.UserId);
+        var userProfileDto = _mapper.Map<UserProfileDto>(userProfile);
+
+        return Result<UserProfileDto>.Success(userProfileDto);
     }
 
     public async Task<Result<UserProfileDto>> GetUserProfileById(Guid id)
@@ -72,16 +75,21 @@ public class UserProfileService : IUserProfileService
         var userProfile = await _userProfileRepository.GetByIdAsync(id);
         if (userProfile is null)
         {
-            return Result<UserProfileDto>
-                .Failure(UserProfileErrors.NotFound);
+            return Result<UserProfileDto>.Failure(UserProfileErrors.NotFound);
         }
         var resutUserProfile = _mapper.Map<UserProfileDto>(userProfile);
         return Result<UserProfileDto>.Success(resutUserProfile);
     }
 
-    public Task<Result<UserProfileDto>> GetUserProfileByUsername(string username)
+    public async Task<Result<UserProfileDto>> GetUserProfileByUsername(string username)
     {
-        throw new NotImplementedException();
+        var userProfile = await _userProfileRepository.GetByUsername(username);
+        if(userProfile is null)
+        {
+            return Result<UserProfileDto>.Failure(UserProfileErrors.NotFound);
+        }
+        var resultUserProfile = _mapper.Map<UserProfileDto>(userProfile);
+        return Result<UserProfileDto>.Success(resultUserProfile);
     }
 
     public async Task<Result<PagedList<UserProfileDto>>> GetUserProfiles(UserProfileQueryParametersDto queryParameters)

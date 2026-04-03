@@ -17,10 +17,18 @@ public class UserProfileController : ControllerBase
         _userProfileService = userProfileService;
     }
 
-    [HttpGet("{id:guid}")]
-    public async Task<IResult> GetById(Guid id)
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<IResult> GetCurrentUserProfile()
     {
-        var result = await _userProfileService.GetUserProfileById(id);
+        var result = await _userProfileService.GetCurrentUserProfileAsync();
+        return result.IsSuccess ? Results.Ok(result.Value) : result.ToProblemDetails();
+    }
+
+    [HttpGet("{username}")]
+    public async Task<IResult> GetByUsername(string username)
+    {
+        var result = await _userProfileService.GetUserProfileByUsername(username);
         return result.IsSuccess ? Results.Ok(result.Value) : result.ToProblemDetails();
     }
 
@@ -28,7 +36,6 @@ public class UserProfileController : ControllerBase
     public async Task<IResult> GetUserProfiles([FromQuery] UserProfileQueryParametersDto queryParameters)
     {
         var result = await _userProfileService.GetUserProfiles(queryParameters);
-        //I'm keeping the result as returned type in case enpoint is expanded to feature filtering
         return result.IsSuccess ? Results.Ok(result.Value) : result.ToProblemDetails();
     }
 
@@ -45,7 +52,6 @@ public class UserProfileController : ControllerBase
     public async Task<IResult> Delete(Guid id)
     {
         var result = await _userProfileService.DeleteUserProfileById(id);
-
         return result.IsSuccess ? Results.NoContent() : result.ToProblemDetails();
     }
 }

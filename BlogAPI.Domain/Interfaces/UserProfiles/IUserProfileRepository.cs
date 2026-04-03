@@ -9,4 +9,5 @@ public interface IUserProfileRepository
     Task<UserProfile?> GetByIdAsync (Guid id);
     Task DeleteAsync(Guid id);
     IQueryable<UserProfile> GetAll();
+    Task<UserProfile?> GetByUsername(string username);
 }
