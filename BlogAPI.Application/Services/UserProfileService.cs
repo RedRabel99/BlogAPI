@@ -114,7 +114,6 @@ public class UserProfileService : IUserProfileService
             return Result<UserProfileDto>.Failure(UserProfileErrors.Forbidden);
         }
 
-        entity.UserName = profile.UserName;
         entity.DisplayName = profile.DisplayName;
 
         var result = await _userProfileRepository.UpdateAsync(entity);

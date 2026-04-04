@@ -35,6 +35,14 @@ public class AuthController : ControllerBase
     }
 
     [Authorize]
+    [HttpPatch("username")]
+    public async Task<IResult> ChangeUsername([FromBody]ChangeUsernameDto changeUsernameDto)
+    {
+        var result = await _authService.ChangeUsernameAsync(changeUsernameDto);
+        return result.IsSuccess ? Results.Ok(result.Value) : result.ToProblemDetails();
+    }
+
+    [Authorize]
     [HttpGet("test")]
     public async Task<IResult> Test()
     {

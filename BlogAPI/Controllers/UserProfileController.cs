@@ -33,7 +33,7 @@ public class UserProfileController : ControllerBase
     }
 
     [Authorize]
-    [HttpPut("{id:guid}")]
+    [HttpPatch("{id:guid}")]
     public async Task<IResult> Update(Guid id, [FromBody] UpdateUserProfileDto userProfile)
     {
         var result = await _userProfileService.UpdateUserProfile(id, userProfile);
