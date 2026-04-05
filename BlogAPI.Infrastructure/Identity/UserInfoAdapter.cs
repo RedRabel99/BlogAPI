@@ -1,4 +1,5 @@
-﻿using BlogAPI.Domain.Interfaces.Auth;
+﻿using BlogAPI.Domain.Entities;
+using BlogAPI.Domain.Interfaces.Auth;
 
 namespace BlogAPI.Infrastructure.Identity;
 
@@ -9,6 +10,7 @@ public class UserInfoAdapter : IUserInfo
         Id = applicationUser.Id;
         Email = applicationUser.Email;
         UserName = applicationUser.UserName;
+        UserProfile = applicationUser.userProfile;
     }
 
     public string Id { get; }
@@ -16,4 +18,6 @@ public class UserInfoAdapter : IUserInfo
     public string UserName { get; }
 
     public string Email { get; }
+    
+    public UserProfile UserProfile { get; }
 }

@@ -10,4 +10,6 @@
             Error.Forbidden("UserProfile.Forbidden", "You are not authorized to perform this action");
         public static Error Internal =
             Error.Internal("UserProfile.Internal", "Something went wrong");
+    public static Error UsernameAlreadyExists =
+        Error.Validation("UserProfile.UsernameAlreadyExists", "User with this username already exists");
     }

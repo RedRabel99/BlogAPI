@@ -134,7 +134,7 @@ namespace BlogAPI.Infrastructure.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UserName")
+                    b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(40)
                         .HasColumnType("nvarchar(40)");
@@ -144,7 +144,7 @@ namespace BlogAPI.Infrastructure.Migrations
                     b.HasIndex("ApplicationUserId")
                         .IsUnique();
 
-                    b.HasIndex("UserName")
+                    b.HasIndex("Username")
                         .IsUnique();
 
                     b.ToTable("UserProfile", (string)null);
@@ -198,7 +198,7 @@ namespace BlogAPI.Infrastructure.Migrations
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
 
-                    b.Property<string>("UserName")
+                    b.Property<string>("Username")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 

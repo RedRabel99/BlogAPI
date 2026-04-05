@@ -1,5 +1,7 @@
-﻿using BlogAPI.Domain;
+﻿using BlogAPI.Application.DTOs;
+using BlogAPI.Domain;
 using BlogAPI.Domain.Abstractions;
+using BlogAPI.Domain.Entities;
 using BlogAPI.Domain.Interfaces.Auth;
 using Microsoft.AspNetCore.Identity;
 
@@ -8,31 +10,58 @@ namespace BlogAPI.Infrastructure.Identity;
 public class IdentityUserManager : IUserManager
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly AppDbContext _appDbContext;
 
-    public IdentityUserManager(UserManager<ApplicationUser> userManager)
+    public IdentityUserManager(UserManager<ApplicationUser> userManager, AppDbContext appDbContext)
     {
         _userManager = userManager;
+        _appDbContext = appDbContext;
     }
 
-    public async Task<Result<IUserInfo>> CreateUserAsync(string email, string password)
+    public async Task<Result> CreateUserAsync(RegisterDto registerUserDto)
     {
+        await _appDbContext.Database.BeginTransactionAsync();
+
         var user = new ApplicationUser
         {
-            UserName = email,
-            Email = email
+            UserName = registerUserDto.Username,
+            Email = registerUserDto.Email
         };
-        var result = await _userManager.CreateAsync(user, password);
+
+        var result = await _userManager.CreateAsync(user, registerUserDto.Password);
+
         if(result is null)
         {
-            return Result<IUserInfo>.Failure(AuthErrors.AuthFailure);
-        }
-        if(result.Succeeded is false)
-        {
-            //TODO: implement corect auth errors
-            return Result<IUserInfo>.Failure(AuthErrors.AuthFailure);
+            return Result.Failure(AuthErrors.AuthFailure);
         }
 
-        return Result<IUserInfo>.Success(new UserInfoAdapter(user));
+        if(result.Succeeded is false)
+        {
+            if(result.Errors.Any(x => x.Code.Contains("DuplicateUserName")))
+            {
+                return Result.Failure(AuthErrors.UserAlreadyExists);
+            }
+
+            if(result.Errors.Any(x => x.Code.Equals("DuplicateEmail")))
+            {
+                return Result.Failure(AuthErrors.UserAlreadyExists);
+            } 
+
+            return Result.Failure(AuthErrors.AuthFailure);
+        }
+
+        var userProfile = new UserProfile
+        {
+            Username = user.UserName,
+            DisplayName = registerUserDto.DisplayName,
+            ApplicationUserId = user.Id
+        };
+
+        await _appDbContext.UserProfiles.AddAsync(userProfile);
+        await _appDbContext.SaveChangesAsync();
+
+        await _appDbContext.Database.CommitTransactionAsync();
+        return Result.Success();
 }
 
     public async Task<Result<IUserInfo>> FindByEmailAsync(string email)
@@ -70,5 +99,13 @@ public class IdentityUserManager : IUserManager
             return Result<IUserInfo>.Failure(AuthErrors.InvalidCredentials);
         }
         return Result<IUserInfo>.Success(new UserInfoAdapter(user));
+    }
+
+    public async Task RemoveByIdAsync(string userId)
+    {
+        if (string.IsNullOrWhiteSpace(userId)) return;
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null) return;
+        await _userManager.DeleteAsync(user);
     }
 }

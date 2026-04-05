@@ -8,6 +8,7 @@ using BlogAPI.Domain;
 using AutoMapper;
 using FluentValidation;
 using BlogAPI.Application.Extensions;
+using BlogAPI.Domain.Exceptions;
 
 namespace BlogAPI.Application.Services;
 
@@ -40,7 +41,7 @@ public class AuthService : IAuthService
 
     }
 
-    public async Task<Result<UserProfileDto>> GetCurrentUserProfileAsync(string userId)
+    public async Task<Result<UserProfileDto>> GetCurrentUserProfileAsync()
     {
         //rewrite is authenticated logic 
         if (_userContext.IsAuthenticated is false)
@@ -77,33 +78,23 @@ public class AuthService : IAuthService
         return Result<string>.Success(token);
     }
 
-    public async Task<Result<Guid>> RegisterAsync(RegisterDto registerDto)
+    public async Task<Result> RegisterAsync(RegisterDto registerDto)
     {
         var validationResult = _registerValidator.Validate(registerDto);
 
         if (validationResult.IsValid is false)
         {
-          return validationResult.ToValidationFailure<Guid>();
+          return validationResult.ToValidationFailure<string>();
         }
 
         var authResult = await _userManager
-            .CreateUserAsync(registerDto.Email, registerDto.Password);
+            .CreateUserAsync(registerDto);
 
         if (authResult.IsError is true)
         {
-            return Result<Guid>.Failure(authResult.Error);
+            return Result.Failure(authResult.Error);
         }
 
-        var userProfile = new UserProfile()
-        {
-            Id = Guid.NewGuid(),
-            ApplicationUserId = authResult.Value.Id,
-            UserName = registerDto.UserName,
-            DisplayName = registerDto.DisplayName
-        };
-        //need to check wether it was created
-        var id = await _userProfileRepository.CreateAsync(userProfile);
-
-        return Result<Guid>.Success(id);
-    }
+        return Result.Success();
+    }   
 }

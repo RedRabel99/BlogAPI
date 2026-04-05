@@ -57,16 +57,39 @@ public class UserProfileService : IUserProfileService
         return Result.Success();
     }
 
+    public async Task<Result<UserProfileDto>> GetCurrentUserProfileAsync()
+    {
+        if (_userContext is null || string.IsNullOrEmpty(_userContext.UserId))
+        {
+            return Result<UserProfileDto>.Failure(UserProfileErrors.NotFound);
+        }
+
+        var userProfile = await _userProfileRepository.GetByApplicationUserIdAsync(_userContext.UserId);
+        var userProfileDto = _mapper.Map<UserProfileDto>(userProfile);
+
+        return Result<UserProfileDto>.Success(userProfileDto);
+    }
+
     public async Task<Result<UserProfileDto>> GetUserProfileById(Guid id)
     {
         var userProfile = await _userProfileRepository.GetByIdAsync(id);
         if (userProfile is null)
         {
-            return Result<UserProfileDto>
-                .Failure(UserProfileErrors.NotFound);
+            return Result<UserProfileDto>.Failure(UserProfileErrors.NotFound);
         }
         var resutUserProfile = _mapper.Map<UserProfileDto>(userProfile);
         return Result<UserProfileDto>.Success(resutUserProfile);
+    }
+
+    public async Task<Result<UserProfileDto>> GetUserProfileByUsername(string username)
+    {
+        var userProfile = await _userProfileRepository.GetByUsername(username);
+        if(userProfile is null)
+        {
+            return Result<UserProfileDto>.Failure(UserProfileErrors.NotFound);
+        }
+        var resultUserProfile = _mapper.Map<UserProfileDto>(userProfile);
+        return Result<UserProfileDto>.Success(resultUserProfile);
     }
 
     public async Task<Result<PagedList<UserProfileDto>>> GetUserProfiles(UserProfileQueryParametersDto queryParameters)

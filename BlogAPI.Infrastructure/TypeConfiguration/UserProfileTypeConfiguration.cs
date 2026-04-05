@@ -10,8 +10,8 @@ internal class UserProfileTypeConfiguration : IEntityTypeConfiguration<UserProfi
     {
         builder.ToTable("UserProfile");
         builder.HasKey(x => x.Id);
-        builder.Property(x => x.UserName).IsRequired().HasMaxLength(40);
-        builder.HasIndex(x => x.UserName).IsUnique();
+        builder.Property(x => x.Username).IsRequired().HasMaxLength(40);
+        builder.HasIndex(x => x.Username).IsUnique();
         builder.Property(x => x.DisplayName).IsRequired().HasMaxLength(40);
 
         builder.HasIndex(x => x.ApplicationUserId).IsUnique();

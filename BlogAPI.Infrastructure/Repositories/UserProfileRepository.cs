@@ -1,6 +1,9 @@
 ﻿using BlogAPI.Domain.Interfaces.UserProfiles;
 using BlogAPI.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
+using BlogAPI.Domain.Exceptions;
+using BlogAPI.Infrastructure.Helper;
 
 namespace BlogAPI.Infrastructure.Repositories;
 
@@ -15,8 +18,14 @@ public class UserProfileRepository : IUserProfileRepository
 
     public async Task<Guid> CreateAsync(UserProfile profile)
     {
+        if (profile == null)
+        {
+            return Guid.Empty;
+        }
+
         _appDbContext.UserProfiles.Add(profile);
         await _appDbContext.SaveChangesAsync();
+
         return profile.Id;
     }
 
@@ -38,6 +47,11 @@ public class UserProfileRepository : IUserProfileRepository
     {
         return await _appDbContext.UserProfiles
             .FirstOrDefaultAsync(x => x.ApplicationUserId == identityUserId);
+    }
+
+    public async Task<UserProfile?> GetByUsername(string username)
+    {
+        return await _appDbContext.UserProfiles.FirstOrDefaultAsync(x => x.Username == username);
     }
 
     public IQueryable<UserProfile> GetAll()

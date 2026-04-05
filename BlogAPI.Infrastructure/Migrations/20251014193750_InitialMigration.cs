@@ -334,7 +334,7 @@ namespace BlogAPI.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_UserProfile_UserName",
                 table: "UserProfile",
-                column: "UserName",
+                column: "Username",
                 unique: true);
         }
 

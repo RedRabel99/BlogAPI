@@ -2,7 +2,7 @@
 using BlogAPI.Application.Validators.Shared;
 using FluentValidation;
 
-namespace BlogAPI.Application.Validators.Auth;
+namespace BlogAPI.Application.Validators.Auth; 
 
 public class RegisterDtoValidator : AbstractValidator<RegisterDto>
 {
