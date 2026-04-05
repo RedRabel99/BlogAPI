@@ -108,4 +108,24 @@ public class IdentityUserManager : IUserManager
         if (user is null) return;
         await _userManager.DeleteAsync(user);
     }
+
+    public Task<Result> ChangeUsernameAsync(string userid, string username)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Result<string>> GenerateChangeEmailTokenAsync(string userId, string newEmail)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Result> ChangeEmailAsync(string userId, string newEmail, string token)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Result> ChangePasswordAsync(string userId, string oldPassword, string newPassword)
+    {
+        throw new NotImplementedException();
+    }
 }

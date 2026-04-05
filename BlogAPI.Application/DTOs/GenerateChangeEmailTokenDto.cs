@@ -1,7 +1,6 @@
 ﻿namespace BlogAPI.Application.DTOs;
 
-public class ChangeEmailDto
+public class GenerateChangeEmailTokenDto
 {
     public string Email { get; set; }
-    public string Token { get; set; }
 }
