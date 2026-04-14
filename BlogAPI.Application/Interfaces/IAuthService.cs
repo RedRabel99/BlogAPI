@@ -7,10 +7,9 @@ namespace BlogAPI.Application.Interfaces
     {
         Task<Result> RegisterAsync(RegisterDto registerDto);
         Task<Result<string>> LoginAsync(LoginDto loginDto);
-        Task<Result<UserProfileDto>> GetCurrentUserProfileAsync(string userId);
         Task<Result> ChangeUsernameAsync(ChangeUsernameDto changeUsernameDto);
         Task<Result> ChangePasswordAsync(ChangePasswordDto changePasswordDto);
         Task<Result> ChangeEmailAsync(ChangeEmailDto changeEmailDto);
-        Task<Result<string>> GenerateChangeEmailTokenAsync(GenerateChangeEmailTokenDto changeEmailDto);
+        Task<Result<ChangeEmailTokenResponseDto>> GenerateChangeEmailTokenAsync(GenerateChangeEmailTokenDto generateChangeEmailTokenDto);
     }
 }

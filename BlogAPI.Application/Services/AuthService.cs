@@ -19,6 +19,10 @@ public class AuthService : IAuthService
     private readonly IMapper _mapper;
     private readonly IValidator<RegisterDto> _registerValidator;
     private readonly IValidator<LoginDto> _loginValidator;
+    private readonly IValidator<ChangeUsernameDto> _changeUsernameValidator;
+    private readonly IValidator<ChangePasswordDto> _changePasswordValidator;
+    private readonly IValidator<GenerateChangeEmailTokenDto> _generateChangeEmailTokenDtoValidator;
+    private readonly IValidator<ChangeEmailDto> _changeEmailDtoValidator; 
 
     public AuthService(
         IUserManager userManager,
@@ -27,7 +31,11 @@ public class AuthService : IAuthService
         IUserContext userContext,
         IMapper mapper,
         IValidator<RegisterDto> registerValidator,
-        IValidator<LoginDto> loginValidator)
+        IValidator<LoginDto> loginValidator,
+        IValidator<GenerateChangeEmailTokenDto> generateChangeEmailTokenDtoValidator,
+        IValidator<ChangeEmailDto> changeEmailDtoValidator,
+        IValidator<ChangeUsernameDto> changeUsernameValidator,
+        IValidator<ChangePasswordDto> changePasswordValidator)
     {
         _userManager = userManager;
         _tokenService = tokenService;
@@ -36,29 +44,10 @@ public class AuthService : IAuthService
         _mapper = mapper;
         _registerValidator = registerValidator;
         _loginValidator = loginValidator;
-
-    }
-
-    public async Task<Result<UserProfileDto>> GetCurrentUserProfileAsync()
-    {
-        //rewrite is authenticated logic 
-        if (_userContext.IsAuthenticated is false)
-        {
-            return Result<UserProfileDto>.Failure(AuthErrors.NoAuthenticatedUser);
-        }
-        var userProfile = await _userProfileRepository
-            .GetByApplicationUserIdAsync(_userContext.UserId);
-
-        if (userProfile is null)
-        {
-            return Result<UserProfileDto>.Failure(AuthErrors.UserNotFound);
-        }
-        return Result<UserProfileDto>.Success(_mapper.Map<UserProfileDto>(userProfile));
-    }
-
-    public Task<Result<UserProfileDto>> GetCurrentUserProfileAsync(string userId)
-    {
-        throw new NotImplementedException();
+        _generateChangeEmailTokenDtoValidator = generateChangeEmailTokenDtoValidator;
+        _changeEmailDtoValidator = changeEmailDtoValidator;
+        _changeUsernameValidator = changeUsernameValidator;
+        _changePasswordValidator = changePasswordValidator;
     }
 
     public async Task<Result<string>> LoginAsync(LoginDto loginDto)
@@ -93,7 +82,7 @@ public class AuthService : IAuthService
         var authResult = await _userManager
             .CreateUserAsync(registerDto);
 
-        if (authResult.IsError is true)
+        if (authResult.IsError)
         {
             return authResult;
         }
@@ -109,9 +98,15 @@ public class AuthService : IAuthService
             return Result.Failure(AuthErrors.UserNotFound);
         }
 
+        var validationResult = _changeUsernameValidator.Validate(changeUsernameDto);
+        if (!validationResult.IsValid)
+        {
+            return validationResult.ToValidationFailure();
+        }
+
         var result = await _userManager.ChangeUsernameAsync(appUserId, changeUsernameDto.Username);
 
-        if (result.IsError)
+            if (result.IsError)
         {
             return result;
         }
@@ -126,6 +121,13 @@ public class AuthService : IAuthService
         {
             return Result.Failure(AuthErrors.UserNotFound);
         }
+
+        var validationResult = _changePasswordValidator.Validate(changePasswordDto);
+        if (!validationResult.IsValid)
+        {
+            return validationResult.ToValidationFailure();
+        }
+
         var result = await _userManager.ChangePasswordAsync(appUserId, changePasswordDto.OldPassword, changePasswordDto.NewPassword);
 
         if (result.IsError)
@@ -136,13 +138,49 @@ public class AuthService : IAuthService
         return Result.Success();
     }
 
-    public Task<Result<string>> GenerateChangeEmailTokenAsync(GenerateChangeEmailTokenDto changeEmailDto)
+    public async Task<Result<ChangeEmailTokenResponseDto>> GenerateChangeEmailTokenAsync(GenerateChangeEmailTokenDto generateChangeEmailTokenDto)
     {
-        
+        var appUserId = _userContext.UserId;
+        if (string.IsNullOrEmpty(appUserId))
+        {
+            return Result<ChangeEmailTokenResponseDto>.Failure(AuthErrors.UserNotFound);
+        }
+
+        var validationResult = _generateChangeEmailTokenDtoValidator.Validate(generateChangeEmailTokenDto);
+        if (!validationResult.IsValid)
+        {
+            return validationResult.ToValidationFailure<ChangeEmailTokenResponseDto>();
+        }
+
+        var result = await _userManager.GenerateChangeEmailTokenAsync(appUserId, generateChangeEmailTokenDto.Email);
+        if (result.IsError)
+        {
+            return Result<ChangeEmailTokenResponseDto>.Failure(result.Error);
+        }
+
+        return Result<ChangeEmailTokenResponseDto>.Success(new ChangeEmailTokenResponseDto
+        {
+            Token = result.Value
+        });
     }
 
-    public Task<Result> ChangeEmailAsync(ChangeEmailDto changeEmailDto)
+    public async Task<Result> ChangeEmailAsync(ChangeEmailDto changeEmailDto)
     {
+        var appUserId = _userContext.UserId;
+        if (string.IsNullOrEmpty(appUserId))
+        {
+            return Result.Failure(AuthErrors.UserNotFound);
+        }
 
+        var validationResult = _changeEmailDtoValidator.Validate(changeEmailDto);
+
+        if (!validationResult.IsValid)
+        {
+            return validationResult.ToValidationFailure();
+        }
+
+        var result = await _userManager.ChangeEmailAsync(appUserId, changeEmailDto.Email, changeEmailDto.Token);
+
+        return result;
     }
 }

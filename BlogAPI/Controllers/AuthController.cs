@@ -18,14 +18,14 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IResult> Register(RegisterDto registerDto)
+    public async Task<IResult> Register([FromBody]RegisterDto registerDto)
     {
         var result = await _authService.RegisterAsync(registerDto);
-        return result.IsSuccess ? Results.Created() : result.ToProblemDetails();
+        return result.IsSuccess ? Results.Ok(new {Message = "User registered"}) : result.ToProblemDetails();
     }
 
     [HttpPost("login")]
-    public async Task<IResult> Login(LoginDto loginDto)
+    public async Task<IResult> Login([FromBody]LoginDto loginDto)
     {
         var result = await _authService.LoginAsync(loginDto);
         return result.IsSuccess ? Results.Ok(result.Value) : result.ToProblemDetails();
@@ -36,7 +36,7 @@ public class AuthController : ControllerBase
     public async Task<IResult> ChangeUsername([FromBody]ChangeUsernameDto changeUsernameDto)
     {
         var result = await _authService.ChangeUsernameAsync(changeUsernameDto);
-        return result.IsSuccess ? Results.Created() : result.ToProblemDetails();
+        return result.IsSuccess ? Results.Ok() : result.ToProblemDetails();
     }
 
     [Authorize]
