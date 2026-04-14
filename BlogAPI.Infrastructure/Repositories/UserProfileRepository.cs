@@ -22,26 +22,10 @@ public class UserProfileRepository : IUserProfileRepository
         {
             return Guid.Empty;
         }
-        try
-        {
-            _appDbContext.UserProfiles.Add(profile);
-            await _appDbContext.SaveChangesAsync();
-        }catch(DbUpdateException ex)
-        {
-            _appDbContext.ChangeTracker.Clear();
-            if (DatabaseExceptionHelper.IsUniqueConstraintViolation(ex, "IX_UserProfile_UserName"))
-            {
 
-                throw new DuplicateUserNameException(profile.Username);
-            }
+        _appDbContext.UserProfiles.Add(profile);
+        await _appDbContext.SaveChangesAsync();
 
-            throw;
-        }catch (Exception)
-        {
-            _appDbContext.ChangeTracker.Clear();
-            throw;
-        }
-        
         return profile.Id;
     }
 
@@ -63,6 +47,11 @@ public class UserProfileRepository : IUserProfileRepository
     {
         return await _appDbContext.UserProfiles
             .FirstOrDefaultAsync(x => x.ApplicationUserId == identityUserId);
+    }
+
+    public async Task<UserProfile?> GetByUsername(string username)
+    {
+        return await _appDbContext.UserProfiles.FirstOrDefaultAsync(x => x.Username == username);
     }
 
     public IQueryable<UserProfile> GetAll()

@@ -6,7 +6,6 @@ namespace BlogAPI.Application.DTOs;
 
 public class UpdateUserProfileDto : IMapFrom<UserProfile>
 {
-    public string UserName { get; set; }
     public string DisplayName { get; set; }
 
     public void Mapping(Profile profile)

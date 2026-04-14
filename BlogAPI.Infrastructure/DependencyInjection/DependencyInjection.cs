@@ -6,6 +6,7 @@ using BlogAPI.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Identity;
 
 namespace BlogAPI.Infrastructure.DependencyInjection;
 
@@ -18,17 +19,18 @@ public static class DependencyInjection
             options.UseSqlServer(configuration["ConnectionStrings:DefaultConnection"]);
         });
         services.AddIdentityCore<ApplicationUser>(opt =>
-        {
-            opt.Password.RequireDigit = true;
-            opt.Password.RequiredLength = 6;
-            opt.Password.RequireNonAlphanumeric = false;
-            opt.Password.RequireUppercase = true;
-            opt.Password.RequireLowercase = true;
+                {
+                    opt.Password.RequireDigit = true;
+                    opt.Password.RequiredLength = 6;
+                    opt.Password.RequireNonAlphanumeric = false;
+                    opt.Password.RequireUppercase = true;
+                    opt.Password.RequireLowercase = true;
 
-            opt.User.RequireUniqueEmail = true;
+                    opt.User.RequireUniqueEmail = true;
 
-        }
-        ).AddEntityFrameworkStores<AppDbContext>();
+                }
+            ).AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders();
         services.AddScoped<IUserManager, IdentityUserManager>();
         services.AddScoped<IUserContext, UserContext>();
         services.AddScoped<ITokenService, JwtTokenService>();

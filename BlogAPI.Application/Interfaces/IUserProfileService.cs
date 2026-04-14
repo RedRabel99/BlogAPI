@@ -8,7 +8,6 @@ namespace BlogAPI.Application.Interfaces
     {
         Task<Result<UserProfileDto>> GetUserProfileById(Guid id);
         Task<Result<UserProfileDto>> GetUserProfileByUsername(string username);
-        Task<Result<UserProfileDto>> GetUserProfileByApplicationUserId(string id);
         Task<Result<UserProfileDto>> GetCurrentUserProfileAsync();
         Task<Result<PagedList<UserProfileDto>>> GetUserProfiles(UserProfileQueryParametersDto queryParameters);
         Task<Result> DeleteUserProfileById(Guid id);
