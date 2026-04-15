@@ -1,4 +1,4 @@
-﻿namespace BlogAPI.Application.DTOs;
+﻿namespace BlogAPI.Application.DTOs.Auth;
 
 public class GenerateChangeEmailTokenDto
 {

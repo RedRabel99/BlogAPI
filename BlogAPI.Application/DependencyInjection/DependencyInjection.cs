@@ -17,7 +17,6 @@ namespace BlogAPI.Application.DependencyInjection
             services.AddScoped<IUserProfileService, UserProfileService>();
             services.AddSingleton<IPagedListFactory, PagedListFactory>();
             services.AddValidatorsFromAssemblyContaining<RegisterDtoValidator>(ServiceLifetime.Transient);
-            services.AddAutoMapper(cfg => { }, typeof(MappingProfile));
             return services;
         }
     }

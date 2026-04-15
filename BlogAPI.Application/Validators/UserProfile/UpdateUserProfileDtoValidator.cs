@@ -1,4 +1,4 @@
-﻿using BlogAPI.Application.DTOs;
+﻿using BlogAPI.Application.DTOs.UserProfile;
 using BlogAPI.Application.Validators.Shared;
 using FluentValidation;
 

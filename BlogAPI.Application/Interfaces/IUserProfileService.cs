@@ -1,4 +1,5 @@
-﻿using BlogAPI.Application.DTOs;
+﻿using BlogAPI.Application.DTOs.UserProfile;
+using BlogAPI.Application.DTOs.UserProfiles;
 using BlogAPI.Application.Shared.Pagination;
 using BlogAPI.Domain.Abstractions;
 
