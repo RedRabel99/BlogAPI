@@ -1,8 +1,9 @@
-﻿using AutoMapper;
-using AutoMapper.QueryableExtensions;
-using BlogAPI.Application.DTOs;
+﻿
+using BlogAPI.Application.DTOs.UserProfile;
+using BlogAPI.Application.DTOs.UserProfiles;
 using BlogAPI.Application.Extensions;
 using BlogAPI.Application.Interfaces;
+using BlogAPI.Application.Mapping.UserProfileMappers;
 using BlogAPI.Application.Shared.Pagination;
 using BlogAPI.Application.Shared.UserProfile;
 using BlogAPI.Domain;
@@ -17,7 +18,6 @@ namespace BlogAPI.Application.Services;
 public class UserProfileService : IUserProfileService
 {
     private readonly IUserProfileRepository _userProfileRepository;
-    private readonly IMapper _mapper;   
     private readonly IUserContext _userContext;
     private readonly IValidator<UpdateUserProfileDto> _updateValidator;
     private readonly IValidator<UserProfileQueryParametersDto> _queryParametersValidation;
@@ -25,7 +25,6 @@ public class UserProfileService : IUserProfileService
 
     public UserProfileService(
         IUserProfileRepository userProfileRepository,
-        IMapper mapper,
         IUserContext userContext,
         IValidator<UpdateUserProfileDto> updateValidation,
         IValidator<UserProfileQueryParametersDto> queryParametersValidation,
@@ -33,7 +32,6 @@ public class UserProfileService : IUserProfileService
         )
     {
         _userProfileRepository = userProfileRepository;
-        _mapper = mapper;
         _userContext = userContext;
         _updateValidator = updateValidation;
         _queryParametersValidation = queryParametersValidation;
@@ -65,7 +63,7 @@ public class UserProfileService : IUserProfileService
         }
 
         var userProfile = await _userProfileRepository.GetByApplicationUserIdAsync(_userContext.UserId);
-        var userProfileDto = _mapper.Map<UserProfileDto>(userProfile);
+        var userProfileDto = userProfile.ToDto();
 
         return Result<UserProfileDto>.Success(userProfileDto);
     }
@@ -77,7 +75,7 @@ public class UserProfileService : IUserProfileService
         {
             return Result<UserProfileDto>.Failure(UserProfileErrors.NotFound);
         }
-        var resutUserProfile = _mapper.Map<UserProfileDto>(userProfile);
+        var resutUserProfile = userProfile.ToDto();
         return Result<UserProfileDto>.Success(resutUserProfile);
     }
 
@@ -88,7 +86,7 @@ public class UserProfileService : IUserProfileService
         {
             return Result<UserProfileDto>.Failure(UserProfileErrors.NotFound);
         }
-        var resultUserProfile = _mapper.Map<UserProfileDto>(userProfile);
+        var resultUserProfile = userProfile.ToDto();
         return Result<UserProfileDto>.Success(resultUserProfile);
     }
 
@@ -108,8 +106,7 @@ public class UserProfileService : IUserProfileService
             .GetAll()
             .ApplyFiltering(queryFilters)
             .ApplySorting(sortingParams)
-
-            .ProjectTo<UserProfileDto>(_mapper.ConfigurationProvider);
+            .Select(UserProfileMappers.ProjectToDto);
 
         var result = await _pagedListFactory.CreateAsync(query, queryParameters.Page, queryParameters.PageSize);
         
@@ -146,6 +143,6 @@ public class UserProfileService : IUserProfileService
             return Result<UserProfileDto>.Failure(UserProfileErrors.Internal);
         }
 
-        return Result<UserProfileDto>.Success(_mapper.Map<UserProfileDto>(result));
+        return Result<UserProfileDto>.Success(result.ToDto());
     }
 }

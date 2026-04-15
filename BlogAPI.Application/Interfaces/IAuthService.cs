@@ -1,4 +1,4 @@
-﻿using BlogAPI.Application.DTOs;
+﻿using BlogAPI.Application.DTOs.Auth;
 using BlogAPI.Domain.Abstractions;
 
 namespace BlogAPI.Application.Interfaces

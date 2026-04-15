@@ -1,6 +1,6 @@
 ﻿using BlogAPI.Application.Shared;
 
-namespace BlogAPI.Application.DTOs;
+namespace BlogAPI.Application.DTOs.UserProfiles;
 
 public class UserProfileQueryParametersDto
 {

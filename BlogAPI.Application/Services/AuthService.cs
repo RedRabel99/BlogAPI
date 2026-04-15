@@ -1,12 +1,11 @@
-﻿using BlogAPI.Application.DTOs;
-using BlogAPI.Application.Interfaces;
+﻿using BlogAPI.Application.Interfaces;
 using BlogAPI.Domain.Abstractions;
 using BlogAPI.Domain.Interfaces.Auth;
 using BlogAPI.Domain.Interfaces.UserProfiles;
 using BlogAPI.Domain;
-using AutoMapper;
 using FluentValidation;
 using BlogAPI.Application.Extensions;
+using BlogAPI.Application.DTOs.Auth;
 
 namespace BlogAPI.Application.Services;
 
@@ -16,7 +15,6 @@ public class AuthService : IAuthService
     private readonly ITokenService _tokenService;
     private readonly IUserProfileRepository _userProfileRepository;
     private readonly IUserContext _userContext;
-    private readonly IMapper _mapper;
     private readonly IValidator<RegisterDto> _registerValidator;
     private readonly IValidator<LoginDto> _loginValidator;
     private readonly IValidator<ChangeUsernameDto> _changeUsernameValidator;
@@ -29,7 +27,6 @@ public class AuthService : IAuthService
         ITokenService tokenService,
         IUserProfileRepository userProfileRepository,
         IUserContext userContext,
-        IMapper mapper,
         IValidator<RegisterDto> registerValidator,
         IValidator<LoginDto> loginValidator,
         IValidator<GenerateChangeEmailTokenDto> generateChangeEmailTokenDtoValidator,
@@ -41,7 +38,6 @@ public class AuthService : IAuthService
         _tokenService = tokenService;
         _userProfileRepository = userProfileRepository;
         _userContext = userContext;
-        _mapper = mapper;
         _registerValidator = registerValidator;
         _loginValidator = loginValidator;
         _generateChangeEmailTokenDtoValidator = generateChangeEmailTokenDtoValidator;
