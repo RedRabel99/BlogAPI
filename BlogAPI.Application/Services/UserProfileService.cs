@@ -106,12 +106,7 @@ public class UserProfileService : IUserProfileService
             .GetAll()
             .ApplyFiltering(queryFilters)
             .ApplySorting(sortingParams)
-            .Select(u => new UserProfileDto
-            {
-                Id = u.Id,
-                UserName = u.Username,
-                DisplayName = u.DisplayName,
-            }); //TODO: create expression to use in the select method
+            .Select(UserProfileMappers.ProjectToDto);
 
         var result = await _pagedListFactory.CreateAsync(query, queryParameters.Page, queryParameters.PageSize);
         
