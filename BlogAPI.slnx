@@ -11,4 +11,5 @@
   <Folder Name="/Web/">
     <Project Path="BlogAPI/BlogAPI.Web.csproj" />
   </Folder>
+  <Project Path="Tests.Application/Tests.Application.csproj" Id="75b847a9-fb2c-4cef-9440-de6bdcbd1101" />
 </Solution>
