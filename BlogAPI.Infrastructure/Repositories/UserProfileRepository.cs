@@ -1,9 +1,6 @@
 ﻿using BlogAPI.Domain.Interfaces.UserProfiles;
 using BlogAPI.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Data.SqlClient;
-using BlogAPI.Domain.Exceptions;
-using BlogAPI.Infrastructure.Helper;
 
 namespace BlogAPI.Infrastructure.Repositories;
 
