@@ -1,5 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace BlogAPI.Infrastructure.Helper;
 
@@ -14,12 +14,10 @@ public static class DatabaseExceptionHelper
         {
             return false;
         }
-        if (exception.InnerException is SqlException sqlException)
+        if (exception.InnerException is PostgresException psqlException)
         {
-            if (sqlException.Number == 2601 || sqlException.Number == 2627)
-            {
-                return sqlException.Message.Contains(constraintName);
-            }
+            return psqlException.SqlState == PostgresErrorCodes.UniqueViolation &&
+                   psqlException.ConstraintName == constraintName;
         }
 
         return false;

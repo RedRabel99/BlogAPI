@@ -16,7 +16,7 @@ public static class DependencyInjection
         this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<AppDbContext>(options => {
-            options.UseSqlServer(configuration["ConnectionStrings:DefaultConnection"]);
+            options.UseNpgsql(configuration["ConnectionStrings:DefaultConnection"]);
         });
         services.AddIdentityCore<ApplicationUser>(opt =>
                 {
