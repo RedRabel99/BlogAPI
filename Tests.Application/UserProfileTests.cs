@@ -142,9 +142,9 @@ public class UserProfileServiceTests
     public async Task GetCurrentUserProfileAsync_WithExisting_ReturnsProfile()
     {
         // Arrange
-        var profile = new UserProfile { Id = Guid.NewGuid(), ApplicationUserId = "app-user-id", Username = "username", DisplayName = "displayname" };
-        _userContext.UserId.Returns("app-user-id");
-        _userProfileRepository.GetByApplicationUserIdAsync("app-user-id").Returns(profile);
+        var userProfile = new UserProfile { Id = Guid.NewGuid(), ApplicationUserId = "app-user-id", Username = "username", DisplayName = "displayname" };
+        _userContext.UserId.Returns(userProfile.ApplicationUserId);
+        _userProfileRepository.GetByApplicationUserIdAsync(userProfile.ApplicationUserId).Returns(userProfile);
 
         // Act
         var result = await _sut.GetCurrentUserProfileAsync();
@@ -152,25 +152,25 @@ public class UserProfileServiceTests
         // Assert
         Assert.True(result.IsSuccess);
         Assert.NotNull(result.Value);
-        Assert.Equal(profile.Id, result.Value.Id);
-        Assert.Equal(profile.Username, result.Value?.DisplayName);
-        Assert.Equal(profile.DisplayName, result.Value?.DisplayName);
-        Assert.Equal(profile.Id, result.Value?.Id);
+        Assert.Equal(userProfile.Id, result.Value.Id);
+        Assert.Equal(userProfile.Username, result.Value?.UserName);
+        Assert.Equal(userProfile.DisplayName, result.Value?.DisplayName);
+        Assert.Equal(userProfile.Id, result.Value?.Id);
     }
 
     [Fact]
     public async Task GetUserProfileByUsername_WithExisting_ReturnsSuccess()
     {
         // Arrange
-        var profile = new UserProfile { Id = Guid.NewGuid(), Username = "username", ApplicationUserId = "app-user-id" };
-        _userProfileRepository.GetByUsername("username").Returns(profile);
+        var userProfile = new UserProfile { Id = Guid.NewGuid(), Username = "username", ApplicationUserId = "app-user-id" };
+        _userProfileRepository.GetByUsername("username").Returns(userProfile);
 
         // Act
         var result = await _sut.GetUserProfileByUsername("username");
 
         // Assert
         Assert.True(result.IsSuccess);
-        Assert.Equal(profile.Id, result.Value.Id);
+        Assert.Equal(userProfile.Id, result.Value.Id);
     }
 
     [Fact]
@@ -263,8 +263,8 @@ public class UserProfileServiceTests
         // Arrange
         var id = Guid.NewGuid();
         _updateValidator.Validate(Arg.Any<UpdateUserProfileDto>()).Returns(new ValidationResult());
-        var entity = new UserProfile { Id = id, ApplicationUserId = "owner" };
-        _userProfileRepository.GetByIdAsync(id).Returns(entity);
+        var userProfile = new UserProfile { Id = id, ApplicationUserId = "owner" };
+        _userProfileRepository.GetByIdAsync(id).Returns(userProfile);
         _userContext.UserId.Returns("other-user");
 
         // Act
