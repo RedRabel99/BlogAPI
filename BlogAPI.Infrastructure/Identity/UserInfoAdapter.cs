@@ -10,7 +10,7 @@ public class UserInfoAdapter : IUserInfo
         Id = applicationUser.Id;
         Email = applicationUser.Email;
         UserName = applicationUser.UserName;
-        UserProfile = applicationUser.userProfile;
+        UserProfile = applicationUser.UserProfile;
     }
 
     public string Id { get; }
