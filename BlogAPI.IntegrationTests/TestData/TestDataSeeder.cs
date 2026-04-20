@@ -53,4 +53,7 @@ public class TestDataSeeder
     // Helper methods to get seeded entities
     public UserProfile GetUserProfile(int index = 0) => _userProfiles[index];
     public ApplicationUser GetApplicationUser(int index = 0) => _applicationUsers[index];
+
+    public int GetUserProfilesLength() => _userProfiles.Count;
+    public int GetApplicationUsersLength() => _applicationUsers.Count;
 }
