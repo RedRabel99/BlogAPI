@@ -8,17 +8,18 @@ public static class AuthErrors
         Error.NotFound("AuthErrors.NotFound", "Given user was not found");
     public static readonly Error NoAuthenticatedUser =
         Error.NotFound("AuthErrors.NoAuthenticatedIser", "There is no user authenticated currently");
-
+    public static readonly Error PasswordMissmatch = 
+        Error.Validation("AuthErrors.PasswordMissmatch", "Given password is not a valid password");
     public static readonly Error InvalidCredentials =
-        Error.Forbidden("AuthErrors.InvalidCredentials", "Given credentials are invalid");
-
+        Error.Unauthorized("AuthErrors.InvalidCredentials", "Given credentials are invalid");
     public static readonly Error AuthFailure =
         Error.Internal("AuthErrors.AuthFailure", "Something went wrong while authenticating");
     public static readonly Error UserAlreadyExists =
         Error.Conflict("AuthErrors.UserAlreadyExists", "User with given username already exists");
     public static readonly Error UserWithEmailAlreadyExists =
         Error.Conflict("AuthErrors.UserWithEmailAlreadyExists", "User with given email already exists");
-
     public static readonly Error Internal =
         Error.Internal("AuthErrors.Internal", "Something went wrong");
+    public static readonly Error InvalidToken = 
+        Error.Validation("AuthErrors.InvalidToken", "Given token is invalid");
 }

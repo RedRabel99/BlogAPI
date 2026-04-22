@@ -391,7 +391,7 @@ namespace BlogAPI.Infrastructure.Migrations
             modelBuilder.Entity("BlogAPI.Domain.Entities.UserProfile", b =>
                 {
                     b.HasOne("BlogAPI.Infrastructure.Identity.ApplicationUser", null)
-                        .WithOne("userProfile")
+                        .WithOne("UserProfile")
                         .HasForeignKey("BlogAPI.Domain.Entities.UserProfile", "ApplicationUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -477,7 +477,7 @@ namespace BlogAPI.Infrastructure.Migrations
 
             modelBuilder.Entity("BlogAPI.Infrastructure.Identity.ApplicationUser", b =>
                 {
-                    b.Navigation("userProfile");
+                    b.Navigation("UserProfile");
                 });
 #pragma warning restore 612, 618
         }

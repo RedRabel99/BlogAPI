@@ -4,5 +4,5 @@ namespace BlogAPI.Infrastructure.Identity;
 
 public class ApplicationUser : IdentityUser
 {
-    public UserProfile? userProfile { get; set; }
+    public UserProfile? UserProfile { get; set; }
 }

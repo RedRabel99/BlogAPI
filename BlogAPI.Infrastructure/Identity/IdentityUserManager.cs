@@ -100,7 +100,7 @@ public class IdentityUserManager : IUserManager
         var user = await _userManager.FindByEmailAsync(email);
         if(user is null)
         {
-            return Result<IUserInfo>.Failure(AuthErrors.UserNotFound);
+            return Result<IUserInfo>.Failure(AuthErrors.InvalidCredentials);
         }
 
         var isValid = await _userManager.CheckPasswordAsync(user, password);
@@ -200,11 +200,16 @@ public class IdentityUserManager : IUserManager
 
         if (!updateResult.Succeeded)
         {
-            var isDuplicateEmail = updateResult.Errors
-                .Any(x => x.Code.Equals("DuplicateEmail"));
-            return Result.Failure(isDuplicateEmail
-                ? AuthErrors.UserWithEmailAlreadyExists
-                : AuthErrors.Internal);
+            if(updateResult.Errors.Any(x => x.Code.Equals("DuplicateEmail")))
+            {
+                return Result.Failure(AuthErrors.UserWithEmailAlreadyExists);
+            }
+            if(updateResult.Errors.Any(x => x.Code.Equals("InvalidToken")))
+            {
+                return Result.Failure(AuthErrors.InvalidToken);
+            }
+            
+            return Result.Failure(AuthErrors.Internal);
         }
 
         return Result.Success();
@@ -231,7 +236,7 @@ public class IdentityUserManager : IUserManager
             //TODO: implement result for invalid new password
             return Result.Failure(
                 result.Errors.Any(x => x.Code.Equals("PasswordMismatch"))
-                    ? AuthErrors.InvalidCredentials 
+                    ? AuthErrors.PasswordMissmatch 
                     : AuthErrors.Internal);
         }
 
