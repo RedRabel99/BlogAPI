@@ -29,15 +29,15 @@ public class TestDataSeeder
         await _appDbContext.SaveChangesAsync();
     }
 
-    private async Task SeedUsers(int count = 10, string password = "Password123!")
+    private async Task SeedUsers(int count = 10)
     {
         var userFaker = new Faker<RegisterDto>()
             .CustomInstantiator(f => new RegisterDto
             {
-                Username = f.Internet.UserName(),
+                Username = f.Internet.UserName().Replace('.','_'),
                 Email = f.Internet.Email(),
                 DisplayName = f.Internet.UserName(),
-                Password = password
+                Password = DefaultPassword
             });
         
         var registerDtos = userFaker.Generate(count);
@@ -53,6 +53,8 @@ public class TestDataSeeder
     // Helper methods to get seeded entities
     public UserProfile GetUserProfile(int index = 0) => _userProfiles[index];
     public ApplicationUser GetApplicationUser(int index = 0) => _applicationUsers[index];
+
+    public string DefaultPassword => "Password123!";
 
     public int GetUserProfilesLength() => _userProfiles.Count;
     public int GetApplicationUsersLength() => _applicationUsers.Count;
