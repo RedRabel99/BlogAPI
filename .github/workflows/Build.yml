@@ -11,6 +11,7 @@ on:
 
 env:
   DOTNET_VERSION: "10.0.x"
+  JWT__Secret: ${{ secrets.JWT_SECRET }}
 
 jobs:
   build:
