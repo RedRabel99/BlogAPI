@@ -1,4 +1,5 @@
-﻿using BlogAPI.Application.DTOs.Tags;
+﻿using System.Linq.Expressions;
+using BlogAPI.Application.DTOs.Tags;
 using BlogAPI.Domain.Entities;
 
 namespace BlogAPI.Application.Mapping;
@@ -13,4 +14,11 @@ public static class TagMappers
             Slug = tag.Slug
         };
     }
+
+    public static Expression<Func<Tag, TagDto>> ProjectToDto =>
+        tag => new TagDto()
+        {
+            Slug = tag.Slug,
+            TagName = tag.TagName
+        };
 }
