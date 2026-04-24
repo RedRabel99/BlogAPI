@@ -16,6 +16,8 @@ namespace BlogAPI.Infrastructure.TypeConfiguration
             builder.HasKey(x => x.Id);
             builder.Property(x => x.TagName).HasMaxLength(200).IsRequired();
             builder.HasIndex(x => x.TagName).IsUnique();
+            builder.Property(x => x.Slug).HasMaxLength(200).IsRequired();
+            builder.HasIndex(x => x.Slug).IsUnique();
         }
     }
 }

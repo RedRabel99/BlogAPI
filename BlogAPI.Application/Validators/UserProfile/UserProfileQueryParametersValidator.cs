@@ -2,6 +2,7 @@
 using BlogAPI.Application.Shared.Pagination;
 using FluentValidation;
 using Microsoft.Extensions.Options;
+using BlogAPI.Application.Validators.Shared;
 
 namespace BlogAPI.Application.Validators.UserProfile;
 
@@ -25,16 +26,7 @@ public class UserProfileQueryParametersValidator :
             .Must(so => so.ToLower() == "asc" || so.ToLower() == "desc")
             .WithMessage("Sorting order must be one of: asc or desc");
 
-        RuleFor(x => x.PageSize)
-            .GreaterThanOrEqualTo(options.MinPageSize)
-                .WithMessage($"Page size can not be lesser than {options.MinPageSize}")
-            .LessThanOrEqualTo(options.MaxPageSize)
-                .WithMessage($"Page size can not be greater than {options.MaxPageSize}")
-            .When(x => x is not null); 
-        
-        RuleFor(x => x.Page)
-            .GreaterThanOrEqualTo(1)
-                .WithMessage($"Page number can not be lesser than 1")
-            .When(x=> x is not null);
+        RuleFor(x => x.PageSize).ApplyPageSizeRules(options);
+        RuleFor(x => x.Page).ApplyPageRules();
     }
 }
