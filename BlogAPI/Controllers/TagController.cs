@@ -30,10 +30,10 @@ public class TagController : ControllerBase
         return result.IsSuccess ? Results.Ok(result.Value) : result.ToProblemDetails();
     }
 
-    [HttpGet("{slug}/posts")]
-    public async Task<IResult> GetPostsByTagSlug(string slug, [FromQuery] SearchTagQueryParametersDto queryParameters)
+    [HttpGet("from-post/{id:guid}")]
+    public async Task<IResult> GetTagsByPostId(Guid id, [FromQuery] SearchTagQueryParametersDto queryParameters)
     {
-        var result = await _tagService.GetTagsByPostIdAsync(Guid.Parse(slug));
+        var result = await _tagService.GetTagsByPostIdAsync(id, queryParameters);
         return result.IsSuccess ? Results.Ok(result.Value) : result.ToProblemDetails();
     }
 }

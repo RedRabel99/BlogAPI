@@ -4,7 +4,5 @@ namespace BlogAPI.Application.Shared;
 
 public interface IQuerySorting<T> where T : class
 {
-    string? SortColumn { get; }
-    SortingOrder SortOrder { get; }
-    Expression<Func<T, object>> GetSortProperty();
+    IQueryable<T> Apply(IQueryable<T> query);
 }

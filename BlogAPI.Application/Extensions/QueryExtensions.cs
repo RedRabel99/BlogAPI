@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Linq.Expressions;
 using BlogAPI.Application.Shared;
 
 
@@ -8,20 +6,17 @@ namespace BlogAPI.Application.Extensions;
 
 public static class QueryExtensions
 {
-    public static IQueryable<T> ApplyFiltering<T>(this IQueryable<T> query, IQueryFilter<T> filter) where T : class 
-        => filter.Apply(query);
-
-    public static IQueryable<T> ApplySorting<T>(this IQueryable<T> query, IQuerySorting<T> sorting) where T : class
+    extension<T>(IQueryable<T> query) where T : class
     {
-        if (string.IsNullOrEmpty(sorting.SortColumn))
-        {
-            return query;
-        }
+        public IQueryable<T> ApplyFiltering(IQueryFilter<T> filter) => filter.Apply(query);
+        public IQueryable<T> ApplySorting(IQuerySorting<T> sorting) => sorting.Apply(query);
+    }
 
-        var keySelector = sorting.GetSortProperty();
-
-        return sorting.SortOrder == SortingOrder.Ascending
+    public static IQueryable<T> OrderByDirection<T>(
+        this IQueryable<T> query,
+        Expression<Func<T, object>> keySelector,
+        SortingOrder sortingOrder)
+        => sortingOrder == SortingOrder.Ascending
             ? query.OrderBy(keySelector)
             : query.OrderByDescending(keySelector);
-    }
 }

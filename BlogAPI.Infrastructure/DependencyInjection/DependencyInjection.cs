@@ -1,4 +1,5 @@
 ﻿using BlogAPI.Domain.Interfaces.Auth;
+using BlogAPI.Domain.Interfaces.Tags;
 using BlogAPI.Domain.Interfaces.UserProfiles;
 using BlogAPI.Infrastructure.Identity;
 using BlogAPI.Infrastructure.Repositories;
@@ -35,6 +36,7 @@ public static class DependencyInjection
         services.AddScoped<IUserContext, UserContext>();
         services.AddScoped<ITokenService, JwtTokenService>();
         services.AddScoped<IUserProfileRepository, UserProfileRepository>();
+        services.AddScoped<ITagRepository, TagRepository>();
         services.AddHttpContextAccessor();
         return services;
     }

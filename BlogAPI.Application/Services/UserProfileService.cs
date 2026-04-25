@@ -57,7 +57,7 @@ public class UserProfileService : IUserProfileService
 
     public async Task<Result<UserProfileDto>> GetCurrentUserProfileAsync()
     {
-        if (_userContext is null || string.IsNullOrEmpty(_userContext.UserId))
+        if (string.IsNullOrEmpty(_userContext.UserId))
         {
             return Result<UserProfileDto>.Failure(UserProfileErrors.NotFound);
         }
