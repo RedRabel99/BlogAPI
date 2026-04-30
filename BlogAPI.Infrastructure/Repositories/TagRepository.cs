@@ -25,12 +25,6 @@ namespace BlogAPI.Infrastructure.Repositories
             return tag;
         }
 
-        public async Task<Tag?> GetBySlugAsync(string slug)
-        {
-            var tag = await _appDbContext.Tags.FirstOrDefaultAsync(x => x.Slug == slug);
-            return tag;
-        }
-
         public  IQueryable<Tag> GetAll()
         {
             return _appDbContext.Tags;

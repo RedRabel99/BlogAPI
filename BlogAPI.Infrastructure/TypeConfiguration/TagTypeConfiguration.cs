@@ -14,10 +14,8 @@ namespace BlogAPI.Infrastructure.TypeConfiguration
         public void Configure(EntityTypeBuilder<Tag> builder)
         {
             builder.HasKey(x => x.Id);
-            builder.Property(x => x.TagName).HasMaxLength(200).IsRequired();
+            builder.Property(x => x.TagName).HasMaxLength(50).IsRequired();
             builder.HasIndex(x => x.TagName).IsUnique();
-            builder.Property(x => x.Slug).HasMaxLength(200).IsRequired();
-            builder.HasIndex(x => x.Slug).IsUnique();
         }
     }
 }

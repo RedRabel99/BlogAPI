@@ -6,7 +6,6 @@ namespace BlogAPI.Domain.Interfaces.Tags
     {
         Task<Tag?> GetByIdAsync(Guid id);
         Task<Tag?> GetByNameAsync(string name);
-        Task<Tag?> GetBySlugAsync(string slug);
         IQueryable<Tag> GetAll();
         IQueryable<Tag> GetTagsByPostId(Guid postId);
     }

@@ -5,12 +5,12 @@ namespace BlogAPI.Infrastructure.Identity;
 
 public class UserInfoAdapter : IUserInfo
 {
-    public UserInfoAdapter(ApplicationUser applicationUser)
+    public UserInfoAdapter(ApplicationUser applicationUser, string userProfileId)
     {
         Id = applicationUser.Id;
         Email = applicationUser.Email;
         UserName = applicationUser.UserName;
-        UserProfile = applicationUser.UserProfile;
+        UserProfileId = userProfileId;
     }
 
     public string Id { get; }
@@ -18,6 +18,6 @@ public class UserInfoAdapter : IUserInfo
     public string UserName { get; }
 
     public string Email { get; }
-    
-    public UserProfile UserProfile { get; }
+
+    public string UserProfileId { get; }
 }

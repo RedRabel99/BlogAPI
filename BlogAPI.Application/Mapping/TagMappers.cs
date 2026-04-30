@@ -11,14 +11,12 @@ public static class TagMappers
         return new TagDto
         {
             TagName = tag.TagName,
-            Slug = tag.Slug
         };
     }
 
     public static Expression<Func<Tag, TagDto>> ProjectToDto =>
         tag => new TagDto()
         {
-            Slug = tag.Slug,
             TagName = tag.TagName
         };
 }

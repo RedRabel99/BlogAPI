@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Identity;
+using BlogAPI.Domain.Interfaces.Posts;
 
 namespace BlogAPI.Infrastructure.DependencyInjection;
 
@@ -37,6 +38,7 @@ public static class DependencyInjection
         services.AddScoped<ITokenService, JwtTokenService>();
         services.AddScoped<IUserProfileRepository, UserProfileRepository>();
         services.AddScoped<ITagRepository, TagRepository>();
+        services.AddScoped<IPostRepository, PostRepository>();
         services.AddHttpContextAccessor();
         return services;
     }

@@ -23,10 +23,10 @@ public class TagController : ControllerBase
         return result.IsSuccess ? Results.Ok(result.Value) : result.ToProblemDetails();
     }
 
-    [HttpGet("{slug}")]
-    public async Task<IResult> GetTagBySlug(string slug)
+    [HttpGet("{tagName}")]
+    public async Task<IResult> GetTagByName(string tagName)
     {
-        var result = await _tagService.GetTagBySlugAsync(slug);
+        var result = await _tagService.GetTagByNameAsync(tagName);
         return result.IsSuccess ? Results.Ok(result.Value) : result.ToProblemDetails();
     }
 

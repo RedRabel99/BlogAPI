@@ -14,9 +14,20 @@ public class PostTypeConfiguration : IEntityTypeConfiguration<Post>
             .HasMaxLength(100)
             .IsRequired();
 
-        builder.Property(x => x.Body)
+        builder.Property(x => x.Content)
             .HasColumnType("text")
             .IsRequired();
+       
+        builder.Property(x => x.Excerpt)
+            .HasColumnType("text")
+            .IsRequired();
+
+        builder.Property(x => x.Slug)
+            .HasMaxLength(100)
+            .IsRequired();
+
+        builder.HasIndex(x => x.Slug)
+            .IsUnique();
 
         builder.HasMany(x => x.Comments)
             .WithOne(x => x.Post)

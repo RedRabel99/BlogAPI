@@ -6,6 +6,7 @@ using BlogAPI.Application.Shared;
 using BlogAPI.Application.Shared.Pagination;
 using BlogAPI.Domain;
 using BlogAPI.Domain.Abstractions;
+using BlogAPI.Domain.Entities;
 using BlogAPI.Domain.Interfaces.Tags;
 using FluentValidation;
 
@@ -41,20 +42,6 @@ public class TagService : ITagService
     public async Task<Result<TagDto>> GetTagByNameAsync(string name)
     {
         var tag = await _tagRepository.GetByNameAsync(name);
-
-        if (tag is null)
-        {
-            return Result<TagDto>.Failure(TagErrors.TagNotFound);
-        }
-
-        var tagDto = tag.ToDto();
-
-        return Result<TagDto>.Success(tagDto);
-    }
-
-    public async Task<Result<TagDto>> GetTagBySlugAsync(string slug)
-    {
-        var tag = await _tagRepository.GetBySlugAsync(slug);
 
         if (tag is null)
         {
@@ -109,5 +96,25 @@ public class TagService : ITagService
         var result = await _pagedListFactory.CreateAsync(query, queryParametersDto.Page, queryParametersDto.PageSize);
 
         return Result<PagedList<TagDto>>.Success(result);
+    }
+
+    public async Task<List<Tag>> ResolveTagsAsync(List<string> tagNames)
+    {
+        var result = new List<Tag>();
+        if(tagNames is null)
+        {
+            return result;
+        }
+
+        foreach( var tagName in tagNames)
+        {
+            var existingTag = await _tagRepository.GetByNameAsync(tagName);
+            result.Add(
+                existingTag is not null 
+                ? existingTag 
+                : new Tag { TagName = tagName }
+            );
+        }
+        return result;
     }
 }

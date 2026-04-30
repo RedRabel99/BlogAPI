@@ -19,7 +19,6 @@ namespace BlogAPI.Application.Shared
             => SortColumn?.ToLower() switch
             {
                 "tagname" => t => t.TagName,
-                "slug" => t => t.Slug,
                 _ => t => t.Id
             };
 

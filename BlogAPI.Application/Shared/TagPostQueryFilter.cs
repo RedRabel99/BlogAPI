@@ -2,14 +2,14 @@
 
 namespace BlogAPI.Application.Shared;
 
-public class TagPostQueryFilter(string? slug) : IQueryFilter<Tag>
+public class TagPostQueryFilter(string? tagName) : IQueryFilter<Tag>
 {
-    private readonly string? _slug = slug;
+    private readonly string? _tagName = tagName;
     public IQueryable<Tag> Apply(IQueryable<Tag> query)
     {
-        if (!string.IsNullOrWhiteSpace(_slug))
+        if (!string.IsNullOrWhiteSpace(_tagName))
         {
-            query = query.Where(t => t.Slug.Contains(_slug));
+            query = query.Where(t => t.TagName.Contains(_tagName));
         }
 
         return query;
