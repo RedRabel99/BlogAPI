@@ -16,7 +16,7 @@ public class PostRepository : IPostRepository
     public async Task<Post?> CreatePostAsync(Post post)
     {
         await _context.Posts.AddAsync(post);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
         return post;
     }
 

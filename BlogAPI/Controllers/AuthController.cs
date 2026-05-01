@@ -21,14 +21,14 @@ public class AuthController : ControllerBase
     public async Task<IResult> Register([FromBody]RegisterDto registerDto)
     {
         var result = await _authService.RegisterAsync(registerDto);
-        return result.IsSuccess ? Results.Ok(new {Message = "User registered"}) : result.ToProblemDetails();
+        return result.IsSuccess ? TypedResults.Ok(new {Message = "User registered"}) : result.ToProblemDetails();
     }
 
     [HttpPost("login")]
     public async Task<IResult> Login([FromBody]LoginDto loginDto)
     {
         var result = await _authService.LoginAsync(loginDto);
-        return result.IsSuccess ? Results.Ok(result.Value) : result.ToProblemDetails();
+        return result.IsSuccess ? TypedResults.Ok(result.Value) : result.ToProblemDetails();
     }
 
     [Authorize]
@@ -36,7 +36,7 @@ public class AuthController : ControllerBase
     public async Task<IResult> ChangeUsername([FromBody]ChangeUsernameDto changeUsernameDto)
     {
         var result = await _authService.ChangeUsernameAsync(changeUsernameDto);
-        return result.IsSuccess ? Results.Ok() : result.ToProblemDetails();
+        return result.IsSuccess ? TypedResults.Ok() : result.ToProblemDetails();
     }
 
     [Authorize]
@@ -44,7 +44,7 @@ public class AuthController : ControllerBase
     public async Task<IResult> ChangePassword([FromBody]ChangePasswordDto changePasswordDto)
     {
         var result = await _authService.ChangePasswordAsync(changePasswordDto);
-        return result.IsSuccess ? Results.Ok() : result.ToProblemDetails();
+        return result.IsSuccess ? TypedResults.Ok() : result.ToProblemDetails();
     }
 
     [Authorize]
@@ -52,7 +52,7 @@ public class AuthController : ControllerBase
     public async Task<IResult> GenerateChangeEmailToken([FromBody]GenerateChangeEmailTokenDto generateChangeEmailTokenDto)
     {
         var result = await _authService.GenerateChangeEmailTokenAsync(generateChangeEmailTokenDto);
-        return result.IsSuccess ? Results.Ok(result.Value) : result.ToProblemDetails();
+        return result.IsSuccess ? TypedResults.Ok(result.Value) : result.ToProblemDetails();
     }
 
     [Authorize]
@@ -60,7 +60,7 @@ public class AuthController : ControllerBase
     public async Task<IResult> ChangeEmailAsync([FromBody] ChangeEmailDto changeEmailDto)
     {
         var result = await _authService.ChangeEmailAsync(changeEmailDto);
-        return result.IsSuccess ? Results.Ok() : result.ToProblemDetails();
+        return result.IsSuccess ? TypedResults.Ok() : result.ToProblemDetails();
     }
 
 
@@ -68,7 +68,7 @@ public class AuthController : ControllerBase
     [HttpGet("test")]
     public async Task<IResult> Test()
     {
-        return Results.Ok(new
+        return TypedResults.Ok(new
         {
             result = "it works"
         });

@@ -24,12 +24,14 @@ public class PostService : IPostService
         IPostRepository postRepository,
         IValidator<CreatePostDto> createPostValidator,
         IUserContext userContext,
-        ITagService tagService)
+        ITagService tagService,
+        ISlugHelper slugHelper)
     {
         _postRepository = postRepository;
         _createPostValidator = createPostValidator;
         _userContext = userContext;
         _tagService = tagService;
+        _slugHelper = slugHelper;
     }
 
     public async Task<Result<PostDto>> CreatePost(CreatePostDto createPostDto)
@@ -52,14 +54,14 @@ public class PostService : IPostService
 
         var slug = string.IsNullOrEmpty(createPostDto.Slug) ? _slugHelper.GenerateSlug(createPostDto.Title) : createPostDto.Slug;
 
-        if (await _postRepository.GetPostBySlugAndUser(userProfileId, createPostDto.Slug) is not null)
+        if (await _postRepository.GetPostBySlugAndUser(userProfileId, slug) is not null)
         {
             return Result<PostDto>.Failure(PostErrors.PostAlreadyExists);
         }
         var post = new Post
         {
             Title = createPostDto.Title,
-            Slug = createPostDto.Slug,
+            Slug = slug,
             Excerpt = createPostDto.Excerpt,
             Content = createPostDto.Content,
             UserProfileId = userProfileId,
