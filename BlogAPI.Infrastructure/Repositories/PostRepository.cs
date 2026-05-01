@@ -20,9 +20,12 @@ public class PostRepository : IPostRepository
         return post;
     }
 
-    public Post? GetPost(Post post)
+    public async Task<Post?> GetPostAsync(Guid id)
     {
-        throw new NotImplementedException();
+        var post = await _context.Posts
+            .Include(x => x.Tags)
+            .FirstOrDefaultAsync(x => x.Id == id);
+        return post;
     }
 
     public async Task<Post?> GetPostBySlugAndUser(Guid id, string slug)
@@ -33,6 +36,6 @@ public class PostRepository : IPostRepository
 
     public IQueryable<Post> GetPostQuery()
     {
-        throw new NotImplementedException();
+        return _context.Posts.Include(x => x.Tags);
     }
 }

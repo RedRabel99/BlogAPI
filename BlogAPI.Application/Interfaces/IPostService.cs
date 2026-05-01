@@ -8,7 +8,7 @@ public interface IPostService
 {
     Task<Result<PostDto>> CreatePost(CreatePostDto createPostDto);
     Task<Result<PostDto>> GetPostById(Guid id);
-    Task<Result<PagedList<PostDto>>> GetAllPosts();
+    Task<Result<PagedList<PostDto>>> GetAllPosts(PostQueryParametersDto queryParametersDto);
     Task<Result<PagedList<PostDto>>> GetPostsByUserProfileId();
     Task<Result<PagedList<PostDto>>> GetPostsByUsername(string username);
     Task<Result<PagedList<PostDto>>> GetPostsByCurrentUser();

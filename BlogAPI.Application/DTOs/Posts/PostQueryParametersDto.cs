@@ -3,11 +3,10 @@
 public class PostQueryParametersDto
 {
     public string? Title { get; set; }
-    public string? Excerpt { get; set; }
-    public string? UserName { get; set; }
-    public DateTime? From { get; set; }
-    public DateTime? To { get; set; }
-    public List<string> Tags { get; set; }=  new List<string>();
+    public List<string> Usernames { get; set; } = [];
+    public DateOnly? From { get; set; }
+    public DateOnly? To { get; set; }
+    public List<string> Tags { get; set; }=  [];
     public string? SortColumn { get; set; } = "Username";
     public string SortingOrder { get; set; } = "asc";
 

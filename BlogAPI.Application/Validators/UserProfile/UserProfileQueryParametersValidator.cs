@@ -13,12 +13,10 @@ public class UserProfileQueryParametersValidator :
     {
         var options = paginationOptions.Value;
         RuleFor(x => x.UserName)
-            .MinimumLength(1)
             .MaximumLength(50)
             .When(x => !string.IsNullOrEmpty(x.UserName))
             .WithMessage("Username length must be within 1 to 50 characters");
         RuleFor(x => x.DisplayName)
-            .MinimumLength(1)
             .MaximumLength(50)
             .When(x => !string.IsNullOrEmpty(x.DisplayName))
             .WithMessage("Display name lenght must be within 1 to 50 characters");

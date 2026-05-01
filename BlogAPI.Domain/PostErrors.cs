@@ -9,4 +9,7 @@ public static class PostErrors
 
     public static Error Internal =
         Error.Internal("Post.Internal", "An internal error occurred while processing the post");
+
+    public static Error NotFound =
+        Error.NotFound("Post.NotFound", "Post could not be found");
 }

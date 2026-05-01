@@ -2,7 +2,6 @@
 using BlogAPI.Application.Interfaces;
 using BlogAPI.Web.Extensions;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlogAPI.Web.Controllers
@@ -36,7 +35,7 @@ namespace BlogAPI.Web.Controllers
         [HttpGet]
         public async Task<IResult> GetPostList([FromQuery]PostQueryParametersDto queryParametersDto)
         {
-            var result = await _postService.GetAllPosts();
+            var result = await _postService.GetAllPosts(queryParametersDto);
             return result.IsSuccess ? TypedResults.Ok(result.Value) : result.ToProblemDetails();
         }
 

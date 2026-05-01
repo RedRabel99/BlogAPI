@@ -4,6 +4,7 @@
     {
         bool IsAuthenticated { get; }
         string UserId { get; }
+        string UserProfileId { get; }
         string Email { get; }
         Task<IUserInfo> GetCurrentUserAsync();
     }
