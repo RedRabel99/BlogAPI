@@ -40,7 +40,7 @@ namespace BlogAPI.Web.Controllers
         }
 
         [Authorize]
-        [HttpPut("{id:guid}")]
+        [HttpPatch("{id:guid}")]
         public async Task<IResult> UpdatePost(Guid id, [FromBody] UpdatePostDto updatePostDto)
         {
             var result = await _postService.UpdatePost(id, updatePostDto);

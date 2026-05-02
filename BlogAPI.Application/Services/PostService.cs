@@ -22,6 +22,7 @@ public class PostService : IPostService
     private readonly ITagService _tagService;
     private readonly ISlugHelper _slugHelper;
     private readonly IValidator<PostQueryParametersDto> _postQueryParameterDtoValidator;
+    private readonly IValidator<UpdatePostDto> _updatePostDtoValidator;
     private readonly IPagedListFactory _pagedListFactory;
     public PostService(
         IPostRepository postRepository,
@@ -30,7 +31,8 @@ public class PostService : IPostService
         ITagService tagService,
         ISlugHelper slugHelper,
         IValidator<PostQueryParametersDto> postQueryParameterDtoValidator,
-        IPagedListFactory pagedListFactory)
+        IPagedListFactory pagedListFactory,
+        IValidator<UpdatePostDto> updatePostDtoValidator)
     {
         _postRepository = postRepository;
         _createPostValidator = createPostValidator;
@@ -39,6 +41,7 @@ public class PostService : IPostService
         _slugHelper = slugHelper;
         _postQueryParameterDtoValidator = postQueryParameterDtoValidator;
         _pagedListFactory = pagedListFactory;
+        _updatePostDtoValidator = updatePostDtoValidator;
     }
 
     public async Task<Result<PostDto>> CreatePost(CreatePostDto createPostDto)
@@ -49,17 +52,16 @@ public class PostService : IPostService
             return validationResult.ToValidationFailure<PostDto>();
         }
 
-        if(!_userContext.IsAuthenticated || string.IsNullOrEmpty(_userContext.UserId))
+        if(!_userContext.IsAuthenticated || string.IsNullOrEmpty(_userContext.UserProfileId))
         {
             return Result<PostDto>.Failure(AuthErrors.UserNotFound); //TODO: dodac wlasciwy error
         }
 
         var tagList = await _tagService.ResolveTagsAsync(createPostDto.Tags);
 
-        var user = await _userContext.GetCurrentUserAsync();
-        var userProfileId = Guid.Parse(user.UserProfileId);
-
         var slug = string.IsNullOrEmpty(createPostDto.Slug) ? _slugHelper.GenerateSlug(createPostDto.Title) : createPostDto.Slug;
+
+        var userProfileId = Guid.Parse(_userContext.UserProfileId);
 
         if (await _postRepository.GetPostBySlugAndUser(userProfileId, slug) is not null)
         {
@@ -85,9 +87,27 @@ public class PostService : IPostService
         return Result<PostDto>.Success(createdPost.ToDto());
     }
 
-    public Task<Result> DeletePost(Guid id)
+    public async Task<Result> DeletePost(Guid id)
     {
-        throw new NotImplementedException();
+        if (!_userContext.IsAuthenticated || string.IsNullOrEmpty(_userContext.UserProfileId))
+        {
+            return Result.Failure(AuthErrors.UserNotFound);
+        }
+
+        var userProfileId = Guid.Parse(_userContext.UserProfileId);
+        var post = await _postRepository.GetPostAsync(id);
+        if(post is null)
+        {
+            return Result.Failure(PostErrors.NotFound);
+        }
+
+        if(post.UserProfileId != userProfileId)
+        {
+            return Result.Failure(PostErrors.Forbidden);
+        }
+        await _postRepository.DeletePostAsync(post);
+
+        return Result.Success();
     }
 
     public async Task<Result<PagedList<PostDto>>> GetAllPosts(PostQueryParametersDto queryParametersDto)
@@ -125,30 +145,62 @@ public class PostService : IPostService
         return Result<PostDto>.Success(postDto);
     }
 
-    public async Task<Result<PagedList<PostDto>>> GetPostsByCurrentUser()
+    public async Task<Result<PostDto>> UpdatePost(Guid id, UpdatePostDto updatePostDto)
     {
-        var userProfileId = _userContext.UserProfileId;
-        if (!_userContext.IsAuthenticated || string.IsNullOrEmpty(userProfileId))
+        var validationResult = await _updatePostDtoValidator.ValidateAsync(updatePostDto);
+
+        if (!validationResult.IsValid)
         {
-            return Result<PagedList<PostDto>>.Failure(AuthErrors.UserNotFound);
+            return validationResult.ToValidationFailure<PostDto>();
         }
 
-        throw new NotImplementedException();
+        if (!_userContext.IsAuthenticated || string.IsNullOrEmpty(_userContext.UserProfileId))
+        {
+            return Result<PostDto>.Failure(AuthErrors.UserNotFound);
+        }
 
-    }
+        var userProfileId = Guid.Parse(_userContext.UserProfileId);
+        var post = await _postRepository.GetPostAsync(id);
 
-    public Task<Result<PagedList<PostDto>>> GetPostsByUsername(string username)
-    {
-        throw new NotImplementedException();
-    }
+        if (post is null)
+        {
+            return Result<PostDto>.Failure(PostErrors.NotFound);
+        }
 
-    public Task<Result<PagedList<PostDto>>> GetPostsByUserProfileId()
-    {
-        throw new NotImplementedException();
-    }
+        if (post.UserProfileId != userProfileId)
+        {
+            return Result<PostDto>.Failure(PostErrors.Forbidden);
+        }
 
-    public Task<Result<PostDto>> UpdatePost(Guid id, UpdatePostDto updatePostDto)
-    {
-        throw new NotImplementedException();
+        if (updatePostDto.Tags is not null)
+        {
+            var tagList = await _tagService.ResolveTagsAsync(updatePostDto.Tags);
+            post.Tags.Clear();
+            foreach (var tag in tagList)
+            {
+                post.Tags.Add(tag);
+            }
+        }
+
+        if (!string.IsNullOrEmpty(updatePostDto.Title))
+        {
+            post.Title = updatePostDto.Title;
+        }
+
+        if(!string.IsNullOrEmpty(updatePostDto.Excerpt))
+        {
+            post.Excerpt = updatePostDto.Excerpt;
+        }
+
+        if(!string.IsNullOrEmpty(updatePostDto.Content))
+        {
+            post.Content = updatePostDto.Content;
+        }
+
+        post.UpdatedAt = DateTime.UtcNow;
+
+        await _postRepository.UpdatePostAsync(post);
+
+        return Result<PostDto>.Success(post.ToDto());
     }
 }

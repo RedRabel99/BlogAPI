@@ -12,4 +12,6 @@ public static class PostErrors
 
     public static Error NotFound =
         Error.NotFound("Post.NotFound", "Post could not be found");
+    public static Error Forbidden =
+        Error.Forbidden("Post.Forbidden", "You do not have permission to perform this action on the post");
 }

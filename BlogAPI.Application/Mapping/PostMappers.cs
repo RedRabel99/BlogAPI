@@ -15,7 +15,7 @@ public static  class PostMappers
             Slug = post.Slug,
             Excerpt = post.Excerpt,
             Content = post.Content,
-            UserProfileId = post.UserProfileId,
+            Author = new AuthorDto { Id = post.UserProfile.Id, Username = post.UserProfile.Username},
             Tags = post.Tags.Select(t => t.TagName).ToList(),
             CreatedAt = post.CreatedAt,
             UpdatedAt = post.UpdatedAt
@@ -30,7 +30,7 @@ public static  class PostMappers
             Slug = post.Slug,
             Excerpt = post.Excerpt,
             Content = post.Content,
-            UserProfileId = post.UserProfileId,
+            Author = new AuthorDto { Id = post.UserProfile.Id, Username = post.UserProfile.Username },
             Tags = post.Tags.Select(t => t.TagName).ToList(),
             CreatedAt = post.CreatedAt,
             UpdatedAt = post.UpdatedAt

@@ -20,10 +20,28 @@ public class PostRepository : IPostRepository
         return post;
     }
 
+    public async Task DeletePostAsync(Post post)
+    {
+        _context.Posts.Remove(post);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeletePostByIdAsync(Guid id)
+    {
+        var post = await _context.Posts.FindAsync(id);
+        if (post is null)
+        {
+            return;
+        }
+        _context.Posts.Remove(post);
+        await _context.SaveChangesAsync();
+    }
+
     public async Task<Post?> GetPostAsync(Guid id)
     {
         var post = await _context.Posts
             .Include(x => x.Tags)
+            .Include(x => x.UserProfile)
             .FirstOrDefaultAsync(x => x.Id == id);
         return post;
     }
@@ -36,6 +54,12 @@ public class PostRepository : IPostRepository
 
     public IQueryable<Post> GetPostQuery()
     {
-        return _context.Posts.Include(x => x.Tags);
+        return _context.Posts;
+    }
+
+    public async Task UpdatePostAsync(Post post)
+    {
+        _context.Posts.Update(post);
+        await _context.SaveChangesAsync();
     }
 }

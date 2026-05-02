@@ -2,8 +2,9 @@
 
 public class UpdatePostDto
 {
-    public required string Title { get; set; }
-    public required string Excerpt { get; set; }
-    public required string Content { get; set; }
-    public required List<string> Tags { get; set; } = new List<string>();
+    public string? Title { get; set; }
+    public string? Slug { get; set; }
+    public string? Excerpt { get; set; }
+    public string? Content { get; set; }
+    public List<string>? Tags { get; set; }
 }
