@@ -15,6 +15,8 @@ public class TestDataSeeder
 
     private readonly List<UserProfile> _userProfiles = new();
     private readonly List<ApplicationUser> _applicationUsers = new();
+    private readonly List<Tag> _tags = new();
+    private readonly List<Post> _posts = new();
 
     public TestDataSeeder(AppDbContext appDbContext, IUserManager userManager)
     {
@@ -26,7 +28,69 @@ public class TestDataSeeder
     public async Task SeedAsync()
     {
         await SeedUsers();
+        await SeedTags();
+        await SeedPosts();
         await _appDbContext.SaveChangesAsync();
+    }
+
+    private async Task SeedTags()
+    {
+        var tagNames = new[] { "dotnet", "csharp", "aspnet" };
+
+        foreach (var tagName in tagNames)
+        {
+            var existing = await _appDbContext.Tags
+                .FirstOrDefaultAsync(t => t.TagName == tagName);
+
+            if (existing is not null)
+            {
+                _tags.Add(existing);
+                continue;
+            }
+
+            var tag = new Tag { TagName = tagName };
+            _appDbContext.Tags.Add(tag);
+            _tags.Add(tag);
+        }
+    }
+
+    private async Task SeedPosts()
+    {
+        var user0 = GetApplicationUser(0);
+        var user1 = GetApplicationUser(1);
+
+        var definitions = new[]
+        {
+        new { Title = "First Post",  Slug = "first-post",  OwnerId = user0.UserProfile.Id, PostTags = new[] { Tags.Dotnet, Tags.Csharp } },
+        new { Title = "Second Post", Slug = "second-post", OwnerId = user0.UserProfile.Id, PostTags = new[] { Tags.Dotnet } },
+        new { Title = "Third Post",  Slug = "third-post",  OwnerId = user1.UserProfile.Id, PostTags = new[] { Tags.Aspnet } },
+    };
+
+        foreach (var def in definitions)
+        {
+            var existing = await _appDbContext.Posts
+                .Include(p => p.Tags)
+                .FirstOrDefaultAsync(p => p.Slug == def.Slug);
+
+            if (existing is not null)
+            {
+                _posts.Add(existing);
+                continue;
+            }
+
+            var post = new Post
+            {
+                Title = def.Title,
+                Slug = def.Slug,
+                Content = _faker.Lorem.Paragraphs(3),
+                Excerpt = _faker.Lorem.Sentence(),
+                UserProfileId = def.OwnerId,
+                Tags = def.PostTags.Select(t => GetTag(t)).ToList()
+            };
+
+            _appDbContext.Posts.Add(post);
+            _posts.Add(post);
+        }
     }
 
     private async Task SeedUsers(int count = 10)
@@ -53,9 +117,25 @@ public class TestDataSeeder
     // Helper methods to get seeded entities
     public UserProfile GetUserProfile(int index = 0) => _userProfiles[index];
     public ApplicationUser GetApplicationUser(int index = 0) => _applicationUsers[index];
+    public Post GetPost(int index = 0) => _posts[index];
+    public Tag GetTag(Tags tag = Tags.Dotnet) => (tag) switch
+    {
+        Tags.Dotnet => _tags[0],
+        Tags.Csharp => _tags[1],
+        Tags.Aspnet => _tags[2],
+        _ => _tags[0]
+    };
 
     public string DefaultPassword => "Password123!";
 
     public int GetUserProfilesLength() => _userProfiles.Count;
     public int GetApplicationUsersLength() => _applicationUsers.Count;
+    public int GetPostsLength() => _posts.Count;
+}
+
+public enum Tags
+{
+   Dotnet,
+   Csharp,
+   Aspnet
 }

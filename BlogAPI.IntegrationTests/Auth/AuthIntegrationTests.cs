@@ -10,6 +10,10 @@ public class AuthIntegrationTests : BaseIntegrationTest
 {
     public AuthIntegrationTests(IntegrationTestFactory factory) : base(factory) { }
 
+    // ---------------------------------------------------------------------------
+    // POST /auth/register
+    // ---------------------------------------------------------------------------
+
     [Fact]
     public async Task Register_ValidRequest_ReturnsOk()
     {
@@ -91,6 +95,10 @@ public class AuthIntegrationTests : BaseIntegrationTest
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
 
+    // ---------------------------------------------------------------------------
+    // POST /auth/login
+    // ---------------------------------------------------------------------------
+
     [Fact]
     public async Task Login_WithValidCredentials_ReturnsToken()
     {
@@ -145,6 +153,10 @@ public class AuthIntegrationTests : BaseIntegrationTest
         //Assert
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
+
+    // ---------------------------------------------------------------------------
+    // PATCH /auth/username
+    // ---------------------------------------------------------------------------
 
     [Fact]
     public async Task ChangeUsername_Authenticated_ReturnsOk()
@@ -203,6 +215,10 @@ public class AuthIntegrationTests : BaseIntegrationTest
         //Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
+
+    // ---------------------------------------------------------------------------
+    // PATCH /auth/password
+    // ---------------------------------------------------------------------------
 
     [Fact]
     public async Task ChangePassword_Authenticated_ReturnsOk()
@@ -275,6 +291,10 @@ public class AuthIntegrationTests : BaseIntegrationTest
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
+    // ---------------------------------------------------------------------------
+    // POST /auth/email/change-token
+    // ---------------------------------------------------------------------------
+
     [Fact]
     public async Task GenerateChangeEmailToken_Authenticated_ReturnsToken()
     {
@@ -311,6 +331,10 @@ public class AuthIntegrationTests : BaseIntegrationTest
         //Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
+
+    // ---------------------------------------------------------------------------
+    // PATCH /auth/email
+    // ---------------------------------------------------------------------------
 
     [Fact]
     public async Task ChangeEmail_WithValidToken_ReturnsOk()
