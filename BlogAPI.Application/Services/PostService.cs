@@ -11,12 +11,14 @@ using BlogAPI.Application.Mapping;
 using BlogAPI.Application.Shared;
 using FluentValidation;
 using Slugify;
+using BlogAPI.Domain.Interfaces.UserProfiles;
 
 namespace BlogAPI.Application.Services;
 
 public class PostService : IPostService
 {
     private readonly IPostRepository _postRepository;
+    private readonly IUserProfileRepository _userProfileRepository;
     private readonly IValidator<CreatePostDto> _createPostValidator;
     private readonly IUserContext _userContext;
     private readonly ITagService _tagService;
@@ -32,7 +34,8 @@ public class PostService : IPostService
         ISlugHelper slugHelper,
         IValidator<PostQueryParametersDto> postQueryParameterDtoValidator,
         IPagedListFactory pagedListFactory,
-        IValidator<UpdatePostDto> updatePostDtoValidator)
+        IValidator<UpdatePostDto> updatePostDtoValidator,
+        IUserProfileRepository userProfileRepository)
     {
         _postRepository = postRepository;
         _createPostValidator = createPostValidator;
@@ -42,6 +45,7 @@ public class PostService : IPostService
         _postQueryParameterDtoValidator = postQueryParameterDtoValidator;
         _pagedListFactory = pagedListFactory;
         _updatePostDtoValidator = updatePostDtoValidator;
+        _userProfileRepository = userProfileRepository;
     }
 
     public async Task<Result<PostDto>> CreatePost(CreatePostDto createPostDto)
@@ -52,18 +56,28 @@ public class PostService : IPostService
             return validationResult.ToValidationFailure<PostDto>();
         }
 
-        if(!_userContext.IsAuthenticated || string.IsNullOrEmpty(_userContext.UserProfileId))
+        if(!_userContext.IsAuthenticated || string.IsNullOrEmpty(_userContext.UserId))
         {
             return Result<PostDto>.Failure(AuthErrors.UserNotFound); //TODO: dodac wlasciwy error
+        }
+
+        var userProfile = await _userProfileRepository.GetByApplicationUserIdAsync(_userContext.UserId);
+
+        if (userProfile is null)
+        {
+            return Result<PostDto>.Failure(AuthErrors.UserNotFound);
+        }
+
+        if(userProfile.ApplicationUserId != _userContext.UserId)
+        {
+            return Result<PostDto>.Failure(PostErrors.Forbidden);
         }
 
         var tagList = await _tagService.ResolveTagsAsync(createPostDto.Tags);
 
         var slug = string.IsNullOrEmpty(createPostDto.Slug) ? _slugHelper.GenerateSlug(createPostDto.Title) : createPostDto.Slug;
 
-        var userProfileId = Guid.Parse(_userContext.UserProfileId);
-
-        if (await _postRepository.GetPostBySlugAndUser(userProfileId, slug) is not null)
+        if (await _postRepository.GetPostBySlugAndUser(userProfile.Id, slug) is not null)
         {
             return Result<PostDto>.Failure(PostErrors.PostAlreadyExists);
         }
@@ -73,7 +87,8 @@ public class PostService : IPostService
             Slug = slug,
             Excerpt = createPostDto.Excerpt,
             Content = createPostDto.Content,
-            UserProfileId = userProfileId,
+            UserProfileId = userProfile.Id,
+            UserProfile = userProfile,
             Tags = tagList
         };
 
@@ -203,4 +218,7 @@ public class PostService : IPostService
 
         return Result<PostDto>.Success(post.ToDto());
     }
+
+
 }
+
