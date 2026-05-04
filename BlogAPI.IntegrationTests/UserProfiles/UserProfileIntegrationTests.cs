@@ -1,6 +1,5 @@
 ﻿using BlogAPI.Application.DTOs.UserProfile;
 using BlogAPI.Application.DTOs.UserProfiles;
-using BlogAPI.Application.Shared.Pagination;
 using BlogAPI.IntegrationTests.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using System.Net;
@@ -11,6 +10,10 @@ namespace BlogAPI.IntegrationTests.UserProfiles;
 public class UserProfileIntegrationTests : BaseIntegrationTest
 {
     public UserProfileIntegrationTests(IntegrationTestFactory factory) : base(factory) { }
+
+    // ---------------------------------------------------------------------------
+    // GET /userprofile/{username}
+    // ---------------------------------------------------------------------------
 
     [Fact]
     public async Task GetUserProfile_WithExistingUsername_ReturnsUserProfile()
@@ -46,6 +49,10 @@ public class UserProfileIntegrationTests : BaseIntegrationTest
         Assert.NotNull(response);
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+
+    // ---------------------------------------------------------------------------
+    // GET /userprofile
+    // ---------------------------------------------------------------------------
 
     [Fact]
     public async Task GetUserProfile_WithQueryParams_RetunsUserProfileList()
@@ -100,6 +107,10 @@ public class UserProfileIntegrationTests : BaseIntegrationTest
         Assert.Equal(queryParams.Page > 1, body.HasPreviousPage);
     }
 
+    // ---------------------------------------------------------------------------
+    // GET /userprofile/me
+    // ---------------------------------------------------------------------------
+
     [Fact]
     public async Task GetCurrentUserProfile_WhenAuthenticated_ReturnsOwnProfile()
     {
@@ -134,6 +145,10 @@ public class UserProfileIntegrationTests : BaseIntegrationTest
         Assert.NotNull(response);
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
+
+    // ---------------------------------------------------------------------------
+    // PATCH /userprofile/{id}
+    // ---------------------------------------------------------------------------
 
     [Fact]
     public async Task UpdateUserProfile_AuthenticatedAsOwner_ReturnsUpdatedProfile()

@@ -63,7 +63,7 @@ namespace BlogAPI.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Body")
+                    b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("text");
 

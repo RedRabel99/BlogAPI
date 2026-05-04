@@ -4,6 +4,7 @@ using BlogAPI.Domain.Abstractions;
 using BlogAPI.Domain.Entities;
 using BlogAPI.Domain.Interfaces.Auth;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlogAPI.Infrastructure.Identity;
 
@@ -79,8 +80,13 @@ public class IdentityUserManager : IUserManager
         {
             return Result<IUserInfo>.Failure(AuthErrors.UserNotFound);
         }
+        var userProfileId = await GetUserProfileIdAsync(user.Id);
+        if (userProfileId is null)
+        {
+            return Result<IUserInfo>.Failure(UserProfileErrors.NotFound);
+        }
 
-        return Result<IUserInfo>.Success(new UserInfoAdapter(user));
+        return Result<IUserInfo>.Success(new UserInfoAdapter(user, userProfileId));
     }
 
     public async Task<Result<IUserInfo>> FindByIdAsync(string userId)
@@ -91,8 +97,13 @@ public class IdentityUserManager : IUserManager
             return Result<IUserInfo>.Failure(AuthErrors.UserNotFound);
         }
 
+        var userProfileId = await GetUserProfileIdAsync(user.Id);
+        if (userProfileId is null)
+        {
+            return Result<IUserInfo>.Failure(UserProfileErrors.NotFound);
+        }
 
-        return Result<IUserInfo>.Success(new UserInfoAdapter(user));
+        return Result<IUserInfo>.Success(new UserInfoAdapter(user, userProfileId));
     }
 
     public async Task<Result<IUserInfo>> ValidateUserAsync(string email, string password)
@@ -109,7 +120,13 @@ public class IdentityUserManager : IUserManager
         {
             return Result<IUserInfo>.Failure(AuthErrors.InvalidCredentials);
         }
-        return Result<IUserInfo>.Success(new UserInfoAdapter(user));
+        var userProfileId = await GetUserProfileIdAsync(user.Id);
+        if (userProfileId is null)
+        {
+            return Result<IUserInfo>.Failure(UserProfileErrors.NotFound);
+        }
+
+        return Result<IUserInfo>.Success(new UserInfoAdapter(user, userProfileId));
     }
 
     public async Task RemoveByIdAsync(string userId)
@@ -241,5 +258,12 @@ public class IdentityUserManager : IUserManager
         }
 
         return Result.Success();
+    }
+
+    private async Task<string?> GetUserProfileIdAsync(string id)
+    {
+        return await _appDbContext.UserProfiles
+            .Where(x => x.ApplicationUserId.Equals(id))
+            .Select(x => x.Id.ToString()).FirstOrDefaultAsync();
     }
 }
