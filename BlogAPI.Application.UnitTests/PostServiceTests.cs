@@ -7,6 +7,7 @@ using BlogAPI.Domain.Abstractions;
 using BlogAPI.Domain.Entities;
 using BlogAPI.Domain.Interfaces.Auth;
 using BlogAPI.Domain.Interfaces.Posts;
+using BlogAPI.Domain.Interfaces.UserProfiles;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.Extensions.Options;
@@ -20,6 +21,7 @@ namespace Tests.Application;
 public class PostServiceTests
 {
     private readonly IPostRepository _postRepository;
+    private readonly IUserProfileRepository _userProfileRepository;
     private readonly IValidator<CreatePostDto> _createPostValidator;
     private readonly IUserContext _userContext;
     private readonly ITagService _tagService;
@@ -32,6 +34,7 @@ public class PostServiceTests
     public PostServiceTests()
     {
         _postRepository = Substitute.For<IPostRepository>();
+        _userProfileRepository = Substitute.For<IUserProfileRepository>();
         _createPostValidator = Substitute.For<IValidator<CreatePostDto>>();
         _userContext = Substitute.For<IUserContext>();
         _tagService = Substitute.For<ITagService>();
@@ -48,7 +51,8 @@ public class PostServiceTests
             _slugHelper,
             _postQueryParameterDtoValidator,
             _pagedListFactory,
-            _updatePostDtoValidator);
+            _updatePostDtoValidator,
+            _userProfileRepository);
     }
 
     [Fact]
@@ -89,12 +93,14 @@ public class PostServiceTests
     public async Task CreatePost_WhenPostWithGivenSlugExists_ReturnsPostAlreadyExists()
     {
         // Arrange
+        var userProfile = new UserProfile { Id = Guid.NewGuid(), Username = "username", ApplicationUserId = "user-id" };
         var createPostDto = new CreatePostDto { Title = "Title", Slug = "title" };
         _createPostValidator.ValidateAsync(createPostDto).Returns(new ValidationResult() );
         _userContext.IsAuthenticated.Returns(true);
-        _userContext.UserProfileId.Returns(Guid.NewGuid().ToString());
+        _userContext.UserId.Returns(userProfile.ApplicationUserId);
         _tagService.ResolveTagsAsync(Arg.Any<List<string>>()).Returns(new List<Tag>());
         _postRepository.GetPostBySlugAndUser(Arg.Any<Guid>(), Arg.Any<string>()).Returns(new Post());
+        _userProfileRepository.GetByApplicationUserIdAsync(userProfile.ApplicationUserId).Returns(userProfile);
 
         // Act
         var result = await _sut.CreatePost(createPostDto);
@@ -108,7 +114,7 @@ public class PostServiceTests
     public async Task CreatePost_WithValidData_ReturnsPostDto()
     {
         // Arrange
-        var profileId = Guid.NewGuid();
+        var userProfile = new UserProfile { Id = Guid.NewGuid(), Username = "username", ApplicationUserId = "user-id" };
         var createPostDto = new CreatePostDto
         {
             Title = "Title",
@@ -119,9 +125,10 @@ public class PostServiceTests
         var slug = createPostDto.Title.ToLower();
         _createPostValidator.ValidateAsync(Arg.Any<CreatePostDto>()).Returns(new ValidationResult());
         _userContext.IsAuthenticated.Returns(true);
-        _userContext.UserProfileId.Returns(profileId.ToString());
+        _userContext.UserId.Returns(userProfile.ApplicationUserId);
         _tagService.ResolveTagsAsync(createPostDto.Tags).Returns([new Tag { TagName = "tag" }]);
         _slugHelper.GenerateSlug(createPostDto.Title).Returns(slug);
+        _userProfileRepository.GetByApplicationUserIdAsync(userProfile.ApplicationUserId).Returns(userProfile);
 
         var created = new Post
         {
@@ -130,10 +137,11 @@ public class PostServiceTests
             Slug = slug,
             Excerpt = createPostDto.Excerpt,
             Content = createPostDto.Content,
-            UserProfile = new UserProfile { Id = Guid.NewGuid(), Username = "username" }
+            UserProfile = userProfile,
+            UserProfileId = Guid.NewGuid(),
         };
 
-        _postRepository.GetPostBySlugAndUser(profileId, slug).ReturnsNull();
+        _postRepository.GetPostBySlugAndUser(userProfile.Id, slug).ReturnsNull();
         _postRepository.CreatePostAsync(Arg.Is<Post>(p =>
             p.Title == createPostDto.Title &&
             p.Slug == slug &&
