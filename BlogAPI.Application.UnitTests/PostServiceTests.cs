@@ -9,6 +9,8 @@ using BlogAPI.Domain.Interfaces.Auth;
 using BlogAPI.Domain.Interfaces.Posts;
 using FluentValidation;
 using FluentValidation.Results;
+using Microsoft.Extensions.Options;
+using MockQueryable;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
 using Slugify;
@@ -36,7 +38,7 @@ public class PostServiceTests
         _slugHelper = Substitute.For<ISlugHelper>();
         _postQueryParameterDtoValidator = Substitute.For<IValidator<PostQueryParametersDto>>();
         _updatePostDtoValidator = Substitute.For<IValidator<UpdatePostDto>>();
-        _pagedListFactory = Substitute.For<IPagedListFactory>();
+        _pagedListFactory = new PagedListFactory(Options.Create(new PaginationOptions { DefaultPage = 1, DefaultPageSize = 10 }));
 
         _sut = new PostService(
             _postRepository,
@@ -366,5 +368,38 @@ public class PostServiceTests
         Assert.Equal(updatePostDto.Title, result.Value.Title);
         Assert.Equal(dtoTagList.Order(), result.Value.Tags.Order());
         Assert.Equal(post.Content, result.Value.Content);
+    }
+
+    [Fact]
+    public async Task GetAllPosts_WithValidQuery_ReturnsPagedList()
+    {
+        // Arrange
+        var queryParamsDto = new PostQueryParametersDto { Page = 1, PageSize = 10 };
+        _postQueryParameterDtoValidator.ValidateAsync(queryParamsDto).Returns(new ValidationResult());
+
+        var posts = new List<Post>
+    {
+        new Post
+        {
+            Id = Guid.NewGuid(),
+            Title = "Post title",
+            Slug = "post-title",
+            Excerpt = "Excerpt",
+            Content = "Content",
+            CreatedAt = DateTime.UtcNow,
+            UserProfile = new UserProfile { Id = Guid.NewGuid(), Username = "username" },
+            Tags = new List<Tag> { new Tag { TagName = "tag" } }
+        }
+    };
+
+        _postRepository.GetPostQuery().Returns(posts.BuildMock());
+
+        // Act
+        var result = await _sut.GetAllPosts(queryParamsDto);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.Equal(1, result.Value.TotalCount);
+        Assert.Equal(posts[0].Title, result.Value.Items[0].Title);
     }
 }
