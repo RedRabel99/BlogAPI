@@ -1,12 +1,15 @@
-﻿using BlogAPI.Application.DTOs.Comments;
+using BlogAPI.Application.DTOs.Comments;
 using BlogAPI.Application.Extensions;
 using BlogAPI.Application.Interfaces;
+using BlogAPI.Application.Mapping;
+using BlogAPI.Application.Shared;
 using BlogAPI.Application.Shared.Pagination;
 using BlogAPI.Domain;
 using BlogAPI.Domain.Abstractions;
 using BlogAPI.Domain.Entities;
 using BlogAPI.Domain.Interfaces.Auth;
 using BlogAPI.Domain.Interfaces.Comments;
+using BlogAPI.Domain.Interfaces.Posts;
 using BlogAPI.Domain.Interfaces.UserProfiles;
 using FluentValidation;
 
@@ -15,8 +18,9 @@ namespace BlogAPI.Application.Services;
 public class CommentService : ICommentService
 {
     private readonly ICommentRepository _commentRepository;
-    private readonly PagedListFactory _pagedListFactory;
+    private readonly IPostRepository _postRepository;
     private readonly IUserProfileRepository _userProfileRepository;
+    private readonly IPagedListFactory _pagedListFactory;
     private readonly IValidator<CreateCommentDto> _createCommentValidator;
     private readonly IValidator<UpdateCommentDto> _updateCommentValidator;
     private readonly IValidator<CommentQueryParametersDto> _commentQueryParametersValidator;
@@ -24,14 +28,16 @@ public class CommentService : ICommentService
 
     public CommentService(
         ICommentRepository commentRepository,
+        IPostRepository postRepository,
         IUserProfileRepository userProfileRepository,
-        PagedListFactory pagedListFactory,
+        IPagedListFactory pagedListFactory,
         IValidator<CreateCommentDto> createCommentValidator,
         IValidator<UpdateCommentDto> updateCommentValidator,
         IValidator<CommentQueryParametersDto> commentQueryParametersValidator,
         IUserContext userContext)
     {
         _commentRepository = commentRepository;
+        _postRepository = postRepository;
         _userProfileRepository = userProfileRepository;
         _pagedListFactory = pagedListFactory;
         _createCommentValidator = createCommentValidator;
@@ -48,45 +54,132 @@ public class CommentService : ICommentService
             return validationResult.ToValidationFailure<CommentDto>();
         }
 
-        if(!_userContext.IsAuthenticated && string.IsNullOrEmpty(_userContext.UserId))
+        if (!_userContext.IsAuthenticated || string.IsNullOrEmpty(_userContext.UserId))
         {
-            return Result<CommentDto>.Failure(CommentErrors.Unautorized);
+            return Result<CommentDto>.Failure(CommentErrors.Unauthorized);
+        }
+
+        var post = await _postRepository.GetPostAsync(postId);
+        if (post is null)
+        {
+            return Result<CommentDto>.Failure(PostErrors.NotFound);
         }
 
         var userProfile = await _userProfileRepository.GetByApplicationUserIdAsync(_userContext.UserId);
-
-        if(userProfile is null)
+        if (userProfile is null)
         {
             return Result<CommentDto>.Failure(UserProfileErrors.NotFound);
         }
 
+        var now = DateTime.UtcNow;
         var comment = new Comment
         {
             Content = createCommentDto.Content,
             UserProfileId = userProfile.Id,
             UserProfile = userProfile,
             PostId = postId,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            CreatedAt = now,
+            UpdatedAt = now
         };
 
         var createdComment = await _commentRepository.CreateAsync(comment);
 
-        return Result<CommentDto>.Success(createComment.ToDto());
+        return Result<CommentDto>.Success(createdComment.ToDto());
     }
 
-    public Task<Result<CommentDto>> GetCommentById()
+    public async Task<Result<CommentDto>> GetCommentByIdAsync(Guid id)
     {
-        throw new NotImplementedException();
+        var comment = await _commentRepository.GetByIdAsync(id);
+        if (comment is null)
+        {
+            return Result<CommentDto>.Failure(CommentErrors.NotFound);
+        }
+
+        return Result<CommentDto>.Success(comment.ToDto());
     }
 
-    public Task<Result<PagedList<CommentDto>>> GetCommentsByPostIdAsync(Guid id, CommentQueryParametersDto commentQueryParametersDto)
+    public async Task<Result<PagedList<CommentDto>>> GetCommentsByPostIdAsync(Guid postId, CommentQueryParametersDto queryParameters)
     {
-        throw new NotImplementedException();
+        var validationResult = await _commentQueryParametersValidator.ValidateAsync(queryParameters);
+        if (!validationResult.IsValid)
+        {
+            return validationResult.ToValidationFailure<PagedList<CommentDto>>();
+        }
+
+        var post = await _postRepository.GetPostAsync(postId);
+        if (post is null)
+        {
+            return Result<PagedList<CommentDto>>.Failure(PostErrors.NotFound);
+        }
+
+        var queryFiltering = new CommentQueryFiltering(queryParameters);
+        var querySorting = new CommentQuerySorting(queryParameters.SortingOrder, queryParameters.SortColumn);
+
+        var query = _commentRepository.GetQuery()
+            .Where(c => c.PostId == postId)
+            .ApplyFiltering(queryFiltering)
+            .ApplySorting(querySorting)
+            .Select(CommentMappers.ProjectToDto);
+
+        var result = await _pagedListFactory.CreateAsync(query, queryParameters.Page, queryParameters.PageSize);
+
+        return Result<PagedList<CommentDto>>.Success(result);
     }
 
-    public Task<Result<CommentDto>> UpdateCommentAsync(Guid id, UpdateCommentDto updateCommentDto)
+    public async Task<Result<CommentDto>> UpdateCommentAsync(Guid id, UpdateCommentDto updateCommentDto)
     {
-        throw new NotImplementedException();
+        var validationResult = await _updateCommentValidator.ValidateAsync(updateCommentDto);
+        if (!validationResult.IsValid)
+        {
+            return validationResult.ToValidationFailure<CommentDto>();
+        }
+
+        if (!_userContext.IsAuthenticated || string.IsNullOrEmpty(_userContext.UserProfileId))
+        {
+            return Result<CommentDto>.Failure(CommentErrors.Unauthorized);
+        }
+
+        var comment = await _commentRepository.GetByIdAsync(id);
+        if (comment is null)
+        {
+            return Result<CommentDto>.Failure(CommentErrors.NotFound);
+        }
+
+        var userProfileId = Guid.Parse(_userContext.UserProfileId);
+        if (comment.UserProfileId != userProfileId)
+        {
+            return Result<CommentDto>.Failure(CommentErrors.Forbidden);
+        }
+
+        comment.Content = updateCommentDto.Content;
+        comment.UpdatedAt = DateTime.UtcNow;
+
+        await _commentRepository.UpdateAsync(comment);
+
+        return Result<CommentDto>.Success(comment.ToDto());
+    }
+
+    public async Task<Result> DeleteCommentAsync(Guid id)
+    {
+        if (!_userContext.IsAuthenticated || string.IsNullOrEmpty(_userContext.UserProfileId))
+        {
+            return Result.Failure(CommentErrors.Unauthorized);
+        }
+
+        var comment = await _commentRepository.GetByIdAsync(id);
+        if (comment is null)
+        {
+            return Result.Failure(CommentErrors.NotFound);
+        }
+
+        var userProfileId = Guid.Parse(_userContext.UserProfileId);
+        if (comment.UserProfileId != userProfileId)
+        {
+            return Result.Failure(CommentErrors.Forbidden);
+        }
+
+        await _commentRepository.DeleteAsync(comment);
+
+        return Result.Success();
     }
 }

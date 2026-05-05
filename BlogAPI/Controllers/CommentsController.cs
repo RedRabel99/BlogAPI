@@ -1,4 +1,4 @@
-﻿using BlogAPI.Application.DTOs.Comments;
+using BlogAPI.Application.DTOs.Comments;
 using BlogAPI.Application.Interfaces;
 using BlogAPI.Web.Extensions;
 using Microsoft.AspNetCore.Authorization;
@@ -12,41 +12,49 @@ namespace BlogAPI.Web.Controllers;
 public class CommentsController : ControllerBase
 {
     private readonly ICommentService _commentService;
-    public CommentsController(
-        ICommentService commentService
-        )
+
+    public CommentsController(ICommentService commentService)
     {
         _commentService = commentService;
     }
 
-    [HttpGet("post/{id:guid}/comments")]
-    public async Task<IResult> GetCommentsByPostId(Guid id, [FromQuery] CommentQueryParametersDto commentQueryParametersDto)
+    [HttpGet("/posts/{postId:guid}/comments")]
+    public async Task<IResult> GetCommentsByPostId(Guid postId, [FromQuery] CommentQueryParametersDto queryParameters)
     {
-        var result = await _commentService.GetCommentsByPostIdAsync(id);
+        var result = await _commentService.GetCommentsByPostIdAsync(postId, queryParameters);
+        return result.IsSuccess ? TypedResults.Ok(result.Value) : result.ToProblemDetails();
+    }
+
+    [HttpGet("{id:guid}", Name = "GetCommentById")]
+    public async Task<IResult> GetCommentById(Guid id)
+    {
+        var result = await _commentService.GetCommentByIdAsync(id);
         return result.IsSuccess ? TypedResults.Ok(result.Value) : result.ToProblemDetails();
     }
 
     [Authorize]
-    [HttpPost("post/{id:guid}/comments")]
-    public async Task<IResult> CreateComment(Guid id, [FromBody] CreateCommentDto commentCreateDto)
+    [HttpPost("/posts/{postId:guid}/comments")]
+    public async Task<IResult> CreateComment(Guid postId, [FromBody] CreateCommentDto createCommentDto)
     {
-        // Implementation for creating a comment goes here
-        return TypedResults.CreatedAtRoute();
+        var result = await _commentService.CreateCommentAsync(postId, createCommentDto);
+        return result.IsSuccess
+            ? TypedResults.CreatedAtRoute(result.Value, "GetCommentById", new { id = result.Value!.Id })
+            : result.ToProblemDetails();
     }
 
     [Authorize]
     [HttpPatch("{id:guid}")]
-    public async Task<IResult> UpdateComment(Guid id, [FromBody] UpdateCommentDto commentUpdateDto)
+    public async Task<IResult> UpdateComment(Guid id, [FromBody] UpdateCommentDto updateCommentDto)
     {
-        // Implementation for updating a comment goes here
-        return TypedResults.Ok();
+        var result = await _commentService.UpdateCommentAsync(id, updateCommentDto);
+        return result.IsSuccess ? TypedResults.Ok(result.Value) : result.ToProblemDetails();
     }
 
     [Authorize]
     [HttpDelete("{id:guid}")]
     public async Task<IResult> DeleteComment(Guid id)
     {
-        // Implementation for deleting a comment goes here
-        return TypedResults.NoContent();
+        var result = await _commentService.DeleteCommentAsync(id);
+        return result.IsSuccess ? TypedResults.NoContent() : result.ToProblemDetails();
     }
 }

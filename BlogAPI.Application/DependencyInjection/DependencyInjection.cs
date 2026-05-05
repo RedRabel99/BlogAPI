@@ -16,6 +16,7 @@ namespace BlogAPI.Application.DependencyInjection
             services.AddScoped<IUserProfileService, UserProfileService>();
             services.AddScoped<ITagService, TagService>();
             services.AddScoped<IPostService, PostService>();
+            services.AddScoped<ICommentService, CommentService>();
             services.AddSingleton<IPagedListFactory, PagedListFactory>();
             services.AddValidatorsFromAssemblyContaining<RegisterDtoValidator>(ServiceLifetime.Transient);
             services.AddSingleton<ISlugHelper, SlugHelper>();
