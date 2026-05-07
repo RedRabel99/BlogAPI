@@ -362,5 +362,8 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# Local secrets
+# Claude Code files
+.claude/
+CLAUDE.md
+CONTEXT.md
 .env
