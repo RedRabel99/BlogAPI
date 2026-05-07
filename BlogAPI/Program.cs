@@ -1,5 +1,6 @@
 using BlogAPI.Application.DependencyInjection;
 using BlogAPI.Infrastructure.DependencyInjection;
+using BlogAPI.Infrastructure.Extensions;
 using BlogAPI.Web.DependencyInjection;
 using Serilog;
 
@@ -36,6 +37,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+await app.ApplyMigrationsAsync();
 
 app.Run();
 
