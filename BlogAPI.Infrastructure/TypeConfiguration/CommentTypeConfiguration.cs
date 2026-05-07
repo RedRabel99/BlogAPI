@@ -16,5 +16,11 @@ public class CommentTypeConfiguration : IEntityTypeConfiguration<Comment>
             .HasForeignKey(x => x.UserProfileId)
             .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(x => x.Post)
+            .WithMany(x => x.Comments)
+            .HasForeignKey(x => x.PostId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

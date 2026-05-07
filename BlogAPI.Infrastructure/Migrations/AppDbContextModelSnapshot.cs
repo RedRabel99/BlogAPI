@@ -51,7 +51,7 @@ namespace BlogAPI.Infrastructure.Migrations
 
                     b.HasIndex("UserProfileId");
 
-                    b.ToTable("Comments");
+                    b.ToTable("Comments", (string)null);
                 });
 
             modelBuilder.Entity("BlogAPI.Domain.Entities.Post", b =>
@@ -94,7 +94,7 @@ namespace BlogAPI.Infrastructure.Migrations
 
                     b.HasIndex("UserProfileId");
 
-                    b.ToTable("Posts");
+                    b.ToTable("Posts", (string)null);
                 });
 
             modelBuilder.Entity("BlogAPI.Domain.Entities.Tag", b =>
@@ -119,7 +119,7 @@ namespace BlogAPI.Infrastructure.Migrations
                     b.HasIndex("TagName")
                         .IsUnique();
 
-                    b.ToTable("Tags");
+                    b.ToTable("Tags", (string)null);
                 });
 
             modelBuilder.Entity("BlogAPI.Domain.Entities.UserProfile", b =>
@@ -367,7 +367,7 @@ namespace BlogAPI.Infrastructure.Migrations
 
                     b.HasIndex("TagsId");
 
-                    b.ToTable("PostTag");
+                    b.ToTable("PostTag", (string)null);
                 });
 
             modelBuilder.Entity("BlogAPI.Domain.Entities.Comment", b =>

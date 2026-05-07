@@ -17,6 +17,7 @@ public class TestDataSeeder
     private readonly List<ApplicationUser> _applicationUsers = new();
     private readonly List<Tag> _tags = new();
     private readonly List<Post> _posts = new();
+    private readonly List<Comment> _comments = new();
 
     public TestDataSeeder(AppDbContext appDbContext, IUserManager userManager)
     {
@@ -31,6 +32,45 @@ public class TestDataSeeder
         await SeedTags();
         await SeedPosts();
         await _appDbContext.SaveChangesAsync();
+        await SeedComments();
+        await _appDbContext.SaveChangesAsync();
+    }
+
+    private async Task SeedComments()
+    {
+        var post0 = _posts[0];
+        var user0Profile = GetApplicationUser(0).UserProfile;
+        var user1Profile = GetApplicationUser(1).UserProfile;
+
+        var definitions = new[]
+        {
+            new { Content = "First seeded comment by user 0", PostId = post0.Id, AuthorId = user0Profile.Id },
+            new { Content = "Second seeded comment by user 1", PostId = post0.Id, AuthorId = user1Profile.Id }
+        };
+
+        foreach (var def in definitions)
+        {
+            var existing = await _appDbContext.Comments
+                .FirstOrDefaultAsync(c => c.PostId == def.PostId && c.Content == def.Content);
+
+            if (existing is not null)
+            {
+                _comments.Add(existing);
+                continue;
+            }
+
+            var comment = new Comment
+            {
+                Content = def.Content,
+                PostId = def.PostId,
+                UserProfileId = def.AuthorId,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            _appDbContext.Comments.Add(comment);
+            _comments.Add(comment);
+        }
     }
 
     private async Task SeedTags()
@@ -118,6 +158,8 @@ public class TestDataSeeder
     public UserProfile GetUserProfile(int index = 0) => _userProfiles[index];
     public ApplicationUser GetApplicationUser(int index = 0) => _applicationUsers[index];
     public Post GetPost(int index = 0) => _posts[index];
+    public Comment GetComment(int index = 0) => _comments[index];
+    public int GetCommentsLength() => _comments.Count;
     public Tag GetTag(Tags tag = Tags.Dotnet) => (tag) switch
     {
         Tags.Dotnet => _tags[0],
