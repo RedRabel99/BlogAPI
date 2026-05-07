@@ -89,10 +89,78 @@ BlogAPI (Web)           ← Controllers, middleware, DI wiring. Depends on all l
 
 ---
 
+## Getting Started
+
+### Prerequisites
+- [Docker](https://www.docker.com/get-started) (for running with Docker Compose)
+or
+- [.NET 10 SDK](https://dotnet.microsoft.com/en-us/download/dotnet) (for local dev)
+- 
 ### Run with Docker Compose
-To be completed
+Easly run the full application — no local .NET SDK required.
+
+**1. Clone the repository**
+
+```bash
+git clone https://github.com/RedRabel99/BlogAPI.git
+cd BlogAPI
+```
+
+**2. Set required secrets**
+
+The app reads JWT configuration from environment variables. Create a `.env` file in the repository root:
+
+```env
+JWT__Secret=your-super-secret-key-at-least-32-characters-long
+JWT__Issuer=myApp
+JWT__Audience=myApp
+```
+
+**3. Start the stack**
+
+```bash
+docker compose up --build
+```
+
+This spins up:
+- `db` — PostgreSQL on port `5432` (credentials: user =`postgres` password = `postgres`, database: `blogapi-db`)
+- `api` — ASP.NET Core API (once the container is added to the compose file)
+
+**4. Access the API**
+
+- API: `http://localhost:8080`
+- Swagger UI: `http://localhost:8080/swagger` (development mode)
+
+> **Note:** EF Core migrations run automatically on startup.
+
+---
+
 ### Run Locally (without Docker)
-To be completed
+**1. Start PostgreSQL**
+```bash
+docker compose up postgres -d
+```
+
+**2. Configure user secrets**
+
+```bash
+dotnet user-secrets set "JWT:Secret" "your-super-secret-key-at-least-32-characters" --project BlogAPI
+dotnet user-secrets set "JWT:Issuer" "myApp" --project BlogAPI
+dotnet user-secrets set "JWT:Audience" "myApp" --project BlogAPI
+```
+
+**3. Apply migrations**
+
+```bash
+dotnet ef database update --project BlogAPI.Infrastructure --startup-project BlogAPI
+```
+
+**4. Run the API**
+
+```bash
+dotnet run --project BlogAPI/BlogAPI.Web.csproj
+```
+
 ---
 
 ## API Endpoints
@@ -279,8 +347,14 @@ dotnet test
 ---
 
 ## Future Improvements
-To be completed
 
+- [ ] **Role-based authorisation** — Admin role to enable post-owner and admin comment moderation
+- [ ] **Threaded comments** — Nested replies with parent reference
+- [ ] **Soft deletes** — Audit trail for deleted posts and comments
+- [ ] **Email confirmation** — Require email verification on registration
+- [ ] **Refresh tokens** — Sliding JWT refresh token flow
+- [ ] **Image uploads** — Avatar support for user profiles, cover images for posts
+- [ ] **Post reactions** — Likes, dislikes, and other reactions on posts and comments
 ---
 
 ## License
