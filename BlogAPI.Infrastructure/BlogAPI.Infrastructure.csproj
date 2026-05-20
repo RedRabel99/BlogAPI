@@ -34,6 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Email\Templates\" />
     <Folder Include="Migrations\" />
   </ItemGroup>
 

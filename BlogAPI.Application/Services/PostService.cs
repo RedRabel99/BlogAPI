@@ -26,6 +26,7 @@ public class PostService : IPostService
     private readonly IValidator<PostQueryParametersDto> _postQueryParameterDtoValidator;
     private readonly IValidator<UpdatePostDto> _updatePostDtoValidator;
     private readonly IPagedListFactory _pagedListFactory;
+    private readonly IEmailQueue _emailQueue;
     public PostService(
         IPostRepository postRepository,
         IValidator<CreatePostDto> createPostValidator,
@@ -35,7 +36,8 @@ public class PostService : IPostService
         IValidator<PostQueryParametersDto> postQueryParameterDtoValidator,
         IPagedListFactory pagedListFactory,
         IValidator<UpdatePostDto> updatePostDtoValidator,
-        IUserProfileRepository userProfileRepository)
+        IUserProfileRepository userProfileRepository,
+        IEmailQueue emailQueue)
     {
         _postRepository = postRepository;
         _createPostValidator = createPostValidator;
@@ -46,6 +48,7 @@ public class PostService : IPostService
         _pagedListFactory = pagedListFactory;
         _updatePostDtoValidator = updatePostDtoValidator;
         _userProfileRepository = userProfileRepository;
+        _emailQueue = emailQueue;
     }
 
     public async Task<Result<PostDto>> CreatePost(CreatePostDto createPostDto)
@@ -160,9 +163,10 @@ public class PostService : IPostService
         return Result<PostDto>.Success(postDto);
     }
 
-    public Task<Result> SendTestEmail(string to, string subject, string body)
+    public async Task<Result> SendTestEmail(string to, string subject, string body)
     {
-        throw new NotImplementedException();
+        await _emailQueue.AddToOuboxAsync(new EmailMessage(to, subject, body));
+        return Result.Success();
     }
 
     public async Task<Result<PostDto>> UpdatePost(Guid id, UpdatePostDto updatePostDto)

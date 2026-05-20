@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using BlogAPI.Domain.Interfaces.Posts;
 using BlogAPI.Domain.Interfaces.Comments;
 using BlogAPI.Infrastructure.Email;
+using BlogAPI.Application.Interfaces;
 
 namespace BlogAPI.Infrastructure.DependencyInjection;
 
@@ -43,7 +44,10 @@ public static class DependencyInjection
         services.AddScoped<ITagRepository, TagRepository>();
         services.AddScoped<IPostRepository, PostRepository>();
         services.AddScoped<ICommentRepository, CommentRepository>();
+        services.AddScoped<IEmailSender, SmtpEmailSender>();
+        services.AddScoped<IEmailQueue, OutboxEmailQueue>();
         services.AddHttpContextAccessor();
+
         return services;
     }
 }
