@@ -160,6 +160,11 @@ public class PostService : IPostService
         return Result<PostDto>.Success(postDto);
     }
 
+    public Task<Result> SendTestEmail(string to, string subject, string body)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task<Result<PostDto>> UpdatePost(Guid id, UpdatePostDto updatePostDto)
     {
         var validationResult = await _updatePostDtoValidator.ValidateAsync(updatePostDto);

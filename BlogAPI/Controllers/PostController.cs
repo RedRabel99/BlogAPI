@@ -54,5 +54,14 @@ namespace BlogAPI.Web.Controllers
             var result = await _postService.DeletePost(id);
             return result.IsSuccess ? TypedResults.NoContent() : result.ToProblemDetails();
         }
+
+        [HttpPost("testmail")]
+        public async Task<IResult> TestEmail(TestEmailRequest emailRequest)
+        {
+            var result = await _postService.SendTestEmail(emailRequest.To, emailRequest.Subject, emailRequest.Body);
+            return TypedResults.Ok($"Email sent to {emailRequest.To} with subject '{emailRequest.Subject}'");
+        }
     }
 }
+
+public record TestEmailRequest(string To, string Subject, string Body);

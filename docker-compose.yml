@@ -19,6 +19,20 @@ services:
     networks:
       - blogapi-net
 
+  smtp4dev:
+    image: rnwood/smtp4dev:v3
+    container_name: blogapi-smtp4dev
+    restart: unless-stopped
+    ports:
+      - "5001:80"
+      - "2525:25"
+    volumes:
+      - blogapi-smtp4dev-data:/smtp4dev
+    environment:
+      ServerOptions__HostName: smtp4dev
+    networks:
+      - blogapi-net
+
   api:
     build:
       context: .
@@ -28,6 +42,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      smtp4dev:
+        condition: service_started
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
@@ -35,6 +51,8 @@ services:
       JWT__Secret: ${JWT_SECRET}
       JWT__Issuer: ${JWT_ISSUER}
       JWT__Audience: ${JWT_AUDIENCE}
+      Smtp__Host: smtp4dev
+      Smtp__Port: "25"
     ports:
       - "8080:8080"
     networks:
@@ -42,6 +60,7 @@ services:
 
 volumes:
   blogapi-db-data:
+  blogapi-smtp4dev-data:
 
 networks:
   blogapi-net:
