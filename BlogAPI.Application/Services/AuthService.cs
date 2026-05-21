@@ -23,6 +23,7 @@ public class AuthService : IAuthService
     private readonly IValidator<GenerateChangeEmailTokenDto> _generateChangeEmailTokenDtoValidator;
     private readonly IValidator<ChangeEmailDto> _changeEmailDtoValidator;
     private readonly IValidator<ConfirmEmailDto> _confirmEmailValidator;
+    private readonly IValidator<ResendConfirmationEmailDto> _resendConfirmationEmailValidator;
     private readonly IEmailQueue _emailQueue;
 
     public AuthService(
@@ -36,7 +37,9 @@ public class AuthService : IAuthService
         IValidator<ChangeEmailDto> changeEmailDtoValidator,
         IValidator<ChangeUsernameDto> changeUsernameValidator,
         IValidator<ChangePasswordDto> changePasswordValidator,
-        IEmailQueue emailQueue)
+        IValidator<ResendConfirmationEmailDto> resendConfirmationEmailValidator,
+        IEmailQueue emailQueue,
+        IValidator<ConfirmEmailDto> confirmEmailValidator)
     {
         _userManager = userManager;
         _tokenService = tokenService;
@@ -49,6 +52,8 @@ public class AuthService : IAuthService
         _changeUsernameValidator = changeUsernameValidator;
         _changePasswordValidator = changePasswordValidator;
         _emailQueue = emailQueue;
+        _resendConfirmationEmailValidator = resendConfirmationEmailValidator;
+        _confirmEmailValidator = confirmEmailValidator;
     }
 
     public async Task<Result<string>> LoginAsync(LoginDto loginDto)
@@ -83,12 +88,12 @@ public class AuthService : IAuthService
         var authResult = await _userManager
             .CreateUserAsync(registerDto);
 
-        var token = await _userManager.GenerateConfirmationTokenAsync(registerDto.Username);
+        var token = await _userManager.GenerateConfirmationTokenAsync(registerDto.Email);
 
         await _emailQueue.AddToOuboxAsync(new EmailMessage(
             To: registerDto.Email,
             Subject: "Confirm your email",
-            Body: $"Please confirm your email with token={token}",
+            Body: $"Please confirm your email with tokenResult={token.Value}",
             IsHtml: false
             ));
 
@@ -204,5 +209,30 @@ public class AuthService : IAuthService
         }
 
         return await _userManager.ConfirmEmailAsync(confirmEmailDto.Email, confirmEmailDto.Token);
+    }
+
+    public async Task<Result> ResendConfirmationEmailAsync(ResendConfirmationEmailDto resendConfirmationEmailDto)
+    {
+        var validationResult = _resendConfirmationEmailValidator.Validate(resendConfirmationEmailDto);
+        if (!validationResult.IsValid)
+        {
+            return validationResult.ToValidationFailure();
+        }
+
+        var tokenResult = await _userManager.GenerateConfirmationTokenAsync(resendConfirmationEmailDto.Email);
+
+        if (tokenResult.IsSuccess)
+        {
+            var token = tokenResult.Value;
+            await _emailQueue.AddToOuboxAsync(new EmailMessage(
+            To: resendConfirmationEmailDto.Email,
+            Subject: "Confirm your email",
+            Body: $"Please confirm your email with tokenResult={token}",
+            IsHtml: false
+            ));
+        }
+        
+
+        return Result.Success();
     }
 }

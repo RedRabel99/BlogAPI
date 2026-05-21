@@ -7,6 +7,7 @@ namespace BlogAPI.Application.Interfaces
     {
         Task<Result> RegisterAsync(RegisterDto registerDto);
         Task<Result> ConfirmEmailAsync(ConfirmEmailDto confirmEmailDto);
+        Task<Result> ResendConfirmationEmailAsync(ResendConfirmationEmailDto resendConfirmationEmailDto);
         Task<Result<string>> LoginAsync(LoginDto loginDto);
         Task<Result> ChangeUsernameAsync(ChangeUsernameDto changeUsernameDto);
         Task<Result> ChangePasswordAsync(ChangePasswordDto changePasswordDto);

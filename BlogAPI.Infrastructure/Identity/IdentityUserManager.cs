@@ -267,9 +267,9 @@ public class IdentityUserManager : IUserManager
             .Select(x => x.Id.ToString()).FirstOrDefaultAsync();
     }
 
-    public async Task<Result<string>> GenerateConfirmationTokenAsync(string username)
+    public async Task<Result<string>> GenerateConfirmationTokenAsync(string email)
     {
-        var user = await _userManager.FindByNameAsync(username);
+        var user = await _userManager.FindByEmailAsync(email);
         
         if (user is null)
         {
@@ -280,9 +280,9 @@ public class IdentityUserManager : IUserManager
         return Result<string>.Success(token);
     }
 
-    public async Task<Result> ConfirmEmailAsync(string userId, string token)
+    public async Task<Result> ConfirmEmailAsync(string email, string token)
     {
-        var user = await _userManager.FindByIdAsync(userId);
+        var user = await _userManager.FindByEmailAsync(email);
         if (user is null)
         {
             return Result<string>.Failure(AuthErrors.UserNotFound);
