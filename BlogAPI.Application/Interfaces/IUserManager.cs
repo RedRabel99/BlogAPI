@@ -5,6 +5,8 @@ using BlogAPI.Domain.Interfaces.Auth;
 public interface IUserManager
 {
     Task<Result> CreateUserAsync(RegisterDto registerDto);
+    Task<Result<string>> GenerateConfirmationTokenAsync(string username);
+    Task<Result> ConfirmEmailAsync(string userId, string token);
     Task<Result<IUserInfo>> ValidateUserAsync(string email, string password);
     Task<Result<IUserInfo>> FindByEmailAsync(string email);
     Task<Result<IUserInfo>> FindByIdAsync(string userId);

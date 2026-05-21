@@ -266,4 +266,37 @@ public class IdentityUserManager : IUserManager
             .Where(x => x.ApplicationUserId.Equals(id))
             .Select(x => x.Id.ToString()).FirstOrDefaultAsync();
     }
+
+    public async Task<Result<string>> GenerateConfirmationTokenAsync(string username)
+    {
+        var user = await _userManager.FindByNameAsync(username);
+        
+        if (user is null)
+        {
+            return Result<string>.Failure(AuthErrors.UserNotFound);
+        }
+
+        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        return Result<string>.Success(token);
+    }
+
+    public async Task<Result> ConfirmEmailAsync(string userId, string token)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null)
+        {
+            return Result<string>.Failure(AuthErrors.UserNotFound);
+        }
+
+        if (user.EmailConfirmed) return Result.Success();
+
+        var result = await _userManager.ConfirmEmailAsync(user, token);
+
+        if (result.Errors.Any(e => e.Code == "InvalidToken"))
+        {
+            return Result.Failure(AuthErrors.InvalidToken);
+        }
+
+        return result.Succeeded ? Result.Success() : Result.Failure(AuthErrors.Internal);
+    }
 }

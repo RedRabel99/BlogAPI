@@ -23,7 +23,7 @@ public sealed class OutboxEmailQueue : IEmailQueue
             Content = JsonSerializer.Serialize(message),
             OccurredOn = DateTime.UtcNow
         };
-        await _emailSender.SendEmailAsync(message, ct);
+
         await _context.OutboxMessages.AddAsync(outboxMessage);
         await _context.SaveChangesAsync(ct);
     }
