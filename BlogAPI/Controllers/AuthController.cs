@@ -66,7 +66,7 @@ public class AuthController : ControllerBase
 
     [AllowAnonymous]
     [HttpPost("resent-confirmation")]
-    [EnableRateLimiting("auth-resend")]
+    [EnableRateLimiting("auth-resend")] //TODO: add rate limiting policy 
     public async Task<IResult> ResendConfirmationEmail([FromBody] ResendConfirmationEmailDto resendConfirmationEmailDto)
     {
         var result = await _authService.ResendConfirmationEmailAsync(resendConfirmationEmailDto);
