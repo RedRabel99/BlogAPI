@@ -3,6 +3,7 @@ using BlogAPI.Application.Interfaces;
 using BlogAPI.Web.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 
 namespace BlogAPI.Web.Controllers;
@@ -63,6 +64,22 @@ public class AuthController : ControllerBase
         return result.IsSuccess ? TypedResults.Ok() : result.ToProblemDetails();
     }
 
+    [AllowAnonymous]
+    [HttpPost("resent-confirmation")]
+    [EnableRateLimiting("auth-resend")] //TODO: add rate limiting policy 
+    public async Task<IResult> ResendConfirmationEmail([FromBody] ResendConfirmationEmailDto resendConfirmationEmailDto)
+    {
+        var result = await _authService.ResendConfirmationEmailAsync(resendConfirmationEmailDto);
+        return result.IsSuccess ? TypedResults.Ok() : result.ToProblemDetails();
+    }
+
+    [AllowAnonymous]
+    [HttpPost("confirm-email")]
+    public async Task<IResult> ConfirmEmail([FromBody] ConfirmEmailDto confirmEmailDto)
+    {
+        var result = await _authService.ConfirmEmailAsync(confirmEmailDto);
+        return result.IsSuccess ? TypedResults.Ok() : result.ToProblemDetails();
+    }
 
     [Authorize]
     [HttpGet("test")]

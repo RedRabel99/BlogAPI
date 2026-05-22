@@ -367,3 +367,5 @@ FodyWeavers.xsd
 CLAUDE.md
 CONTEXT.md
 .env
+/docs/plans
+/docs/adr

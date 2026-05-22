@@ -10,6 +10,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Identity;
 using BlogAPI.Domain.Interfaces.Posts;
 using BlogAPI.Domain.Interfaces.Comments;
+using BlogAPI.Infrastructure.Email;
+using BlogAPI.Application.Interfaces;
 
 namespace BlogAPI.Infrastructure.DependencyInjection;
 
@@ -21,6 +23,7 @@ public static class DependencyInjection
         services.AddDbContext<AppDbContext>(options => {
             options.UseNpgsql(configuration["ConnectionStrings:DefaultConnection"]);
         });
+        services.Configure<SmtpOptions>(configuration.GetSection("Smtp"));
         services.AddIdentityCore<ApplicationUser>(opt =>
                 {
                     opt.Password.RequireDigit = true;
@@ -41,7 +44,11 @@ public static class DependencyInjection
         services.AddScoped<ITagRepository, TagRepository>();
         services.AddScoped<IPostRepository, PostRepository>();
         services.AddScoped<ICommentRepository, CommentRepository>();
+        services.AddScoped<IEmailSender, SmtpEmailSender>();
+        services.AddScoped<IEmailQueue, OutboxEmailQueue>();
         services.AddHttpContextAccessor();
+        services.AddHostedService<OutboxEmailProcessor>();
+
         return services;
     }
 }

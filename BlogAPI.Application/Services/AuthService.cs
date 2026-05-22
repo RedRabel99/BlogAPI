@@ -6,6 +6,7 @@ using BlogAPI.Domain;
 using FluentValidation;
 using BlogAPI.Application.Extensions;
 using BlogAPI.Application.DTOs.Auth;
+using BlogAPI.Domain.Entities;
 
 namespace BlogAPI.Application.Services;
 
@@ -20,7 +21,10 @@ public class AuthService : IAuthService
     private readonly IValidator<ChangeUsernameDto> _changeUsernameValidator;
     private readonly IValidator<ChangePasswordDto> _changePasswordValidator;
     private readonly IValidator<GenerateChangeEmailTokenDto> _generateChangeEmailTokenDtoValidator;
-    private readonly IValidator<ChangeEmailDto> _changeEmailDtoValidator; 
+    private readonly IValidator<ChangeEmailDto> _changeEmailDtoValidator;
+    private readonly IValidator<ConfirmEmailDto> _confirmEmailValidator;
+    private readonly IValidator<ResendConfirmationEmailDto> _resendConfirmationEmailValidator;
+    private readonly IEmailQueue _emailQueue;
 
     public AuthService(
         IUserManager userManager,
@@ -32,7 +36,10 @@ public class AuthService : IAuthService
         IValidator<GenerateChangeEmailTokenDto> generateChangeEmailTokenDtoValidator,
         IValidator<ChangeEmailDto> changeEmailDtoValidator,
         IValidator<ChangeUsernameDto> changeUsernameValidator,
-        IValidator<ChangePasswordDto> changePasswordValidator)
+        IValidator<ChangePasswordDto> changePasswordValidator,
+        IValidator<ResendConfirmationEmailDto> resendConfirmationEmailValidator,
+        IEmailQueue emailQueue,
+        IValidator<ConfirmEmailDto> confirmEmailValidator)
     {
         _userManager = userManager;
         _tokenService = tokenService;
@@ -44,6 +51,9 @@ public class AuthService : IAuthService
         _changeEmailDtoValidator = changeEmailDtoValidator;
         _changeUsernameValidator = changeUsernameValidator;
         _changePasswordValidator = changePasswordValidator;
+        _emailQueue = emailQueue;
+        _resendConfirmationEmailValidator = resendConfirmationEmailValidator;
+        _confirmEmailValidator = confirmEmailValidator;
     }
 
     public async Task<Result<string>> LoginAsync(LoginDto loginDto)
@@ -77,6 +87,15 @@ public class AuthService : IAuthService
 
         var authResult = await _userManager
             .CreateUserAsync(registerDto);
+
+        var token = await _userManager.GenerateConfirmationTokenAsync(registerDto.Email);
+
+        await _emailQueue.AddToOuboxAsync(new EmailMessage(
+            To: registerDto.Email,
+            Subject: "Confirm your email",
+            Body: $"Please confirm your email with tokenResult={token.Value}",
+            IsHtml: false
+            ));
 
         if (authResult.IsError)
         {
@@ -178,5 +197,42 @@ public class AuthService : IAuthService
         var result = await _userManager.ChangeEmailAsync(appUserId, changeEmailDto.Email, changeEmailDto.Token);
 
         return result;
+    }
+
+    public async Task<Result> ConfirmEmailAsync(ConfirmEmailDto confirmEmailDto)
+    {
+        var validationResult = _confirmEmailValidator.Validate(confirmEmailDto);
+
+        if (!validationResult.IsValid)
+        {
+            return validationResult.ToValidationFailure();
+        }
+
+        return await _userManager.ConfirmEmailAsync(confirmEmailDto.Email, confirmEmailDto.Token);
+    }
+
+    public async Task<Result> ResendConfirmationEmailAsync(ResendConfirmationEmailDto resendConfirmationEmailDto)
+    {
+        var validationResult = _resendConfirmationEmailValidator.Validate(resendConfirmationEmailDto);
+        if (!validationResult.IsValid)
+        {
+            return validationResult.ToValidationFailure();
+        }
+
+        var tokenResult = await _userManager.GenerateConfirmationTokenAsync(resendConfirmationEmailDto.Email);
+
+        if (tokenResult.IsSuccess)
+        {
+            var token = tokenResult.Value;
+            await _emailQueue.AddToOuboxAsync(new EmailMessage(
+            To: resendConfirmationEmailDto.Email,
+            Subject: "Confirm your email",
+            Body: $"Please confirm your email with tokenResult={token}",
+            IsHtml: false
+            ));
+        }
+        
+
+        return Result.Success();
     }
 }

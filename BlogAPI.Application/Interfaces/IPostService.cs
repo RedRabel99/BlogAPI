@@ -11,4 +11,5 @@ public interface IPostService
     Task<Result<PagedList<PostDto>>> GetAllPosts(PostQueryParametersDto queryParametersDto);
     Task<Result<PostDto>> UpdatePost(Guid id, UpdatePostDto updatePostDto);
     Task<Result> DeletePost(Guid id);
+    Task<Result> SendTestEmail(string to, string subject, string body);
 }
