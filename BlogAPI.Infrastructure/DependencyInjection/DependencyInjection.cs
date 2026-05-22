@@ -47,6 +47,7 @@ public static class DependencyInjection
         services.AddScoped<IEmailSender, SmtpEmailSender>();
         services.AddScoped<IEmailQueue, OutboxEmailQueue>();
         services.AddHttpContextAccessor();
+        services.AddHostedService<OutboxEmailProcessor>();
 
         return services;
     }
