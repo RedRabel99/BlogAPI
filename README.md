@@ -39,6 +39,8 @@ Was build as a portfolio project to demonstrate usage of Clean Architecture, the
 - **RFC 7807 Problem Details** - Consistent error responses accross all endpoints
 - **Structured logging** - Serilog daily file output
 - **Swagger UI** - Interactive API documentation in development with auth implemented
+- **Email confirmation** - Registration generates a confirmation token; Resend endpoint is provided for expired or lost tokens.
+- **Transactional email delivery** - Outbound emails are persisted as `OutboxMessage` rows and dispatched by a `BackgroundService` (`OutboxEmailProcessor`) that polls in batches with `FOR UPDATE SKIP LOCKED`, retries failures up to a configured maximum, and records the last error per row for diagnostics.
 
 ---
 
@@ -169,8 +171,10 @@ dotnet run --project BlogAPI/BlogAPI.Web.csproj
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| `POST` | `/auth/register` | — | Register a new user |
-| `POST` | `/auth/login` | — | Login and receive JWT token |
+| `POST` | `/auth/register` | — | Register a new user (sends confirmation email via outbox) |
+| `POST` | `/auth/login` | — | Login and receive JWT token (requires confirmed email) |
+| `POST` | `/auth/confirm-email` | — | Confirm email with token issued at registration |
+| `POST` | `/auth/resent-confirmation` | — | Re-send confirmation email if the previous token expired or was lost |
 | `PATCH` | `/auth/username` | ✓ | Change username |
 | `PATCH` | `/auth/password` | ✓ | Change password |
 | `POST` | `/auth/email/change-token` | ✓ | Generate email change token |
@@ -344,6 +348,8 @@ dotnet test
 
 **Integration tests with real database** — Integration tests run against a real PostgreSQL container (Testcontainers) rather than an in-memory database. This catches migration issues and query behaviour that in-memory providers would miss.
 
+**Outbox pattern for email delivery** — Email payloads are serialised into an `OutboxMessages` table and processed asynchronously by `OutboxEmailProcessor`, a hosted `BackgroundService`. The processor claims rows under `FOR UPDATE SKIP LOCKED`, deserialises into the `EmailMessage` contract, sends through `IEmailSender`, and either stamps `ProcessedOn` on success or increments `RetryCount` and stores the error on failure. This decouples user registration from email delivery and persists an email in case of SMTP or service errors.
+
 ---
 
 ## Future Improvements
@@ -351,10 +357,11 @@ dotnet test
 - [ ] **Role-based authorisation** — Admin role to enable post-owner and admin comment moderation
 - [ ] **Threaded comments** — Nested replies with parent reference
 - [ ] **Soft deletes** — Audit trail for deleted posts and comments
-- [ ] **Email confirmation** — Require email verification on registration
 - [ ] **Refresh tokens** — Sliding JWT refresh token flow
 - [ ] **Image uploads** — Avatar support for user profiles, cover images for posts
 - [ ] **Post reactions** — Likes, dislikes, and other reactions on posts and comments
+- [ ] **Transactional outbox enrollment** — Currently `OutboxEmailQueue` persists the outbox row in its own `SaveChanges` call, separate from the business write that triggered it. The plan is to enlist the outbox insert in the same `DbContext` / transaction as the originating change (e.g. user registration) so that the business entity and its outbound email are committed atomically — no orphaned emails on a rollback, no missed emails on a partial commit.
+- [ ] **Unit of Work / DbContext abstraction in the application layer** — Repositories presently call `SaveChangesAsync` internally, which forces each repository method to be its own implicit transaction and makes multi-aggregate writes harder to handle. The plan is to replace these with a `DbContext` abstraction exposed to the application layer, so that services compose multiple repository operations and commit them together. This will also be the foundation for the transactional outbox enrollment above.
 ---
 
 ## License
