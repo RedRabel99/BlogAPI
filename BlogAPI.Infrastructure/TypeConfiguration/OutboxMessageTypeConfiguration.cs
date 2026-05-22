@@ -32,11 +32,6 @@ public class OutboxMessageTypeConfiguration : IEntityTypeConfiguration<OutboxMes
             .IsRequired()
             .HasDefaultValue(0);
 
-        builder.Property<uint>("xmin")
-            .HasColumnType("xid")
-            .ValueGeneratedOnAddOrUpdate()
-            .IsConcurrencyToken();
-
         builder.HasIndex(x => new { x.ProcessedOn, x.OccurredOn })
             .HasFilter("\"ProcessedOn\" IS NULL");
     }

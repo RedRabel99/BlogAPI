@@ -1,4 +1,5 @@
 using BlogAPI.Application.DTOs.Auth;
+using BlogAPI.Application.Interfaces;
 using BlogAPI.Application.Services;
 using BlogAPI.Domain;
 using BlogAPI.Domain.Abstractions;
@@ -22,6 +23,9 @@ public class AuthServiceTests
     private readonly IValidator<ChangePasswordDto> _changePasswordValidator;
     private readonly IValidator<GenerateChangeEmailTokenDto> _generateChangeEmailTokenDtoValidator;
     private readonly IValidator<ChangeEmailDto> _changeEmailDtoValidator;
+    private readonly IValidator<ResendConfirmationEmailDto> _resendConfirmationEmailValidator;
+    private readonly IValidator<ConfirmEmailDto> _confirmEmailValidator;
+    private readonly IEmailQueue _emailQueue;
 
     private readonly AuthService _sut;
 
@@ -37,6 +41,9 @@ public class AuthServiceTests
         _changePasswordValidator = Substitute.For<IValidator<ChangePasswordDto>>();
         _generateChangeEmailTokenDtoValidator = Substitute.For<IValidator<GenerateChangeEmailTokenDto>>();
         _changeEmailDtoValidator = Substitute.For<IValidator<ChangeEmailDto>>();
+        _resendConfirmationEmailValidator = Substitute.For<IValidator<ResendConfirmationEmailDto>>();
+        _confirmEmailValidator = Substitute.For<IValidator<ConfirmEmailDto>>();
+        _emailQueue = Substitute.For<IEmailQueue>();
 
         _sut = new AuthService(
             _userManager,
@@ -48,7 +55,10 @@ public class AuthServiceTests
             _generateChangeEmailTokenDtoValidator,
             _changeEmailDtoValidator,
             _changeUsernameValidator,
-            _changePasswordValidator);
+            _changePasswordValidator,
+            _resendConfirmationEmailValidator,
+            _emailQueue,
+            _confirmEmailValidator);
     }
 
     [Fact]
@@ -126,6 +136,7 @@ public class AuthServiceTests
         var dto = new RegisterDto { Username = "existing-username",Email = "user@mail.com" };
         _registerValidator.Validate(dto).Returns(new ValidationResult());
         _userManager.CreateUserAsync(dto).Returns(Task.FromResult(Result.Failure(AuthErrors.UserAlreadyExists)));
+        _userManager.GenerateConfirmationTokenAsync(dto.Email).Returns(Task.FromResult(Result<string>.Success("token")));
 
         // Act
         var result = await _sut.RegisterAsync(dto);
@@ -143,6 +154,7 @@ public class AuthServiceTests
         var dto = new RegisterDto { Username = "username", Email = "user@mail.com", Password ="password" };
         _registerValidator.Validate(dto).Returns(new ValidationResult());
         _userManager.CreateUserAsync(dto).Returns(Task.FromResult(Result.Success()));
+        _userManager.GenerateConfirmationTokenAsync(dto.Email).Returns(Task.FromResult(Result<string>.Success("token")));
 
         // Act
         var result = await _sut.RegisterAsync(dto);

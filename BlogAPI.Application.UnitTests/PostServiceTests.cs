@@ -29,6 +29,7 @@ public class PostServiceTests
     private readonly IValidator<PostQueryParametersDto> _postQueryParameterDtoValidator;
     private readonly IValidator<UpdatePostDto> _updatePostDtoValidator;
     private readonly IPagedListFactory _pagedListFactory;
+    private readonly IEmailQueue _emailQueue;
     private readonly PostService _sut;
 
     public PostServiceTests()
@@ -42,6 +43,7 @@ public class PostServiceTests
         _postQueryParameterDtoValidator = Substitute.For<IValidator<PostQueryParametersDto>>();
         _updatePostDtoValidator = Substitute.For<IValidator<UpdatePostDto>>();
         _pagedListFactory = new PagedListFactory(Options.Create(new PaginationOptions { DefaultPage = 1, DefaultPageSize = 10 }));
+        _emailQueue = Substitute.For<IEmailQueue>();
 
         _sut = new PostService(
             _postRepository,
@@ -52,7 +54,8 @@ public class PostServiceTests
             _postQueryParameterDtoValidator,
             _pagedListFactory,
             _updatePostDtoValidator,
-            _userProfileRepository);
+            _userProfileRepository,
+            _emailQueue);
     }
 
     [Fact]

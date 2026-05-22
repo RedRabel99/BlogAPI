@@ -65,7 +65,7 @@ public sealed class OutboxEmailProcessor : BackgroundService
             SELECT *
             FROM "OutboxMessages"
             WHERE "ProcessedOn" IS NULL AND "RetryCount" < {MaxAttempts}
-            ORDER BY "OccuredOn"
+            ORDER BY "OccurredOn"
             LIMIT {BatchSize}
             FOR UPDATE SKIP LOCKED
 
@@ -79,12 +79,12 @@ public sealed class OutboxEmailProcessor : BackgroundService
 
         foreach(var outboxMessage in outboxMessages)
         {
-            outboxMessage.RetryCount += 1;
-
-            if(outboxMessage.Type != nameof(EmailMessage))
+            if(outboxMessage.Type != typeof(EmailMessage).FullName)
             {
                 continue;
             }
+
+            outboxMessage.RetryCount += 1;
             try
             {
                 var email = JsonSerializer.Deserialize<EmailMessage>(outboxMessage.Content);
