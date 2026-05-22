@@ -37,7 +37,7 @@ public sealed class SmtpEmailSender : IEmailSender
 
         } catch (Exception ex)
         {
-            _logger.LogError(ex, $"Smtp send failed: To={message.To}, Subject={message.Subject}");
+            _logger.LogError(ex, "Smtp send failed: To={To}, Subject={Subject}", message.To, message.Subject);
             throw; //rethrow for processor 
         }
         finally

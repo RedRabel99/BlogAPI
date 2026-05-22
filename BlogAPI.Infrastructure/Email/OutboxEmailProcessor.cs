@@ -60,34 +60,34 @@ public sealed class OutboxEmailProcessor : BackgroundService
 
         await using var tx = await context.Database.BeginTransactionAsync(ct);
 
+        var emailType = typeof(EmailMessage).FullName!;
+
         var outboxMessages = await context.OutboxMessages.FromSql(
             $"""
             SELECT *
             FROM "OutboxMessages"
-            WHERE "ProcessedOn" IS NULL AND "RetryCount" < {MaxAttempts}
+            WHERE "ProcessedOn" IS NULL
+              AND "RetryCount" < {MaxAttempts}
+              AND "Type" = {emailType}
             ORDER BY "OccurredOn"
             LIMIT {BatchSize}
             FOR UPDATE SKIP LOCKED
-
             """).ToListAsync(ct);
 
         if (outboxMessages.Count == 0)
         {
             await tx.RollbackAsync(ct);
-            return; 
+            return;
         }
 
         foreach(var outboxMessage in outboxMessages)
         {
-            if(outboxMessage.Type != typeof(EmailMessage).FullName)
-            {
-                continue;
-            }
-
             outboxMessage.RetryCount += 1;
             try
             {
-                var email = JsonSerializer.Deserialize<EmailMessage>(outboxMessage.Content);
+                var email = JsonSerializer.Deserialize<EmailMessage>(outboxMessage.Content)
+                    ?? throw new InvalidOperationException(
+                        $"Outbox message {outboxMessage.Id} deserialized to null EmailMessage.");
                 await sender.SendEmailAsync(email, ct);
 
                 outboxMessage.ProcessedOn = DateTime.UtcNow;
@@ -96,9 +96,9 @@ public sealed class OutboxEmailProcessor : BackgroundService
             catch(Exception ex) when (ex is not OperationCanceledException)
             {
                 outboxMessage.Error = ex.Message;
-                _logger.LogWarning(
-                    $"Failed to send outbox email {outboxMessage.Id}" +
-                    $" (attempt {outboxMessage.RetryCount}/{MaxAttempts} because: {outboxMessage.Error} ");
+                _logger.LogWarning(ex,
+                    "Failed to send outbox email {Id} (attempt {Attempt}/{Max}): {Error}",
+                    outboxMessage.Id, outboxMessage.RetryCount, MaxAttempts, outboxMessage.Error);
             }
         }
         await context.SaveChangesAsync(ct);
