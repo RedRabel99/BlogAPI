@@ -23,6 +23,8 @@ public static class DependencyInjection
         services.AddDbContext<AppDbContext>(options => {
             options.UseNpgsql(configuration["ConnectionStrings:DefaultConnection"]);
         });
+
+        services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());
         services.Configure<SmtpOptions>(configuration.GetSection("Smtp"));
         services.AddIdentityCore<ApplicationUser>(opt =>
                 {
