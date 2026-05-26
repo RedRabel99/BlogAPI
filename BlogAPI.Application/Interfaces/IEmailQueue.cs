@@ -7,5 +7,5 @@ namespace BlogAPI.Application.Interfaces;
 
 public interface IEmailQueue 
 {
-    Task AddToOuboxAsync(EmailMessage message, CancellationToken ct = default);
+    Task EnqueueToOutbox(EmailMessage message, CancellationToken cancellationToken = default);
 }

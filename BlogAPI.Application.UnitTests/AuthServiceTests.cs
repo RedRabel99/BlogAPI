@@ -202,7 +202,7 @@ public class AuthServiceTests
         _userContext.UserId.Returns("id");
         var dto = new ChangeUsernameDto { Username = "existing-username" };
         _changeUsernameValidator.Validate(dto).Returns(new ValidationResult());
-        _userManager.ChangeUsernameAsync("id", dto.Username).Returns(Task.FromResult(Result.Failure(AuthErrors.UserAlreadyExists)));
+        _userManager.UpdateUsernameAsync("id", dto.Username).Returns(Task.FromResult(Result.Failure(AuthErrors.UserAlreadyExists)));
 
         // Act
         var result = await _sut.ChangeUsernameAsync(dto);
@@ -220,7 +220,7 @@ public class AuthServiceTests
         _userContext.UserId.Returns("id");
         var dto = new ChangeUsernameDto { Username = "new-username" };
         _changeUsernameValidator.Validate(dto).Returns(new ValidationResult());
-        _userManager.ChangeUsernameAsync("id", dto.Username).Returns(Task.FromResult(Result.Success()));
+        _userManager.UpdateUsernameAsync("id", dto.Username).Returns(Task.FromResult(Result.Success()));
 
         // Act
         var result = await _sut.ChangeUsernameAsync(dto);

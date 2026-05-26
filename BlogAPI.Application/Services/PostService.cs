@@ -165,7 +165,7 @@ public class PostService : IPostService
 
     public async Task<Result> SendTestEmail(string to, string subject, string body)
     {
-        await _emailQueue.AddToOuboxAsync(new EmailMessage(to, subject, body));
+        await _emailQueue.EnqueueToOutbox(new EmailMessage(to, subject, body));
         return Result.Success();
     }
 

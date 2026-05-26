@@ -15,7 +15,7 @@ public sealed class OutboxEmailQueue : IEmailQueue
         _emailSender = emailSender;
     }
 
-    public async Task AddToOuboxAsync(EmailMessage message, CancellationToken ct = default)
+    public async Task EnqueueToOutbox(EmailMessage message, CancellationToken ct = default)
     {
         var outboxMessage = new OutboxMessage
         {
@@ -24,7 +24,7 @@ public sealed class OutboxEmailQueue : IEmailQueue
             OccurredOn = DateTime.UtcNow
         };
 
-        await _context.OutboxMessages.AddAsync(outboxMessage);
-        await _context.SaveChangesAsync(ct);
+        await _context.OutboxMessages.AddAsync(outboxMessage, ct);
+
     }
 }

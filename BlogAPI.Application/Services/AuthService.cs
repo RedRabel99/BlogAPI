@@ -7,6 +7,7 @@ using FluentValidation;
 using BlogAPI.Application.Extensions;
 using BlogAPI.Application.DTOs.Auth;
 using BlogAPI.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlogAPI.Application.Services;
 
@@ -25,6 +26,7 @@ public class AuthService : IAuthService
     private readonly IValidator<ConfirmEmailDto> _confirmEmailValidator;
     private readonly IValidator<ResendConfirmationEmailDto> _resendConfirmationEmailValidator;
     private readonly IEmailQueue _emailQueue;
+    private readonly IAppDbContext _appDbContext;
 
     public AuthService(
         IUserManager userManager,
@@ -39,7 +41,8 @@ public class AuthService : IAuthService
         IValidator<ChangePasswordDto> changePasswordValidator,
         IValidator<ResendConfirmationEmailDto> resendConfirmationEmailValidator,
         IEmailQueue emailQueue,
-        IValidator<ConfirmEmailDto> confirmEmailValidator)
+        IValidator<ConfirmEmailDto> confirmEmailValidator,
+        IAppDbContext appDbContext)
     {
         _userManager = userManager;
         _tokenService = tokenService;
@@ -54,6 +57,7 @@ public class AuthService : IAuthService
         _emailQueue = emailQueue;
         _resendConfirmationEmailValidator = resendConfirmationEmailValidator;
         _confirmEmailValidator = confirmEmailValidator;
+        _appDbContext = appDbContext;
     }
 
     public async Task<Result<string>> LoginAsync(LoginDto loginDto)
@@ -85,23 +89,38 @@ public class AuthService : IAuthService
             return validationResult.ToValidationFailure<string>();
         }
 
-        var authResult = await _userManager
-            .CreateUserAsync(registerDto);
+        await using var transaction = await _appDbContext.BeginTransactionAsync(); //rollback on dispose if not commited
+
+        var createResult = await _userManager.CreateUserAsync(registerDto.Username, registerDto.Email, registerDto.Password);
+        if (createResult.IsError)
+        {
+            return createResult;
+        }
+
+        var userId = createResult.Value;
+
+        _appDbContext.UserProfiles.Add(new UserProfile
+        {
+            ApplicationUserId = userId,
+            Username = registerDto.Username,
+        });
 
         var token = await _userManager.GenerateConfirmationTokenAsync(registerDto.Email);
+        if (token.IsError)
+        {
+            return Result.Failure(token.Error);
+        }
 
-        await _emailQueue.AddToOuboxAsync(new EmailMessage(
+        await _emailQueue.EnqueueToOutbox(new EmailMessage(
             To: registerDto.Email,
             Subject: "Confirm your email",
             Body: $"Please confirm your email with tokenResult={token.Value}",
             IsHtml: false
             ));
-
-        if (authResult.IsError)
-        {
-            return authResult;
-        }
-
+      
+        await _appDbContext.SaveChangesAsync(); //fix possible unique constraint violation rare case later
+        await transaction.CommitAsync();
+        
         return Result.Success();
     }
 
@@ -113,18 +132,30 @@ public class AuthService : IAuthService
             return Result.Failure(AuthErrors.UserNotFound);
         }
 
-        var validationResult = _changeUsernameValidator.Validate(changeUsernameDto);
-        if (!validationResult.IsValid)
+        var validation = _changeUsernameValidator.Validate(changeUsernameDto);
+        if (!validation.IsValid)
         {
-            return validationResult.ToValidationFailure();
+            return validation.ToValidationFailure();
+        }
+        await using var tx = await _appDbContext.BeginTransactionAsync();
+
+        var updateResult = await _userManager.UpdateUsernameAsync(appUserId, changeUsernameDto.Username);
+        if (updateResult.IsError)
+        {
+            return updateResult;
         }
 
-        var result = await _userManager.ChangeUsernameAsync(appUserId, changeUsernameDto.Username);
+        var profile = await _appDbContext.UserProfiles.FirstOrDefaultAsync(p => p.ApplicationUserId == appUserId);
 
-            if (result.IsError)
+        if (profile is null)
         {
-            return result;
+            return Result.Failure(UserProfileErrors.NotFound);
         }
+
+        profile.Username = changeUsernameDto.Username;
+
+        await _appDbContext.SaveChangesAsync();
+        await tx.CommitAsync();
 
         return Result.Success();
     }
@@ -220,18 +251,21 @@ public class AuthService : IAuthService
         }
 
         var tokenResult = await _userManager.GenerateConfirmationTokenAsync(resendConfirmationEmailDto.Email);
-
-        if (tokenResult.IsSuccess)
+        if(tokenResult.IsError)
         {
-            var token = tokenResult.Value;
-            await _emailQueue.AddToOuboxAsync(new EmailMessage(
+            Result.Success(); //return success even if token was no generated, to prevent email enumeration
+        }
+
+        var token = tokenResult.Value;
+
+        await _emailQueue.EnqueueToOutbox(new EmailMessage(
             To: resendConfirmationEmailDto.Email,
             Subject: "Confirm your email",
             Body: $"Please confirm your email with tokenResult={token}",
             IsHtml: false
-            ));
-        }
+        ));
         
+        await _appDbContext.SaveChangesAsync();
 
         return Result.Success();
     }
