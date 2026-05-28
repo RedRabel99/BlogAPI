@@ -1,4 +1,4 @@
-﻿using BlogAPI.Application.DTOs.Posts;
+using BlogAPI.Application.DTOs.Posts;
 using BlogAPI.Application.Extensions;
 using BlogAPI.Application.Interfaces;
 using BlogAPI.Application.Shared.Pagination;
@@ -6,19 +6,17 @@ using BlogAPI.Domain;
 using BlogAPI.Domain.Abstractions;
 using BlogAPI.Domain.Entities;
 using BlogAPI.Domain.Interfaces.Auth;
-using BlogAPI.Domain.Interfaces.Posts;
 using BlogAPI.Application.Mapping;
 using BlogAPI.Application.Shared;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using Slugify;
-using BlogAPI.Domain.Interfaces.UserProfiles;
 
 namespace BlogAPI.Application.Services;
 
 public class PostService : IPostService
 {
-    private readonly IPostRepository _postRepository;
-    private readonly IUserProfileRepository _userProfileRepository;
+    private readonly IAppDbContext _appDbContext;
     private readonly IValidator<CreatePostDto> _createPostValidator;
     private readonly IUserContext _userContext;
     private readonly ITagService _tagService;
@@ -27,8 +25,9 @@ public class PostService : IPostService
     private readonly IValidator<UpdatePostDto> _updatePostDtoValidator;
     private readonly IPagedListFactory _pagedListFactory;
     private readonly IEmailQueue _emailQueue;
+
     public PostService(
-        IPostRepository postRepository,
+        IAppDbContext appDbContext,
         IValidator<CreatePostDto> createPostValidator,
         IUserContext userContext,
         ITagService tagService,
@@ -36,10 +35,9 @@ public class PostService : IPostService
         IValidator<PostQueryParametersDto> postQueryParameterDtoValidator,
         IPagedListFactory pagedListFactory,
         IValidator<UpdatePostDto> updatePostDtoValidator,
-        IUserProfileRepository userProfileRepository,
         IEmailQueue emailQueue)
     {
-        _postRepository = postRepository;
+        _appDbContext = appDbContext;
         _createPostValidator = createPostValidator;
         _userContext = userContext;
         _tagService = tagService;
@@ -47,7 +45,6 @@ public class PostService : IPostService
         _postQueryParameterDtoValidator = postQueryParameterDtoValidator;
         _pagedListFactory = pagedListFactory;
         _updatePostDtoValidator = updatePostDtoValidator;
-        _userProfileRepository = userProfileRepository;
         _emailQueue = emailQueue;
     }
 
@@ -59,31 +56,31 @@ public class PostService : IPostService
             return validationResult.ToValidationFailure<PostDto>();
         }
 
-        if(!_userContext.IsAuthenticated || string.IsNullOrEmpty(_userContext.UserId))
+        if (!_userContext.IsAuthenticated || string.IsNullOrEmpty(_userContext.UserId))
         {
-            return Result<PostDto>.Failure(AuthErrors.UserNotFound); //TODO: dodac wlasciwy error
+            return Result<PostDto>.Failure(AuthErrors.UserNotFound);
         }
 
-        var userProfile = await _userProfileRepository.GetByApplicationUserIdAsync(_userContext.UserId);
+        var userProfile = await _appDbContext.UserProfiles
+            .FirstOrDefaultAsync(up => up.ApplicationUserId == _userContext.UserId);
 
         if (userProfile is null)
         {
             return Result<PostDto>.Failure(AuthErrors.UserNotFound);
         }
 
-        if(userProfile.ApplicationUserId != _userContext.UserId)
-        {
-            return Result<PostDto>.Failure(PostErrors.Forbidden);
-        }
-
         var tagList = await _tagService.ResolveTagsAsync(createPostDto.Tags);
 
         var slug = string.IsNullOrEmpty(createPostDto.Slug) ? _slugHelper.GenerateSlug(createPostDto.Title) : createPostDto.Slug;
 
-        if (await _postRepository.GetPostBySlugAndUser(userProfile.Id, slug) is not null)
+        var slugTaken = await _appDbContext.Posts
+            .AnyAsync(p => p.UserProfileId == userProfile.Id && p.Slug == slug);
+
+        if (slugTaken)
         {
             return Result<PostDto>.Failure(PostErrors.PostAlreadyExists);
         }
+
         var post = new Post
         {
             Title = createPostDto.Title,
@@ -95,14 +92,10 @@ public class PostService : IPostService
             Tags = tagList
         };
 
-        var createdPost = await _postRepository.CreatePostAsync(post);
+        _appDbContext.Posts.Add(post);
+        await _appDbContext.SaveChangesAsync();
 
-        if(createdPost is null)
-        {
-            return Result<PostDto>.Failure(PostErrors.Internal);
-        }
-
-        return Result<PostDto>.Success(createdPost.ToDto());
+        return Result<PostDto>.Success(post.ToDto());
     }
 
     public async Task<Result> DeletePost(Guid id)
@@ -112,18 +105,23 @@ public class PostService : IPostService
             return Result.Failure(AuthErrors.UserNotFound);
         }
 
-        var userProfileId = Guid.Parse(_userContext.UserProfileId);
-        var post = await _postRepository.GetPostAsync(id);
-        if(post is null)
+        
+        var post = await _appDbContext.Posts.FirstOrDefaultAsync(p => p.Id == id);
+
+        if (post is null)
         {
             return Result.Failure(PostErrors.NotFound);
         }
 
-        if(post.UserProfileId != userProfileId)
+        var userProfileId = Guid.Parse(_userContext.UserProfileId);
+        
+        if (post.UserProfileId != userProfileId)
         {
             return Result.Failure(PostErrors.Forbidden);
         }
-        await _postRepository.DeletePostAsync(post);
+
+        _appDbContext.Posts.Remove(post);
+        await _appDbContext.SaveChangesAsync();
 
         return Result.Success();
     }
@@ -139,34 +137,29 @@ public class PostService : IPostService
         var postQueryFilter = new PostSearchQueryFilter(queryParametersDto);
         var postQuerySorting = new PostQuerySorting(queryParametersDto.SortingOrder, queryParametersDto.SortColumn);
 
-        var query = _postRepository.GetPostQuery()
+        var query = _appDbContext.Posts
             .ApplyFiltering(postQueryFilter)
             .ApplySorting(postQuerySorting)
             .Select(PostMappers.ProjectToDto);
 
         var result = await _pagedListFactory.CreateAsync(query, queryParametersDto.Page, queryParametersDto.PageSize);
 
-
         return Result<PagedList<PostDto>>.Success(result);
     }
 
     public async Task<Result<PostDto>> GetPostById(Guid id)
     {
-        var post = await _postRepository.GetPostAsync(id);
+        var post = await _appDbContext.Posts
+            .Include(p => p.Tags)
+            .Include(p => p.UserProfile)
+            .FirstOrDefaultAsync(p => p.Id == id);
+
         if (post is null)
         {
             return Result<PostDto>.Failure(PostErrors.NotFound);
         }
-            
-        var postDto = post.ToDto();
 
-        return Result<PostDto>.Success(postDto);
-    }
-
-    public async Task<Result> SendTestEmail(string to, string subject, string body)
-    {
-        await _emailQueue.EnqueueToOutbox(new EmailMessage(to, subject, body));
-        return Result.Success();
+        return Result<PostDto>.Success(post.ToDto());
     }
 
     public async Task<Result<PostDto>> UpdatePost(Guid id, UpdatePostDto updatePostDto)
@@ -183,13 +176,17 @@ public class PostService : IPostService
             return Result<PostDto>.Failure(AuthErrors.UserNotFound);
         }
 
-        var userProfileId = Guid.Parse(_userContext.UserProfileId);
-        var post = await _postRepository.GetPostAsync(id);
+        var post = await _appDbContext.Posts
+            .Include(p => p.Tags)
+            .Include(p => p.UserProfile)
+            .FirstOrDefaultAsync(p => p.Id == id);
 
         if (post is null)
         {
             return Result<PostDto>.Failure(PostErrors.NotFound);
         }
+
+        var userProfileId = Guid.Parse(_userContext.UserProfileId);
 
         if (post.UserProfileId != userProfileId)
         {
@@ -211,23 +208,20 @@ public class PostService : IPostService
             post.Title = updatePostDto.Title;
         }
 
-        if(!string.IsNullOrEmpty(updatePostDto.Excerpt))
+        if (!string.IsNullOrEmpty(updatePostDto.Excerpt))
         {
             post.Excerpt = updatePostDto.Excerpt;
         }
 
-        if(!string.IsNullOrEmpty(updatePostDto.Content))
+        if (!string.IsNullOrEmpty(updatePostDto.Content))
         {
             post.Content = updatePostDto.Content;
         }
 
         post.UpdatedAt = DateTime.UtcNow;
 
-        await _postRepository.UpdatePostAsync(post);
+        await _appDbContext.SaveChangesAsync();
 
         return Result<PostDto>.Success(post.ToDto());
     }
-
-
 }
-

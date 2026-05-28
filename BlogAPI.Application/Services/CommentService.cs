@@ -8,18 +8,14 @@ using BlogAPI.Domain;
 using BlogAPI.Domain.Abstractions;
 using BlogAPI.Domain.Entities;
 using BlogAPI.Domain.Interfaces.Auth;
-using BlogAPI.Domain.Interfaces.Comments;
-using BlogAPI.Domain.Interfaces.Posts;
-using BlogAPI.Domain.Interfaces.UserProfiles;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlogAPI.Application.Services;
 
 public class CommentService : ICommentService
 {
-    private readonly ICommentRepository _commentRepository;
-    private readonly IPostRepository _postRepository;
-    private readonly IUserProfileRepository _userProfileRepository;
+    private readonly IAppDbContext _appDbContext;
     private readonly IPagedListFactory _pagedListFactory;
     private readonly IValidator<CreateCommentDto> _createCommentValidator;
     private readonly IValidator<UpdateCommentDto> _updateCommentValidator;
@@ -27,18 +23,14 @@ public class CommentService : ICommentService
     private readonly IUserContext _userContext;
 
     public CommentService(
-        ICommentRepository commentRepository,
-        IPostRepository postRepository,
-        IUserProfileRepository userProfileRepository,
+        IAppDbContext appDbContext,
         IPagedListFactory pagedListFactory,
         IValidator<CreateCommentDto> createCommentValidator,
         IValidator<UpdateCommentDto> updateCommentValidator,
         IValidator<CommentQueryParametersDto> commentQueryParametersValidator,
         IUserContext userContext)
     {
-        _commentRepository = commentRepository;
-        _postRepository = postRepository;
-        _userProfileRepository = userProfileRepository;
+        _appDbContext = appDbContext;
         _pagedListFactory = pagedListFactory;
         _createCommentValidator = createCommentValidator;
         _updateCommentValidator = updateCommentValidator;
@@ -59,13 +51,16 @@ public class CommentService : ICommentService
             return Result<CommentDto>.Failure(CommentErrors.Unauthorized);
         }
 
-        var post = await _postRepository.GetPostAsync(postId);
-        if (post is null)
+        var postExists = await _appDbContext.Posts.AnyAsync(p => p.Id == postId);
+        
+        if (!postExists)
         {
             return Result<CommentDto>.Failure(PostErrors.NotFound);
         }
 
-        var userProfile = await _userProfileRepository.GetByApplicationUserIdAsync(_userContext.UserId);
+        var userProfile = await _appDbContext.UserProfiles
+            .FirstOrDefaultAsync(up => up.ApplicationUserId == _userContext.UserId);
+
         if (userProfile is null)
         {
             return Result<CommentDto>.Failure(UserProfileErrors.NotFound);
@@ -82,14 +77,18 @@ public class CommentService : ICommentService
             UpdatedAt = now
         };
 
-        var createdComment = await _commentRepository.CreateAsync(comment);
+        _appDbContext.Comments.Add(comment);
+        await _appDbContext.SaveChangesAsync();
 
-        return Result<CommentDto>.Success(createdComment.ToDto());
+        return Result<CommentDto>.Success(comment.ToDto());
     }
 
     public async Task<Result<CommentDto>> GetCommentByIdAsync(Guid id)
     {
-        var comment = await _commentRepository.GetByIdAsync(id);
+        var comment = await _appDbContext.Comments
+            .Include(c => c.UserProfile)
+            .FirstOrDefaultAsync(c => c.Id == id);
+
         if (comment is null)
         {
             return Result<CommentDto>.Failure(CommentErrors.NotFound);
@@ -106,8 +105,9 @@ public class CommentService : ICommentService
             return validationResult.ToValidationFailure<PagedList<CommentDto>>();
         }
 
-        var post = await _postRepository.GetPostAsync(postId);
-        if (post is null)
+        var postExists = await _appDbContext.Posts.AnyAsync(p => p.Id == postId);
+        
+        if (!postExists)
         {
             return Result<PagedList<CommentDto>>.Failure(PostErrors.NotFound);
         }
@@ -115,7 +115,7 @@ public class CommentService : ICommentService
         var queryFiltering = new CommentQueryFiltering(queryParameters);
         var querySorting = new CommentQuerySorting(queryParameters.SortingOrder, queryParameters.SortColumn);
 
-        var query = _commentRepository.GetQuery()
+        var query = _appDbContext.Comments
             .Where(c => c.PostId == postId)
             .ApplyFiltering(queryFiltering)
             .ApplySorting(querySorting)
@@ -139,7 +139,10 @@ public class CommentService : ICommentService
             return Result<CommentDto>.Failure(CommentErrors.Unauthorized);
         }
 
-        var comment = await _commentRepository.GetByIdAsync(id);
+        var comment = await _appDbContext.Comments
+            .Include(c => c.UserProfile)
+            .FirstOrDefaultAsync(c => c.Id == id);
+
         if (comment is null)
         {
             return Result<CommentDto>.Failure(CommentErrors.NotFound);
@@ -153,8 +156,8 @@ public class CommentService : ICommentService
 
         comment.Content = updateCommentDto.Content;
         comment.UpdatedAt = DateTime.UtcNow;
-
-        await _commentRepository.UpdateAsync(comment);
+        
+        await _appDbContext.SaveChangesAsync();
 
         return Result<CommentDto>.Success(comment.ToDto());
     }
@@ -166,7 +169,8 @@ public class CommentService : ICommentService
             return Result.Failure(CommentErrors.Unauthorized);
         }
 
-        var comment = await _commentRepository.GetByIdAsync(id);
+        var comment = await _appDbContext.Comments.FirstOrDefaultAsync(c => c.Id == id);
+
         if (comment is null)
         {
             return Result.Failure(CommentErrors.NotFound);
@@ -178,7 +182,8 @@ public class CommentService : ICommentService
             return Result.Failure(CommentErrors.Forbidden);
         }
 
-        await _commentRepository.DeleteAsync(comment);
+        _appDbContext.Comments.Remove(comment);
+        await _appDbContext.SaveChangesAsync();
 
         return Result.Success();
     }
