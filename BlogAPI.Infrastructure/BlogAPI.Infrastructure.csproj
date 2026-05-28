@@ -36,6 +36,7 @@
   <ItemGroup>
     <Folder Include="Email\Templates\" />
     <Folder Include="Migrations\" />
+    <Folder Include="Repositories\" />
   </ItemGroup>
 
 </Project>
