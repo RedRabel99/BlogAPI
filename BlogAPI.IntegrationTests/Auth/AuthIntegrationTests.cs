@@ -232,7 +232,8 @@ public class AuthIntegrationTests : BaseIntegrationTest
             DisplayName = "changepassworduser",
             Password = DataSeeder.DefaultPassword
         };
-        await UserManager.CreateUserAsync(newUserDto);
+        // Register through endpoint for the moment data is not respawned between tests
+        await HttpClient.PostAsJsonAsync("auth/register", newUserDto);
         await AuthenticateAsync(newUserDto.Email, DataSeeder.DefaultPassword);
 
         var changeDto = new ChangePasswordDto
