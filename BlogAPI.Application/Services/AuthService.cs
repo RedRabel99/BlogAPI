@@ -99,6 +99,7 @@ public class AuthService : IAuthService
         {
             ApplicationUserId = userId,
             Username = registerDto.Username,
+            DisplayName = registerDto.DisplayName,
         });
 
         var token = await _userManager.GenerateConfirmationTokenAsync(registerDto.Email);
