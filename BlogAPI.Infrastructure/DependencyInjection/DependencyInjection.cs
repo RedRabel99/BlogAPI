@@ -1,15 +1,10 @@
 ﻿using BlogAPI.Domain.Interfaces.Auth;
-using BlogAPI.Domain.Interfaces.Tags;
-using BlogAPI.Domain.Interfaces.UserProfiles;
 using BlogAPI.Infrastructure.Identity;
-using BlogAPI.Infrastructure.Repositories;
 using BlogAPI.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Identity;
-using BlogAPI.Domain.Interfaces.Posts;
-using BlogAPI.Domain.Interfaces.Comments;
 using BlogAPI.Infrastructure.Email;
 using BlogAPI.Application.Interfaces;
 
@@ -42,10 +37,6 @@ public static class DependencyInjection
         services.AddScoped<IUserManager, IdentityUserManager>();
         services.AddScoped<IUserContext, UserContext>();
         services.AddScoped<ITokenService, JwtTokenService>();
-        services.AddScoped<IUserProfileRepository, UserProfileRepository>();
-        services.AddScoped<ITagRepository, TagRepository>();
-        services.AddScoped<IPostRepository, PostRepository>();
-        services.AddScoped<ICommentRepository, CommentRepository>();
         services.AddScoped<IEmailSender, SmtpEmailSender>();
         services.AddScoped<IEmailQueue, OutboxEmailQueue>();
         services.AddHttpContextAccessor();
