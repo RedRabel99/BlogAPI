@@ -53,7 +53,7 @@ public class AuthController : ControllerBase
     public async Task<IResult> GenerateChangeEmailToken([FromBody]GenerateChangeEmailTokenDto generateChangeEmailTokenDto)
     {
         var result = await _authService.GenerateChangeEmailTokenAsync(generateChangeEmailTokenDto);
-        return result.IsSuccess ? TypedResults.Ok(result.Value) : result.ToProblemDetails();
+        return result.IsSuccess ? TypedResults.Ok() : result.ToProblemDetails();
     }
 
     [Authorize]
@@ -70,6 +70,22 @@ public class AuthController : ControllerBase
     public async Task<IResult> ResendConfirmationEmail([FromBody] ResendConfirmationEmailDto resendConfirmationEmailDto)
     {
         var result = await _authService.ResendConfirmationEmailAsync(resendConfirmationEmailDto);
+        return result.IsSuccess ? TypedResults.Ok() : result.ToProblemDetails();
+    }
+
+    [AllowAnonymous]
+    [HttpPost("forgot-password")]
+    public async Task<IResult> ForgotPassword([FromBody] ForgotPasswordDto forgotPasswordDto)
+    {
+        var result = await _authService.ForgotPasswordAsync(forgotPasswordDto);
+        return result.IsSuccess ? TypedResults.Ok() : result.ToProblemDetails();
+    }
+
+    [AllowAnonymous]
+    [HttpPost("reset-password")]
+    public async Task<IResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
+    {
+        var result = await _authService.ResetPasswordAsync(resetPasswordDto);
         return result.IsSuccess ? TypedResults.Ok() : result.ToProblemDetails();
     }
 
