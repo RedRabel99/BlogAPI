@@ -297,23 +297,25 @@ public class AuthIntegrationTests : BaseIntegrationTest
     // ---------------------------------------------------------------------------
 
     [Fact]
-    public async Task GenerateChangeEmailToken_Authenticated_ReturnsToken()
+    public async Task GenerateChangeEmailToken_Authenticated_EnqueuesEmailToOutbox()
     {
         //Arrange
         var user = DataSeeder.GetApplicationUser();
         await AuthenticateAsync(user.Email, DataSeeder.DefaultPassword);
+        var newEmail = "generatenew@mail.com";
         var generateTokenDto = new GenerateChangeEmailTokenDto
         {
-            Email = "generatenew@mail.com"
+            Email = newEmail
         };
 
         //Act
         var response = await HttpClient.PostAsJsonAsync("auth/email/change-token", generateTokenDto);
-        var body = await response.Content.ReadFromJsonAsync<ChangeEmailTokenResponseDto>();
+
         //Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.NotNull(body);
-        Assert.False(string.IsNullOrEmpty(body.Token));
+        //Materialize in memory first to avoid translation error between string and jsonb
+        var enqueued = (await AppDbContext.OutboxMessages.ToListAsync()).Any(m => m.Content.Contains(newEmail));
+        Assert.True(enqueued);
     }
 
     [Fact]
@@ -379,6 +381,128 @@ public class AuthIntegrationTests : BaseIntegrationTest
 
         //Act
         var response = await HttpClient.PatchAsJsonAsync("auth/email", dto);
+
+        //Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    // ---------------------------------------------------------------------------
+    // POST /auth/forgot-password
+    // ---------------------------------------------------------------------------
+
+    [Fact]
+    public async Task ForgotPassword_WithExistingEmail_EnqueuesEmailToOutbox()
+    {
+        //Arrange
+        var user = DataSeeder.GetApplicationUser();
+        var dto = new ForgotPasswordDto
+        {
+            Email = user.Email
+        };
+
+        //Act
+        var response = await HttpClient.PostAsJsonAsync("auth/forgot-password", dto);
+
+        //Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        //Materialize in memory first to avoid translation error between string and jsonb
+        var enqueued = (await AppDbContext.OutboxMessages.ToListAsync()).Any(m => m.Content.Contains(user.Email));
+        Assert.True(enqueued);
+    }
+
+    [Fact]
+    public async Task ForgotPassword_WithUnknownEmail_ReturnsOk()
+    {
+        //Arrange
+        var dto = new ForgotPasswordDto
+        {
+            Email = "doesnotexist@mail.com"
+        };
+
+        //Act
+        var response = await HttpClient.PostAsJsonAsync("auth/forgot-password", dto);
+
+        //Assert: success even for unknown email, preventing email enumeration
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    // ---------------------------------------------------------------------------
+    // POST /auth/reset-password
+    // ---------------------------------------------------------------------------
+
+    [Fact]
+    public async Task ResetPassword_WithValidToken_ChangesPassword()
+    {
+        //Arrange: dedicated user so resetting password does not affect the shared seeded users
+        var suffix = Guid.NewGuid().ToString("N")[..12];
+        var username = $"reset_{suffix}";
+        var email = $"reset-{suffix}@mail.com";
+        var createResult = await UserManager.CreateUserAsync(username, email, DataSeeder.DefaultPassword);
+        Assert.True(createResult.IsSuccess);
+        AppDbContext.UserProfiles.Add(new BlogAPI.Domain.Entities.UserProfile
+        {
+            ApplicationUserId = createResult.Value,
+            Username = username,
+            DisplayName = "Reset User"
+        });
+        var appUser = await AppDbContext.Users.FirstAsync(u => u.Id == createResult.Value);
+        appUser.EmailConfirmed = true;
+        await AppDbContext.SaveChangesAsync();
+
+        var token = (await UserManager.GeneratePasswordResetTokenAsync(email)).Value;
+        var newPassword = "NewPassword123!";
+        var dto = new ResetPasswordDto
+        {
+            Email = email,
+            Token = token,
+            NewPassword = newPassword
+        };
+
+        //Act
+        var response = await HttpClient.PostAsJsonAsync("auth/reset-password", dto);
+
+        //Assert: reset succeeded and login works with OK status code
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var loginResponse = await HttpClient.PostAsJsonAsync("auth/login", new LoginDto
+        {
+            Email = email,
+            Password = newPassword
+        });
+        Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode);
+    }
+
+    [Fact]
+    public async Task ResetPassword_WithInvalidToken_ReturnsBadRequest()
+    {
+        //Arrange
+        var user = DataSeeder.GetApplicationUser();
+        var dto = new ResetPasswordDto
+        {
+            Email = user.Email,
+            Token = "invalid-token",
+            NewPassword = "NewPassword123!"
+        };
+
+        //Act
+        var response = await HttpClient.PostAsJsonAsync("auth/reset-password", dto);
+
+        //Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task ResetPassword_WithUnknownEmail_ReturnsBadRequest()
+    {
+        //Arrange: unknown is bad request to prevent email enumeration
+        var dto = new ResetPasswordDto
+        {
+            Email = "doesnotexist@mail.com",
+            Token = "some-token",
+            NewPassword = "NewPassword123!"
+        };
+
+        //Act
+        var response = await HttpClient.PostAsJsonAsync("auth/reset-password", dto);
 
         //Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);

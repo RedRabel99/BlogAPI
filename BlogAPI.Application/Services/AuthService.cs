@@ -23,6 +23,8 @@ public class AuthService : IAuthService
     private readonly IValidator<ChangeEmailDto> _changeEmailDtoValidator;
     private readonly IValidator<ConfirmEmailDto> _confirmEmailValidator;
     private readonly IValidator<ResendConfirmationEmailDto> _resendConfirmationEmailValidator;
+    private readonly IValidator<ForgotPasswordDto> _forgotPasswordValidator;
+    private readonly IValidator<ResetPasswordDto> _resetPasswordValidator;
     private readonly IEmailQueue _emailQueue;
     private readonly IAppDbContext _appDbContext;
 
@@ -37,6 +39,8 @@ public class AuthService : IAuthService
         IValidator<ChangeUsernameDto> changeUsernameValidator,
         IValidator<ChangePasswordDto> changePasswordValidator,
         IValidator<ResendConfirmationEmailDto> resendConfirmationEmailValidator,
+        IValidator<ForgotPasswordDto> forgotPasswordValidator,
+        IValidator<ResetPasswordDto> resetPasswordValidator,
         IEmailQueue emailQueue,
         IValidator<ConfirmEmailDto> confirmEmailValidator,
         IAppDbContext appDbContext)
@@ -52,6 +56,8 @@ public class AuthService : IAuthService
         _changePasswordValidator = changePasswordValidator;
         _emailQueue = emailQueue;
         _resendConfirmationEmailValidator = resendConfirmationEmailValidator;
+        _forgotPasswordValidator = forgotPasswordValidator;
+        _resetPasswordValidator = resetPasswordValidator;
         _confirmEmailValidator = confirmEmailValidator;
         _appDbContext = appDbContext;
     }
@@ -181,30 +187,37 @@ public class AuthService : IAuthService
         return Result.Success();
     }
 
-    public async Task<Result<ChangeEmailTokenResponseDto>> GenerateChangeEmailTokenAsync(GenerateChangeEmailTokenDto generateChangeEmailTokenDto)
+    public async Task<Result> GenerateChangeEmailTokenAsync(GenerateChangeEmailTokenDto generateChangeEmailTokenDto)
     {
         var appUserId = _userContext.UserId;
         if (string.IsNullOrEmpty(appUserId))
         {
-            return Result<ChangeEmailTokenResponseDto>.Failure(AuthErrors.UserNotFound);
+            return Result.Failure(AuthErrors.UserNotFound);
         }
 
         var validationResult = _generateChangeEmailTokenDtoValidator.Validate(generateChangeEmailTokenDto);
         if (!validationResult.IsValid)
         {
-            return validationResult.ToValidationFailure<ChangeEmailTokenResponseDto>();
+            return validationResult.ToValidationFailure();
         }
 
         var result = await _userManager.GenerateChangeEmailTokenAsync(appUserId, generateChangeEmailTokenDto.Email);
         if (result.IsError)
         {
-            return Result<ChangeEmailTokenResponseDto>.Failure(result.Error);
+            return Result.Failure(result.Error);
         }
 
-        return Result<ChangeEmailTokenResponseDto>.Success(new ChangeEmailTokenResponseDto
-        {
-            Token = result.Value
-        });
+        //create email message template later
+        await _emailQueue.EnqueueToOutbox(new EmailMessage(
+            To: generateChangeEmailTokenDto.Email,
+            Subject: "Confirm your email change",
+            Body: $"Please confirm your email change with token={result.Value}",
+            IsHtml: false
+        ));
+
+        await _appDbContext.SaveChangesAsync();
+
+        return Result.Success();
     }
 
     public async Task<Result> ChangeEmailAsync(ChangeEmailDto changeEmailDto)
@@ -265,5 +278,45 @@ public class AuthService : IAuthService
         await _appDbContext.SaveChangesAsync();
 
         return Result.Success();
+    }
+
+    public async Task<Result> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto)
+    {
+        var validationResult = _forgotPasswordValidator.Validate(forgotPasswordDto);
+        if (!validationResult.IsValid)
+        {
+            return validationResult.ToValidationFailure();
+        }
+
+        var tokenResult = await _userManager.GeneratePasswordResetTokenAsync(forgotPasswordDto.Email);
+        if (tokenResult.IsError)
+        {
+            return Result.Success(); //return success even if token was not generated, to prevent email enumeration
+        }
+
+        await _emailQueue.EnqueueToOutbox(new EmailMessage(
+            To: forgotPasswordDto.Email,
+            Subject: "Reset your password",
+            Body: $"Reset your password with token={tokenResult.Value}",
+            IsHtml: false
+        ));
+
+        await _appDbContext.SaveChangesAsync();
+
+        return Result.Success();
+    }
+
+    public async Task<Result> ResetPasswordAsync(ResetPasswordDto resetPasswordDto)
+    {
+        var validationResult = _resetPasswordValidator.Validate(resetPasswordDto);
+        if (!validationResult.IsValid)
+        {
+            return validationResult.ToValidationFailure();
+        }
+
+        return await _userManager.ResetPasswordAsync(
+            resetPasswordDto.Email,
+            resetPasswordDto.Token,
+            resetPasswordDto.NewPassword);
     }
 }

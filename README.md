@@ -40,6 +40,7 @@ Was build as a portfolio project to demonstrate usage of Clean Architecture, the
 - **Structured logging** - Serilog daily file output
 - **Swagger UI** - Interactive API documentation in development with auth implemented
 - **Email confirmation** - Registration generates a confirmation token; Resend endpoint is provided for expired or lost tokens.
+- **Password reset & email change** - Forgot-password and email-change flows generate single-use tokens delivered via the email outbox.
 - **Transactional email delivery** - Outbound emails are persisted as `OutboxMessage` rows and dispatched by a `BackgroundService` (`OutboxEmailProcessor`) that polls in batches with `FOR UPDATE SKIP LOCKED`, retries failures up to a configured maximum, and records the last error per row for diagnostics.
 
 ---
@@ -176,8 +177,10 @@ dotnet run --project BlogAPI/BlogAPI.Web.csproj
 | `POST` | `/auth/confirm-email` | — | Confirm email with token issued at registration |
 | `POST` | `/auth/resent-confirmation` | — | Re-send confirmation email if the previous token expired or was lost |
 | `PATCH` | `/auth/username` | ✓ | Change username |
-| `PATCH` | `/auth/password` | ✓ | Change password |
-| `POST` | `/auth/email/change-token` | ✓ | Generate email change token |
+| `PATCH` | `/auth/password` | ✓ | Change password (authenticated, old + new) |
+| `POST` | `/auth/forgot-password` | — | Request a password reset token (sent via outbox email) |
+| `POST` | `/auth/reset-password` | — | Reset password with the emailed token |
+| `POST` | `/auth/email/change-token` | ✓ | Generate email change token (sent via outbox email) |
 | `PATCH` | `/auth/email` | ✓ | Apply email change with token |
 
 ### Posts
@@ -361,7 +364,7 @@ dotnet test
 - [ ] **Image uploads** — Avatar support for user profiles, cover images for posts
 - [ ] **Post reactions** — Likes, dislikes, and other reactions on posts and comments
 - [ ] **Transactional outbox enrollment** — Currently `OutboxEmailQueue` persists the outbox row in its own `SaveChanges` call, separate from the business write that triggered it. The plan is to enlist the outbox insert in the same `DbContext` / transaction as the originating change (e.g. user registration) so that the business entity and its outbound email are committed atomically — no orphaned emails on a rollback, no missed emails on a partial commit.
-- [ ] **Unit of Work / DbContext abstraction in the application layer** — Repositories presently call `SaveChangesAsync` internally, which forces each repository method to be its own implicit transaction and makes multi-aggregate writes harder to handle. The plan is to replace these with a `DbContext` abstraction exposed to the application layer, so that services compose multiple repository operations and commit them together. This will also be the foundation for the transactional outbox enrollment above.
+- [ ] **Caching for read heavy endpoints** - Hibrid in-memory / distributed caching strategy for read-heavy endpoints like post and comments, or post lists with cache invalidation on writes.
 ---
 
 ## License

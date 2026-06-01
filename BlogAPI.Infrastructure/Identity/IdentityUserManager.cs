@@ -215,6 +215,41 @@ public class IdentityUserManager : IUserManager
         return Result.Success();
     }
 
+    public async Task<Result<string>> GeneratePasswordResetTokenAsync(string email)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+
+        if (user is null)
+        {
+            return Result<string>.Failure(AuthErrors.UserNotFound);
+        }
+
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+        return Result<string>.Success(token);
+    }
+
+    public async Task<Result> ResetPasswordAsync(string email, string token, string newPassword)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            //return success to prevent email enumeration
+            return Result.Failure(AuthErrors.InvalidToken);
+        }
+
+        var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+        if (!result.Succeeded)
+        {
+            return Result.Failure(
+                result.Errors.Any(e => e.Code.Equals("InvalidToken"))
+                    ? AuthErrors.InvalidToken
+                    : AuthErrors.Internal);
+        }
+
+        return Result.Success();
+    }
+
     private async Task<string?> GetUserProfileIdAsync(string id)
     {
         return await _appDbContext.UserProfiles

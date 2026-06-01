@@ -12,6 +12,8 @@ namespace BlogAPI.Application.Interfaces
         Task<Result> ChangeUsernameAsync(ChangeUsernameDto changeUsernameDto);
         Task<Result> ChangePasswordAsync(ChangePasswordDto changePasswordDto);
         Task<Result> ChangeEmailAsync(ChangeEmailDto changeEmailDto);
-        Task<Result<ChangeEmailTokenResponseDto>> GenerateChangeEmailTokenAsync(GenerateChangeEmailTokenDto generateChangeEmailTokenDto);
+        Task<Result> GenerateChangeEmailTokenAsync(GenerateChangeEmailTokenDto generateChangeEmailTokenDto);
+        Task<Result> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto);
+        Task<Result> ResetPasswordAsync(ResetPasswordDto resetPasswordDto);
     }
 }
