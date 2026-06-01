@@ -363,7 +363,6 @@ dotnet test
 - [ ] **Refresh tokens** — Sliding JWT refresh token flow
 - [ ] **Image uploads** — Avatar support for user profiles, cover images for posts
 - [ ] **Post reactions** — Likes, dislikes, and other reactions on posts and comments
-- [ ] **Transactional outbox enrollment** — Currently `OutboxEmailQueue` persists the outbox row in its own `SaveChanges` call, separate from the business write that triggered it. The plan is to enlist the outbox insert in the same `DbContext` / transaction as the originating change (e.g. user registration) so that the business entity and its outbound email are committed atomically — no orphaned emails on a rollback, no missed emails on a partial commit.
 - [ ] **Caching for read heavy endpoints** - Hibrid in-memory / distributed caching strategy for read-heavy endpoints like post and comments, or post lists with cache invalidation on writes.
 ---
 
