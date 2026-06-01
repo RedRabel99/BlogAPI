@@ -148,12 +148,28 @@ public class TestDataSeeder
 
         foreach(var dto in registerDtos)
         {
-            await _userManager.CreateUserAsync(dto);
+            var createResult = await _userManager.CreateUserAsync(dto.Username, dto.Email, dto.Password);
+            if (createResult.IsError)
+            {
+                throw new InvalidOperationException(
+                    $"Seeding user '{dto.Username}' failed: {createResult.Error.Code} {createResult.Error.Description}");
+            }
+
+            _appDbContext.UserProfiles.Add(new UserProfile
+            {
+                ApplicationUserId = createResult.Value,
+                Username = dto.Username,
+                DisplayName = dto.DisplayName
+            });
         }
+
+        // save the profiles so the queries adding elemens to lits belowe could include freshly created userprofiles
+        await _appDbContext.SaveChangesAsync();
 
         _applicationUsers.AddRange(_appDbContext.Users.Include(u => u.UserProfile).ToList());
         _userProfiles.AddRange(_appDbContext.UserProfiles.ToList());
     }
+
     // Helper methods to get seeded entities
     public UserProfile GetUserProfile(int index = 0) => _userProfiles[index];
     public ApplicationUser GetApplicationUser(int index = 0) => _applicationUsers[index];

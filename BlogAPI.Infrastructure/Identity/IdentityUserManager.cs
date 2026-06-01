@@ -19,59 +19,37 @@ public class IdentityUserManager : IUserManager
         _appDbContext = appDbContext;
     }
 
-    public async Task<Result> CreateUserAsync(RegisterDto registerUserDto)
+    public async Task<Result<string>> CreateUserAsync(string userName, string email, string password)
     {
-        try
+        var appUser = new ApplicationUser
         {
-            await _appDbContext.Database.BeginTransactionAsync();
-
-            var user = new ApplicationUser
-            {
-                UserName = registerUserDto.Username,
-                Email = registerUserDto.Email
-            };
-
-            var result = await _userManager.CreateAsync(user, registerUserDto.Password);
-
-            if (result is null)
-            {
-                return Result.Failure(AuthErrors.AuthFailure);
-            }
-
-            if (result.Succeeded is false)
-            {
-                if (result.Errors.Any(x => x.Code.Contains("DuplicateUserName")))
-                {
-                    return Result.Failure(AuthErrors.UserAlreadyExists);
-                }
-
-                if (result.Errors.Any(x => x.Code.Equals("DuplicateEmail")))
-                {
-                    return Result.Failure(AuthErrors.UserAlreadyExists);
-                }
-
-                return Result.Failure(AuthErrors.AuthFailure);
-            }
-
-            var userProfile = new UserProfile
-            {
-                Username = user.UserName,
-                DisplayName = registerUserDto.DisplayName,
-                ApplicationUserId = user.Id
-            };
-
-            await _appDbContext.UserProfiles.AddAsync(userProfile);
-            await _appDbContext.SaveChangesAsync();
-
-            await _appDbContext.Database.CommitTransactionAsync();
-            return Result.Success();
-        }
-        catch
+            UserName = userName,
+            Email = email
+        };
+        var result = await _userManager.CreateAsync(appUser, password);
+        if (result is null)
         {
-            await _appDbContext.Database.RollbackTransactionAsync();
-            throw;
+            return Result<string>.Failure(AuthErrors.AuthFailure);
         }
-}
+
+        if(!result.Succeeded)
+        {
+            var isDuplicateEmail = result.Errors.Any(x => x.Code.Equals("DuplicateEmail"));
+            var isDuplicateUsername = result.Errors.Any(x => x.Code.Equals("DuplicateUserName"));
+            if (isDuplicateEmail)
+            {
+                return Result<string>.Failure(AuthErrors.UserWithEmailAlreadyExists);
+            }
+            if (isDuplicateUsername)
+            {
+                return Result<string>.Failure(AuthErrors.UserAlreadyExists);
+            }
+            return Result<string>.Failure(AuthErrors.AuthFailure);
+        }
+
+        return Result<string>.Success(appUser.Id);
+    }
+
 
     public async Task<Result<IUserInfo>> FindByEmailAsync(string email)
     {
@@ -137,49 +115,26 @@ public class IdentityUserManager : IUserManager
         await _userManager.DeleteAsync(user);
     }
 
-    public async Task<Result> ChangeUsernameAsync(string userId, string username)
+    public async Task<Result> UpdateUsernameAsync(string userId, string username)
     {
-        try
+        var applicationUser = await _userManager.FindByIdAsync(userId);
+        if (applicationUser is null)
         {
-            await _appDbContext.Database.BeginTransactionAsync();
-            var applicationUser = await _userManager.FindByIdAsync(userId);
-            if (applicationUser is null)
-            {
-                return Result.Failure(AuthErrors.UserNotFound);
-            }
-
-            applicationUser.UserName = username;
-            var updateResult = await _userManager.UpdateAsync(applicationUser);
-
-            if (!updateResult.Succeeded)
-            {
-                var isDuplicateUsername = updateResult.Errors
-                    .Any(x => x.Code.Equals("DuplicateUserName"));
-                return Result.Failure(isDuplicateUsername
-                    ? AuthErrors.UserAlreadyExists
-                    : AuthErrors.Internal);
-            }
-
-            var userProfile = _appDbContext.UserProfiles
-                .FirstOrDefault(x => x.ApplicationUserId.Equals(applicationUser.Id));
-
-            if (userProfile is null)
-            {
-                return Result.Failure(UserProfileErrors.NotFound);
-            }
-
-            userProfile.Username = username;
-            _appDbContext.Update(userProfile);
-            await _appDbContext.SaveChangesAsync();
-            await _appDbContext.Database.CommitTransactionAsync();
-
-            return Result.Success();
+            return Result.Failure(AuthErrors.UserNotFound);
         }
-        catch
+
+        applicationUser.UserName = username;
+        var updateResult = await _userManager.UpdateAsync(applicationUser);
+        if (!updateResult.Succeeded)
         {
-            await _appDbContext.Database.RollbackTransactionAsync();
-            throw;
+            var isDuplicateUsername = updateResult.Errors.Any(x => x.Code.Equals("DuplicateUserName"));
+            return Result.Failure(
+                isDuplicateUsername 
+                ? AuthErrors.UserAlreadyExists 
+                : AuthErrors.Internal);
         }
+
+        return Result.Success();
     }
 
     public async Task<Result<string>> GenerateChangeEmailTokenAsync(string userId, string newEmail)

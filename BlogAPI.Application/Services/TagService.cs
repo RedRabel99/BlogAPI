@@ -1,4 +1,4 @@
-﻿using BlogAPI.Application.DTOs.Tags;
+using BlogAPI.Application.DTOs.Tags;
 using BlogAPI.Application.Extensions;
 using BlogAPI.Application.Interfaces;
 using BlogAPI.Application.Mapping;
@@ -7,50 +7,46 @@ using BlogAPI.Application.Shared.Pagination;
 using BlogAPI.Domain;
 using BlogAPI.Domain.Abstractions;
 using BlogAPI.Domain.Entities;
-using BlogAPI.Domain.Interfaces.Tags;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlogAPI.Application.Services;
 
 public class TagService : ITagService
 {
-    private readonly ITagRepository _tagRepository;
+    private readonly IAppDbContext _appDbContext;
     private readonly IPagedListFactory _pagedListFactory;
     private readonly IValidator<SearchTagQueryParametersDto> _tagQueryParametersValidator;
 
-    public TagService(ITagRepository tagRepository, IPagedListFactory pagedListFactory, IValidator<SearchTagQueryParametersDto> tagQueryParametersValidator)
+    public TagService(IAppDbContext appDbContext, IPagedListFactory pagedListFactory, IValidator<SearchTagQueryParametersDto> tagQueryParametersValidator)
     {
-        _tagRepository = tagRepository;
+        _appDbContext = appDbContext;
         _pagedListFactory = pagedListFactory;
         _tagQueryParametersValidator = tagQueryParametersValidator;
     }
 
     public async Task<Result<TagDto>> GetTagByIdAsync(Guid id)
     {
-        var tag = await _tagRepository.GetByIdAsync(id);
-
-        if(tag is null)
-        {
-            return Result<TagDto>.Failure(TagErrors.TagNotFound);
-        }
-
-        var tagDto = tag.ToDto();
-
-        return Result<TagDto>.Success(tagDto);
-    }
-
-    public async Task<Result<TagDto>> GetTagByNameAsync(string name)
-    {
-        var tag = await _tagRepository.GetByNameAsync(name);
+        var tag = await _appDbContext.Tags.FirstOrDefaultAsync(t => t.Id == id);
 
         if (tag is null)
         {
             return Result<TagDto>.Failure(TagErrors.TagNotFound);
         }
 
-        var tagDto = tag.ToDto();
+        return Result<TagDto>.Success(tag.ToDto());
+    }
 
-        return Result<TagDto>.Success(tagDto);
+    public async Task<Result<TagDto>> GetTagByNameAsync(string name)
+    {
+        var tag = await _appDbContext.Tags.FirstOrDefaultAsync(t => t.TagName == name);
+
+        if (tag is null)
+        {
+            return Result<TagDto>.Failure(TagErrors.TagNotFound);
+        }
+
+        return Result<TagDto>.Success(tag.ToDto());
     }
 
     public async Task<Result<PagedList<TagDto>>> GetTagsAsync(SearchTagQueryParametersDto queryParamsDto)
@@ -65,7 +61,7 @@ public class TagService : ITagService
         var tagQuerySorting = new TagQuerySorting(queryParamsDto.SortingOrder, queryParamsDto.SortColumn);
         var tagQueryFiltering = new TagSearchQueryFilter(queryParamsDto.TagName);
 
-        var query = _tagRepository.GetAll()
+        var query = _appDbContext.Tags
             .ApplyFiltering(tagQueryFiltering)
             .ApplySorting(tagQuerySorting)
             .Select(TagMappers.ProjectToDto);
@@ -84,11 +80,11 @@ public class TagService : ITagService
             return validationResult.ToValidationFailure<PagedList<TagDto>>();
         }
 
-        var tagQuerySorting = new TagQuerySorting(queryParametersDto.SortingOrder,
-            queryParametersDto.SortColumn);
+        var tagQuerySorting = new TagQuerySorting(queryParametersDto.SortingOrder, queryParametersDto.SortColumn);
         var tagQueryFiltering = new TagSearchQueryFilter(queryParametersDto.TagName);
 
-        var query = _tagRepository.GetTagsByPostId(id)
+        var query = _appDbContext.Tags
+            .Where(t => t.Posts.Any(p => p.Id == id))
             .ApplyFiltering(tagQueryFiltering)
             .ApplySorting(tagQuerySorting)
             .Select(TagMappers.ProjectToDto);
@@ -98,20 +94,21 @@ public class TagService : ITagService
         return Result<PagedList<TagDto>>.Success(result);
     }
 
+    //resolve doesnt call save changes, so the one calling controlls when to save
     public async Task<List<Tag>> ResolveTagsAsync(List<string> tagNames)
     {
         var result = new List<Tag>();
-        if(tagNames is null)
+        if (tagNames is null)
         {
             return result;
         }
 
-        foreach( var tagName in tagNames)
+        foreach (var tagName in tagNames)
         {
-            var existingTag = await _tagRepository.GetByNameAsync(tagName);
+            var existingTag = await _appDbContext.Tags.FirstOrDefaultAsync(t => t.TagName == tagName);
             result.Add(
-                existingTag is not null 
-                ? existingTag 
+                existingTag is not null
+                ? existingTag
                 : new Tag { TagName = tagName }
             );
         }

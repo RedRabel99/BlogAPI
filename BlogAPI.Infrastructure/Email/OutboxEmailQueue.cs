@@ -7,15 +7,14 @@ namespace BlogAPI.Infrastructure.Email;
 public sealed class OutboxEmailQueue : IEmailQueue
 {
     private readonly AppDbContext _context;
-    private readonly IEmailSender _emailSender;
+    
 
     public OutboxEmailQueue(AppDbContext context, IEmailSender emailSender)
     {
         _context = context;
-        _emailSender = emailSender;
     }
 
-    public async Task AddToOuboxAsync(EmailMessage message, CancellationToken ct = default)
+    public async Task EnqueueToOutbox(EmailMessage message, CancellationToken ct = default)
     {
         var outboxMessage = new OutboxMessage
         {
@@ -24,7 +23,7 @@ public sealed class OutboxEmailQueue : IEmailQueue
             OccurredOn = DateTime.UtcNow
         };
 
-        await _context.OutboxMessages.AddAsync(outboxMessage);
-        await _context.SaveChangesAsync(ct);
+        await _context.OutboxMessages.AddAsync(outboxMessage, ct);
+
     }
 }
