@@ -30,6 +30,13 @@ namespace BlogAPI.Infrastructure.Services
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             
+            if (_configuration["JWT:AccessTokenMinutes"] == null || !int.TryParse(_configuration["JWT:AccessTokenMinutes"], out var accessTokenMinutes))
+            {
+                throw new InvalidOperationException("JWT:AccessTokenMinutes configuration is invalid.");
+            }
+
+            var accessTokenMinutes = int.Parse(_configuration["JWT:AccessTokenMinutes"] ?? "15");
+
             var token = new JwtSecurityToken(
                 issuer: _configuration["JWT:Issuer"],
                 audience: _configuration["JWT:Audience"],
