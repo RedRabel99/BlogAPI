@@ -1,4 +1,4 @@
-﻿using BlogAPI.Application.DTOs.Auth;
+using BlogAPI.Application.DTOs.Auth;
 using BlogAPI.Application.Interfaces;
 using BlogAPI.Web.Extensions;
 using Microsoft.AspNetCore.Authorization;
@@ -19,81 +19,97 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IResult> Register([FromBody]RegisterDto registerDto)
+    public async Task<IResult> Register([FromBody]RegisterDto registerDto, CancellationToken ct)
     {
-        var result = await _authService.RegisterAsync(registerDto);
+        var result = await _authService.RegisterAsync(registerDto, ct);
         return result.IsSuccess ? TypedResults.Ok(new {Message = "User registered"}) : result.ToProblemDetails();
     }
 
     [HttpPost("login")]
-    public async Task<IResult> Login([FromBody]LoginDto loginDto)
+    public async Task<IResult> Login([FromBody]LoginDto loginDto, CancellationToken ct)
     {
-        var result = await _authService.LoginAsync(loginDto);
+        var result = await _authService.LoginAsync(loginDto, ct);
+        return result.IsSuccess ? TypedResults.Ok(result.Value) : result.ToProblemDetails();
+    }
+
+    [AllowAnonymous]
+    [HttpPost("refresh")]
+    public async Task<IResult> Refresh([FromBody]RefreshRequestDto refreshRequestDto, CancellationToken ct)
+    {
+        var result = await _authService.RefreshTokenAsync(refreshRequestDto, ct);
         return result.IsSuccess ? TypedResults.Ok(result.Value) : result.ToProblemDetails();
     }
 
     [Authorize]
-    [HttpPatch("username")]
-    public async Task<IResult> ChangeUsername([FromBody]ChangeUsernameDto changeUsernameDto)
+    [HttpPost("logout")]
+    public async Task<IResult> Logout([FromBody]LogoutRequestDto logoutRequestDto, CancellationToken ct)
     {
-        var result = await _authService.ChangeUsernameAsync(changeUsernameDto);
+        var result = await _authService.LogoutAsync(logoutRequestDto, ct);
+        return result.IsSuccess ? TypedResults.Ok() : result.ToProblemDetails();
+    }
+
+    [Authorize]
+    [HttpPatch("username")]
+    public async Task<IResult> ChangeUsername([FromBody]ChangeUsernameDto changeUsernameDto, CancellationToken ct)
+    {
+        var result = await _authService.ChangeUsernameAsync(changeUsernameDto, ct);
         return result.IsSuccess ? TypedResults.Ok() : result.ToProblemDetails();
     }
 
     [Authorize]
     [HttpPatch("password")]
-    public async Task<IResult> ChangePassword([FromBody]ChangePasswordDto changePasswordDto)
+    public async Task<IResult> ChangePassword([FromBody]ChangePasswordDto changePasswordDto, CancellationToken ct)
     {
-        var result = await _authService.ChangePasswordAsync(changePasswordDto);
+        var result = await _authService.ChangePasswordAsync(changePasswordDto, ct);
         return result.IsSuccess ? TypedResults.Ok() : result.ToProblemDetails();
     }
 
     [Authorize]
     [HttpPost("email/change-token")]
-    public async Task<IResult> GenerateChangeEmailToken([FromBody]GenerateChangeEmailTokenDto generateChangeEmailTokenDto)
+    public async Task<IResult> GenerateChangeEmailToken([FromBody]GenerateChangeEmailTokenDto generateChangeEmailTokenDto, CancellationToken ct)
     {
-        var result = await _authService.GenerateChangeEmailTokenAsync(generateChangeEmailTokenDto);
+        var result = await _authService.GenerateChangeEmailTokenAsync(generateChangeEmailTokenDto, ct);
         return result.IsSuccess ? TypedResults.Ok() : result.ToProblemDetails();
     }
 
     [Authorize]
     [HttpPatch("email")]
-    public async Task<IResult> ChangeEmailAsync([FromBody] ChangeEmailDto changeEmailDto)
+    public async Task<IResult> ChangeEmailAsync([FromBody] ChangeEmailDto changeEmailDto, CancellationToken ct)
     {
-        var result = await _authService.ChangeEmailAsync(changeEmailDto);
+        var result = await _authService.ChangeEmailAsync(changeEmailDto, ct);
         return result.IsSuccess ? TypedResults.Ok() : result.ToProblemDetails();
     }
 
     [AllowAnonymous]
     [HttpPost("resent-confirmation")]
-    [EnableRateLimiting("auth-resend")] //TODO: add rate limiting policy 
-    public async Task<IResult> ResendConfirmationEmail([FromBody] ResendConfirmationEmailDto resendConfirmationEmailDto)
+    [EnableRateLimiting("auth-resend")] //TODO: add rate limiting policy
+    public async Task<IResult> ResendConfirmationEmail([FromBody] ResendConfirmationEmailDto resendConfirmationEmailDto, CancellationToken ct)
     {
-        var result = await _authService.ResendConfirmationEmailAsync(resendConfirmationEmailDto);
+        var result = await _authService.ResendConfirmationEmailAsync(resendConfirmationEmailDto, ct);
         return result.IsSuccess ? TypedResults.Ok() : result.ToProblemDetails();
     }
 
     [AllowAnonymous]
     [HttpPost("forgot-password")]
-    public async Task<IResult> ForgotPassword([FromBody] ForgotPasswordDto forgotPasswordDto)
+    public async Task<IResult> ForgotPassword([FromBody] ForgotPasswordDto forgotPasswordDto, CancellationToken ct)
     {
-        var result = await _authService.ForgotPasswordAsync(forgotPasswordDto);
+        var result = await _authService.ForgotPasswordAsync(forgotPasswordDto, ct);
         return result.IsSuccess ? TypedResults.Ok() : result.ToProblemDetails();
     }
 
     [AllowAnonymous]
     [HttpPost("reset-password")]
-    public async Task<IResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
+    public async Task<IResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto, CancellationToken ct)
     {
-        var result = await _authService.ResetPasswordAsync(resetPasswordDto);
+        var result = await _authService.ResetPasswordAsync(resetPasswordDto, ct);
         return result.IsSuccess ? TypedResults.Ok() : result.ToProblemDetails();
     }
 
     [AllowAnonymous]
     [HttpPost("confirm-email")]
-    public async Task<IResult> ConfirmEmail([FromBody] ConfirmEmailDto confirmEmailDto)
+    public async Task<IResult> ConfirmEmail([FromBody] ConfirmEmailDto confirmEmailDto, CancellationToken ct)
     {
-        var result = await _authService.ConfirmEmailAsync(confirmEmailDto);
+        var result = await _authService.ConfirmEmailAsync(confirmEmailDto, ct);
         return result.IsSuccess ? TypedResults.Ok() : result.ToProblemDetails();
     }
 
