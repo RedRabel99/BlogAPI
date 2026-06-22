@@ -38,9 +38,10 @@ public static class DependencyInjection
             .AddDefaultTokenProviders();
         services.AddScoped<IUserManager, IdentityUserManager>();
         services.AddScoped<IUserContext, UserContext>();
-        services.AddScoped<ITokenService, JwtTokenService>();
+        services.AddScoped<IAccessTokenService, JwtTokenService>();
         services.AddScoped<IEmailSender, SmtpEmailSender>();
         services.AddScoped<IEmailQueue, OutboxEmailQueue>();
+        services.AddScoped<IRefreshTokenService, RefreshTokenService>();
         services.AddHttpContextAccessor();
         services.AddHostedService<OutboxEmailProcessor>();
         services.AddOptions<JwtOptions>()

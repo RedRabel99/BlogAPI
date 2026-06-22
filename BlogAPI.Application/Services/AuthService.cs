@@ -14,7 +14,7 @@ namespace BlogAPI.Application.Services;
 public class AuthService : IAuthService
 {
     private readonly IUserManager _userManager;
-    private readonly ITokenService _tokenService;
+    private readonly IAccessTokenService _tokenService;
     private readonly IUserContext _userContext;
     private readonly IValidator<RegisterDto> _registerValidator;
     private readonly IValidator<LoginDto> _loginValidator;
@@ -31,7 +31,7 @@ public class AuthService : IAuthService
 
     public AuthService(
         IUserManager userManager,
-        ITokenService tokenService,
+        IAccessTokenService tokenService,
         IUserContext userContext,
         IValidator<RegisterDto> registerValidator,
         IValidator<LoginDto> loginValidator,
