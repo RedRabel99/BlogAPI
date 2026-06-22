@@ -1,5 +1,4 @@
 ﻿using BlogAPI.Application.Constants;
-using BlogAPI.Application.DTOs.Auth;
 using BlogAPI.Application.Interfaces.Auth;
 using BlogAPI.Domain.Interfaces.Auth;
 using BlogAPI.Infrastructure.Options;
@@ -11,7 +10,7 @@ using System.Text;
 
 namespace BlogAPI.Infrastructure.Services
 {
-    public class JwtTokenService : ITokenService
+    public class JwtTokenService : IAccessTokenService
     {
         private readonly JwtOptions _jwtOptions;
 
@@ -20,7 +19,7 @@ namespace BlogAPI.Infrastructure.Services
             _jwtOptions = options.Value;
         }
 
-        public Task<AccessTokenResultDto> GenerateAccessTokenAsync(IUserInfo user)
+        public Task<AccessTokenResult> GenerateAccessTokenAsync(IUserInfo user)
         {
             var claims = new[]
             {
@@ -44,7 +43,7 @@ namespace BlogAPI.Infrastructure.Services
 
             var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
 
-            return Task.FromResult(new AccessTokenResultDto(accessToken, accessTokenMinutes * 60));
+            return Task.FromResult(new AccessTokenResult(accessToken, accessTokenMinutes * 60));
         }
     }
 }
