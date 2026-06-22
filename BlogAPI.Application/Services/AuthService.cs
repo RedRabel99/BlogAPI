@@ -7,6 +7,7 @@ using BlogAPI.Application.Extensions;
 using BlogAPI.Application.DTOs.Auth;
 using BlogAPI.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using BlogAPI.Application.Interfaces.Auth;
 
 namespace BlogAPI.Application.Services;
 
@@ -77,9 +78,9 @@ public class AuthService : IAuthService
         {
             return Result<string>.Failure(authResult.Error);
         }
-        var token = await _tokenService.GenerateTokenAsync(authResult.Value);
+        var token = await _tokenService.GenerateAccessTokenAsync(authResult.Value);
 
-        return Result<string>.Success(token);
+        return Result<string>.Success(token.AccessToken);
     }
 
     public async Task<Result> RegisterAsync(RegisterDto registerDto)

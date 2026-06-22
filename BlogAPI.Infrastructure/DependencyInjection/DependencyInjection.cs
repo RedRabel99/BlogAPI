@@ -7,6 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Identity;
 using BlogAPI.Infrastructure.Email;
 using BlogAPI.Application.Interfaces;
+using BlogAPI.Application.Interfaces.Auth;
+using BlogAPI.Infrastructure.Options;
 
 namespace BlogAPI.Infrastructure.DependencyInjection;
 
@@ -41,6 +43,10 @@ public static class DependencyInjection
         services.AddScoped<IEmailQueue, OutboxEmailQueue>();
         services.AddHttpContextAccessor();
         services.AddHostedService<OutboxEmailProcessor>();
+        services.AddOptions<JwtOptions>()
+            .BindConfiguration("JWT")
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
         return services;
     }
