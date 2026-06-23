@@ -1,6 +1,8 @@
 ﻿using BlogAPI.Application.Constants;
+using BlogAPI.Application.Interfaces.Auth;
 using BlogAPI.Domain.Interfaces.Auth;
-using Microsoft.Extensions.Configuration;
+using BlogAPI.Infrastructure.Options;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -8,16 +10,16 @@ using System.Text;
 
 namespace BlogAPI.Infrastructure.Services
 {
-    public class JwtTokenService : ITokenService
+    public class JwtTokenService : IAccessTokenService
     {
-        private readonly IConfiguration _configuration;
+        private readonly JwtOptions _jwtOptions;
 
-        public JwtTokenService(IConfiguration configuration)
+        public JwtTokenService(IOptions<JwtOptions> options)
         {
-            _configuration = configuration;
+            _jwtOptions = options.Value;
         }
 
-        public Task<string> GenerateTokenAsync(IUserInfo user)
+        public Task<AccessTokenResult> GenerateAccessTokenAsync(IUserInfo user)
         {
             var claims = new[]
             {
@@ -27,17 +29,21 @@ namespace BlogAPI.Infrastructure.Services
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Secret));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            
+
+            var accessTokenMinutes = _jwtOptions.AccessTokenMinutes;
+
             var token = new JwtSecurityToken(
-                issuer: _configuration["JWT:Issuer"],
-                audience: _configuration["JWT:Audience"],
+                issuer: _jwtOptions.Issuer,
+                audience: _jwtOptions.Audience,
                 claims: claims,
-                expires: DateTime.Now.AddHours(24),
+                expires: DateTime.UtcNow.AddMinutes(accessTokenMinutes),
                 signingCredentials: creds);
 
-            return Task.FromResult(new JwtSecurityTokenHandler().WriteToken(token));
+            var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return Task.FromResult(new AccessTokenResult(accessToken, accessTokenMinutes * 60));
         }
     }
 }
