@@ -112,11 +112,13 @@ public class AuthIntegrationTests : BaseIntegrationTest
         };
         //Act
         var response = await HttpClient.PostAsJsonAsync("auth/login", dto);
-        var token = await response.Content.ReadAsStringAsync();
+        var auth = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
 
         //Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.False(string.IsNullOrWhiteSpace(token));
+        Assert.NotNull(auth);
+        Assert.False(string.IsNullOrWhiteSpace(auth.AccessToken));
+        Assert.False(string.IsNullOrWhiteSpace(auth.RefreshToken));
     }
 
     [Fact]
@@ -506,5 +508,79 @@ public class AuthIntegrationTests : BaseIntegrationTest
 
         //Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    // ---------------------------------------------------------------------------
+    // POST /auth/refresh
+    // ---------------------------------------------------------------------------
+
+    [Fact]
+    public async Task Refresh_WithValidToken_ReturnsNewRotatedTokens()
+    {
+        //Arrange
+        var user = DataSeeder.GetApplicationUser();
+        var auth = await AuthenticateAsync(user.Email, DataSeeder.DefaultPassword);
+
+        //Act
+        var response = await HttpClient.PostAsJsonAsync("auth/refresh",
+            new RefreshRequestDto { RefreshToken = auth.RefreshToken });
+        var refreshed = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
+
+        //Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.NotNull(refreshed);
+        Assert.False(string.IsNullOrWhiteSpace(refreshed.AccessToken));
+        Assert.NotEqual(auth.RefreshToken, refreshed.RefreshToken);
+    }
+
+    [Fact]
+    public async Task Refresh_WithRotatedToken_ReturnsUnauthorized()
+    {
+        //Arrange
+        var user = DataSeeder.GetApplicationUser();
+        var auth = await AuthenticateAsync(user.Email, DataSeeder.DefaultPassword);
+        // first refresh rotates -> revokes the original
+        await HttpClient.PostAsJsonAsync("auth/refresh",
+            new RefreshRequestDto { RefreshToken = auth.RefreshToken });
+
+        //Act - replay the now-rotated token
+        var response = await HttpClient.PostAsJsonAsync("auth/refresh",
+            new RefreshRequestDto { RefreshToken = auth.RefreshToken });
+
+        //Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Refresh_WithInvalidToken_ReturnsUnauthorized()
+    {
+        //Act
+        var response = await HttpClient.PostAsJsonAsync("auth/refresh",
+            new RefreshRequestDto { RefreshToken = "not-a-real-token" });
+
+        //Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    // ---------------------------------------------------------------------------
+    // POST /auth/logout
+    // ---------------------------------------------------------------------------
+
+    [Fact]
+    public async Task Logout_RevokedRefreshToken_CannotBeUsedToRefresh()
+    {
+        //Arrange
+        var user = DataSeeder.GetApplicationUser();
+        var auth = await AuthenticateAsync(user.Email, DataSeeder.DefaultPassword);
+
+        //Act - logout revokes the presented refresh token
+        var logout = await HttpClient.PostAsJsonAsync("auth/logout",
+            new LogoutRequestDto { RefreshToken = auth.RefreshToken });
+
+        //Assert
+        Assert.Equal(HttpStatusCode.OK, logout.StatusCode);
+        var refresh = await HttpClient.PostAsJsonAsync("auth/refresh",
+            new RefreshRequestDto { RefreshToken = auth.RefreshToken });
+        Assert.Equal(HttpStatusCode.Unauthorized, refresh.StatusCode);
     }
 }

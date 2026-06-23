@@ -24,7 +24,7 @@ public abstract class BaseIntegrationTest : IClassFixture<IntegrationTestFactory
         DataSeeder = new TestDataSeeder(AppDbContext, UserManager);
     }
 
-    public async Task AuthenticateAsync(string email, string password)
+    public async Task<AuthResponseDto> AuthenticateAsync(string email, string password)
     {
         var loginDto = new LoginDto
         {
@@ -33,8 +33,10 @@ public abstract class BaseIntegrationTest : IClassFixture<IntegrationTestFactory
         };
         var response = await HttpClient.PostAsJsonAsync("/auth/login", loginDto);
         response.EnsureSuccessStatusCode();
-        var authResponse = await response.Content.ReadFromJsonAsync<string>();
-        HttpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", authResponse);
+        var authResponse = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
+        HttpClient.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", authResponse!.AccessToken);
+        return authResponse;
     }
     public Task InitializeAsync()
     {

@@ -27,6 +27,8 @@ public class AuthService : IAuthService
     private readonly IValidator<ResendConfirmationEmailDto> _resendConfirmationEmailValidator;
     private readonly IValidator<ForgotPasswordDto> _forgotPasswordValidator;
     private readonly IValidator<ResetPasswordDto> _resetPasswordValidator;
+    private readonly IValidator<RefreshRequestDto> _refreshRequestValidator;
+    private readonly IValidator<LogoutRequestDto> _logoutRequestValidator;
     private readonly IEmailQueue _emailQueue;
     private readonly IAppDbContext _appDbContext;
 
@@ -44,9 +46,12 @@ public class AuthService : IAuthService
         IValidator<ResendConfirmationEmailDto> resendConfirmationEmailValidator,
         IValidator<ForgotPasswordDto> forgotPasswordValidator,
         IValidator<ResetPasswordDto> resetPasswordValidator,
+        IValidator<RefreshRequestDto> refreshRequestValidator,
+        IValidator<LogoutRequestDto> logoutRequestValidator,
         IEmailQueue emailQueue,
         IValidator<ConfirmEmailDto> confirmEmailValidator,
-        IAppDbContext appDbContext)
+        IAppDbContext appDbContext
+        )
     {
         _userManager = userManager;
         _accessTokenService = accessTokenService;
@@ -64,6 +69,8 @@ public class AuthService : IAuthService
         _resetPasswordValidator = resetPasswordValidator;
         _confirmEmailValidator = confirmEmailValidator;
         _appDbContext = appDbContext;
+        _refreshRequestValidator = refreshRequestValidator;
+        _logoutRequestValidator = logoutRequestValidator;
     }
 
     public async Task<Result<AuthResponseDto>> LoginAsync(LoginDto loginDto, CancellationToken ct = default)
@@ -334,6 +341,12 @@ public class AuthService : IAuthService
 
     public async Task<Result<AuthResponseDto>> RefreshTokenAsync(RefreshRequestDto refreshRequestDto, CancellationToken ct = default)
     {
+        var validationResult = _refreshRequestValidator.Validate(refreshRequestDto);
+        if (!validationResult.IsValid)
+        {
+            return validationResult.ToValidationFailure<AuthResponseDto>();
+        }
+
         var rotateResult = await _refreshTokenService.RotateAsync(refreshRequestDto.RefreshToken, ct);
         if (rotateResult.IsError)
         {
@@ -358,6 +371,12 @@ public class AuthService : IAuthService
 
     public async Task<Result> LogoutAsync(LogoutRequestDto logoutRequestDto, CancellationToken ct = default)
     {
+        var validationResult = _logoutRequestValidator.Validate(logoutRequestDto);
+        if (!validationResult.IsValid)
+        {
+            return validationResult.ToValidationFailure();
+        }
+
         await _refreshTokenService.RevokeAsync(logoutRequestDto.RefreshToken, ct);
         return Result.Success();
     }
