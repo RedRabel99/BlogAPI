@@ -3,7 +3,7 @@ using BlogAPI.Application.DTOs.UserProfile;
 using BlogAPI.Application.DTOs.UserProfiles;
 using BlogAPI.Application.Extensions;
 using BlogAPI.Application.Interfaces;
-using BlogAPI.Application.Mapping.UserProfileMappers;
+using BlogAPI.Application.Mapping;
 using BlogAPI.Application.Shared.Pagination;
 using BlogAPI.Application.Shared.UserProfile;
 using BlogAPI.Domain;

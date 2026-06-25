@@ -2,7 +2,7 @@
 using BlogAPI.Domain.Entities;
 using System.Linq.Expressions;
 
-namespace BlogAPI.Application.Mapping.UserProfileMappers;
+namespace BlogAPI.Application.Mapping;
 
 public static class UserProfileMappers
 {
