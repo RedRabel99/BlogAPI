@@ -11,5 +11,5 @@ public static class CommentErrors
     public static Error NotFound =
         Error.NotFound("Comment.NotFound", "The specified comment was not found.");
     public static Error Internal =
-        Error.Internal("Comment.InternalError", "An unexpected error occurred while processing the comment.");
+        Error.Internal("Comment.Internal", "An unexpected error occurred while processing the comment.");
 }

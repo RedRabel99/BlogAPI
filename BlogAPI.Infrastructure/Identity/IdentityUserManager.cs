@@ -208,7 +208,7 @@ public class IdentityUserManager : IUserManager
             //TODO: implement result for invalid new password
             return Result.Failure(
                 result.Errors.Any(x => x.Code.Equals("PasswordMismatch"))
-                    ? AuthErrors.PasswordMissmatch 
+                    ? AuthErrors.PasswordMismatch
                     : AuthErrors.Internal);
         }
 

@@ -1,25 +1,25 @@
-﻿using BlogAPI.Domain.Abstractions;
+using BlogAPI.Domain.Abstractions;
 
 namespace BlogAPI.Domain;
 
-public static class AuthErrors  
+public static class AuthErrors
 {
     public static readonly Error UserNotFound =
-        Error.NotFound("AuthErrors.NotFound", "Given user was not found");
+        Error.NotFound("Auth.NotFound", "Given user was not found");
     public static readonly Error NoAuthenticatedUser =
-        Error.NotFound("AuthErrors.NoAuthenticatedIser", "There is no user authenticated currently");
-    public static readonly Error PasswordMissmatch = 
-        Error.Validation("AuthErrors.PasswordMissmatch", "Given password is not a valid password");
+        Error.NotFound("Auth.NoAuthenticatedUser", "There is no user authenticated currently");
+    public static readonly Error PasswordMismatch =
+        Error.Validation("Auth.PasswordMismatch", "Given password is not a valid password");
     public static readonly Error InvalidCredentials =
-        Error.Unauthorized("AuthErrors.InvalidCredentials", "Given credentials are invalid");
+        Error.Unauthorized("Auth.InvalidCredentials", "Given credentials are invalid");
     public static readonly Error AuthFailure =
-        Error.Internal("AuthErrors.AuthFailure", "Something went wrong while authenticating");
+        Error.Internal("Auth.AuthFailure", "Something went wrong while authenticating");
     public static readonly Error UserAlreadyExists =
-        Error.Conflict("AuthErrors.UserAlreadyExists", "User with given username already exists");
+        Error.Conflict("Auth.UserAlreadyExists", "User with given username already exists");
     public static readonly Error UserWithEmailAlreadyExists =
-        Error.Conflict("AuthErrors.UserWithEmailAlreadyExists", "User with given email already exists");
+        Error.Conflict("Auth.UserWithEmailAlreadyExists", "User with given email already exists");
     public static readonly Error Internal =
-        Error.Internal("AuthErrors.Internal", "Something went wrong");
-    public static readonly Error InvalidToken = 
-        Error.Validation("AuthErrors.InvalidToken", "Given token is invalid");
+        Error.Internal("Auth.Internal", "Something went wrong");
+    public static readonly Error InvalidToken =
+        Error.Validation("Auth.InvalidToken", "Given token is invalid");
 }

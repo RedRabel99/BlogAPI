@@ -31,7 +31,7 @@ public class TagService : ITagService
 
         if (tag is null)
         {
-            return Result<TagDto>.Failure(TagErrors.TagNotFound);
+            return Result<TagDto>.Failure(TagErrors.NotFound);
         }
 
         return Result<TagDto>.Success(tag.ToDto());
@@ -43,7 +43,7 @@ public class TagService : ITagService
 
         if (tag is null)
         {
-            return Result<TagDto>.Failure(TagErrors.TagNotFound);
+            return Result<TagDto>.Failure(TagErrors.NotFound);
         }
 
         return Result<TagDto>.Success(tag.ToDto());

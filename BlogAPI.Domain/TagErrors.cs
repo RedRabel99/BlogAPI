@@ -1,9 +1,9 @@
-﻿using BlogAPI.Domain.Abstractions;
+using BlogAPI.Domain.Abstractions;
 
 namespace BlogAPI.Domain;
 
 public static class TagErrors
 {
-    public static readonly Error TagNotFound =
-        Error.NotFound("TagErrors.NotFound", "Given tag was not found");
+    public static readonly Error NotFound =
+        Error.NotFound("Tag.NotFound", "Given tag was not found");
 }
