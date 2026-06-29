@@ -1,6 +1,6 @@
 ﻿using BlogAPI.Domain.Abstractions;
 
-namespace BlogAPI.Application.Shared
+namespace BlogAPI.Application.Errors
 {
     public static class CommonErrors
     {

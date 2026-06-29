@@ -1,6 +1,6 @@
 using BlogAPI.Domain.Abstractions;
 
-namespace BlogAPI.Domain;
+namespace BlogAPI.Application.Errors;
 
 public static class AuthErrors
 {

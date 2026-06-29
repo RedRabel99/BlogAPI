@@ -1,4 +1,4 @@
-﻿using BlogAPI.Application.Shared;
+﻿using BlogAPI.Application.Errors;
 using BlogAPI.Domain.Abstractions;
 using FluentValidation.Results;
 

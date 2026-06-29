@@ -1,7 +1,5 @@
-﻿using BlogAPI.Application.DTOs.Auth;
-using BlogAPI.Domain;
+﻿using BlogAPI.Application.Errors;
 using BlogAPI.Domain.Abstractions;
-using BlogAPI.Domain.Entities;
 using BlogAPI.Domain.Interfaces.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

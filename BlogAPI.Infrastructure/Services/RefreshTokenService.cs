@@ -1,6 +1,6 @@
-﻿using BlogAPI.Application.Interfaces;
+﻿using BlogAPI.Application.Errors;
+using BlogAPI.Application.Interfaces;
 using BlogAPI.Application.Interfaces.Auth;
-using BlogAPI.Domain;
 using BlogAPI.Domain.Abstractions;
 using BlogAPI.Domain.Entities;
 using BlogAPI.Infrastructure.Options;

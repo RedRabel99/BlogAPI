@@ -1,10 +1,10 @@
 using BlogAPI.Application.DTOs.Tags;
+using BlogAPI.Application.Errors;
 using BlogAPI.Application.Extensions;
 using BlogAPI.Application.Interfaces;
 using BlogAPI.Application.Mapping;
 using BlogAPI.Application.Shared;
 using BlogAPI.Application.Shared.Pagination;
-using BlogAPI.Domain;
 using BlogAPI.Domain.Abstractions;
 using BlogAPI.Domain.Entities;
 using FluentValidation;
