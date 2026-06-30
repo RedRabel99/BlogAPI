@@ -1,9 +1,9 @@
-﻿using BlogAPI.Application.DTOs.Tags;
+﻿using BlogAPI.Application.Tags.Dtos;
 using BlogAPI.Application.Common.Pagination;
 using BlogAPI.Domain.Abstractions;
 using BlogAPI.Domain.Entities;
 
-namespace BlogAPI.Application.Interfaces;
+namespace BlogAPI.Application.Tags;
 
 public interface ITagService
 {

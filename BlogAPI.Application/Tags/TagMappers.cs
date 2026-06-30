@@ -1,8 +1,8 @@
 ﻿using System.Linq.Expressions;
-using BlogAPI.Application.DTOs.Tags;
+using BlogAPI.Application.Tags.Dtos;
 using BlogAPI.Domain.Entities;
 
-namespace BlogAPI.Application.Mapping;
+namespace BlogAPI.Application.Tags;
 
 public static class TagMappers
 {

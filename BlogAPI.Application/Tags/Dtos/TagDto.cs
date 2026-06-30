@@ -1,4 +1,4 @@
-﻿namespace BlogAPI.Application.DTOs.Tags;
+﻿namespace BlogAPI.Application.Tags.Dtos;
 
 public record TagDto
 {

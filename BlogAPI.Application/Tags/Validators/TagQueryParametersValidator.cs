@@ -1,10 +1,10 @@
-﻿using BlogAPI.Application.DTOs.Tags;
+﻿using BlogAPI.Application.Tags.Dtos;
 using BlogAPI.Application.Common.Pagination;
 using BlogAPI.Application.Common.Validation;
 using FluentValidation;
 using Microsoft.Extensions.Options;
 
-namespace BlogAPI.Application.Validators.Tags;
+namespace BlogAPI.Application.Tags.Validators;
 
 public class TagQueryParametersValidator : AbstractValidator<SearchTagQueryParametersDto>
 {

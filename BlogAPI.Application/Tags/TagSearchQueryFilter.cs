@@ -1,7 +1,7 @@
 ﻿using BlogAPI.Domain.Entities;
 using BlogAPI.Application.Common.Querying;
 
-namespace BlogAPI.Application.Shared;
+namespace BlogAPI.Application.Tags;
 
 public class TagSearchQueryFilter(string? tagName) : IQueryFilter<Tag>
 {

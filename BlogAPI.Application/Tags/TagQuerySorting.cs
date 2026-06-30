@@ -2,7 +2,7 @@
 using BlogAPI.Application.Common.Querying;
 using BlogAPI.Domain.Entities;
 
-namespace BlogAPI.Application.Shared
+namespace BlogAPI.Application.Tags
 {
     public class TagQuerySorting(string? sortOrder, string? sortColumn) : IQuerySorting<Tag>
     {

@@ -1,4 +1,4 @@
-﻿using BlogAPI.Application.DTOs.Tags;
+﻿using BlogAPI.Application.Tags.Dtos;
 
 namespace BlogAPI.Application.Posts.Dtos;
 
