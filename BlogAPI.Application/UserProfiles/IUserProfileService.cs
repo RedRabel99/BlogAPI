@@ -1,9 +1,8 @@
-﻿using BlogAPI.Application.DTOs.UserProfile;
-using BlogAPI.Application.DTOs.UserProfiles;
+﻿using BlogAPI.Application.UserProfiles.Dtos;
 using BlogAPI.Application.Common.Pagination;
 using BlogAPI.Domain.Abstractions;
 
-namespace BlogAPI.Application.Interfaces
+namespace BlogAPI.Application.UserProfiles
 {
     public interface IUserProfileService
     {

@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions;
 using BlogAPI.Application.Common.Querying;
 
-namespace BlogAPI.Application.Shared.UserProfile;
+namespace BlogAPI.Application.UserProfiles;
 
 public class UserProfileQuerySorting(string? sortOrder, string? sortColumn) : IQuerySorting<Domain.Entities.UserProfile>
 {

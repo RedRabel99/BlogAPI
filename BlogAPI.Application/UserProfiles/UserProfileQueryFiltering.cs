@@ -1,6 +1,6 @@
 ﻿using BlogAPI.Application.Common.Querying;
 
-namespace BlogAPI.Application.Shared.UserProfile;
+namespace BlogAPI.Application.UserProfiles;
 
 public class UserProfileQueryFiltering(string? username, string? displayName)
     : IQueryFilter<Domain.Entities.UserProfile>

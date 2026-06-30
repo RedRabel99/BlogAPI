@@ -1,8 +1,8 @@
-﻿using BlogAPI.Application.DTOs.UserProfile;
+﻿using BlogAPI.Application.UserProfiles.Dtos;
 using BlogAPI.Domain.Entities;
 using System.Linq.Expressions;
 
-namespace BlogAPI.Application.Mapping;
+namespace BlogAPI.Application.UserProfiles;
 
 public static class UserProfileMappers
 {

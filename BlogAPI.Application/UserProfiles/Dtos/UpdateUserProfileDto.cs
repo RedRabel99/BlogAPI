@@ -1,4 +1,4 @@
-﻿namespace BlogAPI.Application.DTOs.UserProfile;
+﻿namespace BlogAPI.Application.UserProfiles.Dtos;
 
 public class UpdateUserProfileDto
 {

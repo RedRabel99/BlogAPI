@@ -1,10 +1,10 @@
-﻿using BlogAPI.Application.DTOs.UserProfiles;
+﻿using BlogAPI.Application.UserProfiles.Dtos;
 using BlogAPI.Application.Common.Pagination;
 using FluentValidation;
 using Microsoft.Extensions.Options;
 using BlogAPI.Application.Common.Validation;
 
-namespace BlogAPI.Application.Validators.UserProfile;
+namespace BlogAPI.Application.UserProfiles.Validators;
 
 public class UserProfileQueryParametersValidator :
     AbstractValidator<UserProfileQueryParametersDto>

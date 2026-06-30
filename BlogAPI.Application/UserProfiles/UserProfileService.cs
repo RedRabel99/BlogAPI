@@ -1,6 +1,5 @@
 ﻿
-using BlogAPI.Application.DTOs.UserProfile;
-using BlogAPI.Application.DTOs.UserProfiles;
+using BlogAPI.Application.UserProfiles.Dtos;
 using BlogAPI.Application.Common.Errors;
 using BlogAPI.Application.Common.Querying;
 using BlogAPI.Application.Common.Validation;
@@ -8,13 +7,13 @@ using BlogAPI.Application.Interfaces;
 using BlogAPI.Application.Common.Persistance;
 using BlogAPI.Application.Mapping;
 using BlogAPI.Application.Common.Pagination;
-using BlogAPI.Application.Shared.UserProfile;
+using BlogAPI.Application.UserProfiles;
 using BlogAPI.Domain.Abstractions;
 using BlogAPI.Domain.Interfaces.Auth;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
-namespace BlogAPI.Application.Services;
+namespace BlogAPI.Application.UserProfiles;
 
 public class UserProfileService : IUserProfileService
 {

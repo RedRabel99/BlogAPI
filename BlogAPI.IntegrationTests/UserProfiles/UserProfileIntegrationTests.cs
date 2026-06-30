@@ -1,5 +1,4 @@
-﻿using BlogAPI.Application.DTOs.UserProfile;
-using BlogAPI.Application.DTOs.UserProfiles;
+﻿using BlogAPI.Application.UserProfiles.Dtos;
 using BlogAPI.IntegrationTests.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using System.Net;

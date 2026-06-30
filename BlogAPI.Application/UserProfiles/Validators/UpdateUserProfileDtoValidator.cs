@@ -1,8 +1,8 @@
-﻿using BlogAPI.Application.DTOs.UserProfile;
+﻿using BlogAPI.Application.UserProfiles.Dtos;
 using BlogAPI.Application.Common.Validation;
 using FluentValidation;
 
-namespace BlogAPI.Application.Validators.UserProfile;
+namespace BlogAPI.Application.UserProfiles.Validators;
 
 public class UpdateUserProfileDtoValidator : AbstractValidator<UpdateUserProfileDto>
 {
