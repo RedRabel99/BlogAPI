@@ -1,5 +1,4 @@
 ﻿using BlogAPI.Application.Common.Errors;
-using BlogAPI.Application.Interfaces;
 using BlogAPI.Application.Common.Persistance;
 using BlogAPI.Application.Auth;
 using BlogAPI.Domain.Abstractions;

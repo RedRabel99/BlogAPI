@@ -1,4 +1,4 @@
-﻿namespace BlogAPI.Application.DTOs.Comments;
+﻿namespace BlogAPI.Application.Comments.Dtos;
 
 public class UpdateCommentDto
 {

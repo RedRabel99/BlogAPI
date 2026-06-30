@@ -1,5 +1,4 @@
 ﻿using BlogAPI.Application.UserProfiles.Dtos;
-using BlogAPI.Application.Interfaces;
 using BlogAPI.Application.UserProfiles;
 using BlogAPI.Web.Extensions;
 using Microsoft.AspNetCore.Authorization;

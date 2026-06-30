@@ -1,11 +1,8 @@
-using BlogAPI.Application.DTOs.Comments;
+using BlogAPI.Application.Comments.Dtos;
 using BlogAPI.Application.Common.Errors;
 using BlogAPI.Application.Common.Querying;
 using BlogAPI.Application.Common.Validation;
-using BlogAPI.Application.Interfaces;
 using BlogAPI.Application.Common.Persistance;
-using BlogAPI.Application.Mapping;
-using BlogAPI.Application.Shared;
 using BlogAPI.Application.Common.Pagination;
 using BlogAPI.Domain.Abstractions;
 using BlogAPI.Domain.Entities;
@@ -13,7 +10,7 @@ using BlogAPI.Domain.Interfaces.Auth;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
-namespace BlogAPI.Application.Services;
+namespace BlogAPI.Application.Comments;
 
 public class CommentService : ICommentService
 {

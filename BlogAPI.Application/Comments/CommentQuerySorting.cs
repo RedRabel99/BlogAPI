@@ -2,7 +2,7 @@ using System.Linq.Expressions;
 using BlogAPI.Application.Common.Querying;
 using BlogAPI.Domain.Entities;
 
-namespace BlogAPI.Application.Shared;
+namespace BlogAPI.Application.Comments;
 
 public class CommentQuerySorting(string? sortOrder, string? sortColumn) : IQuerySorting<Comment>
 {

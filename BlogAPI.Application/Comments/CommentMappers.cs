@@ -1,9 +1,9 @@
-﻿using BlogAPI.Application.DTOs.Comments;
+﻿using BlogAPI.Application.Comments.Dtos;
 using BlogAPI.Application.Posts.Dtos;
 using BlogAPI.Domain.Entities;
 using System.Linq.Expressions;
 
-namespace BlogAPI.Application.Mapping;
+namespace BlogAPI.Application.Comments;
 
 public static class CommentMappers
 {

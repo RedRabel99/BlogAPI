@@ -1,4 +1,3 @@
-﻿using BlogAPI.Application.Interfaces;
 using BlogAPI.Application.Common.Email;
 using BlogAPI.Domain.Entities;
 using System.Text.Json;

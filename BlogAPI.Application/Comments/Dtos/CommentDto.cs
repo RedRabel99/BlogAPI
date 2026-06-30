@@ -1,6 +1,6 @@
 ﻿using BlogAPI.Application.Posts.Dtos;
 
-namespace BlogAPI.Application.DTOs.Comments;
+namespace BlogAPI.Application.Comments.Dtos;
 
 public class CommentDto
 {

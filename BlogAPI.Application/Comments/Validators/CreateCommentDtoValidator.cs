@@ -1,11 +1,11 @@
-using BlogAPI.Application.DTOs.Comments;
+using BlogAPI.Application.Comments.Dtos;
 using FluentValidation;
 
-namespace BlogAPI.Application.Validators.Comments;
+namespace BlogAPI.Application.Comments.Validators;
 
-public class UpdateCommentDtoValidator : AbstractValidator<UpdateCommentDto>
+public class CreateCommentDtoValidator : AbstractValidator<CreateCommentDto>
 {
-    public UpdateCommentDtoValidator()
+    public CreateCommentDtoValidator()
     {
         RuleFor(x => x.Content)
             .NotNull()

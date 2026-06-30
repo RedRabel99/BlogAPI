@@ -2,7 +2,6 @@ using BlogAPI.Application.Tags.Dtos;
 using BlogAPI.Application.Common.Errors;
 using BlogAPI.Application.Common.Querying;
 using BlogAPI.Application.Common.Validation;
-using BlogAPI.Application.Interfaces;
 using BlogAPI.Application.Common.Persistance;
 using BlogAPI.Application.Common.Pagination;
 using BlogAPI.Domain.Abstractions;

@@ -1,10 +1,10 @@
-using BlogAPI.Application.DTOs.Comments;
+using BlogAPI.Application.Comments.Dtos;
 using BlogAPI.Application.Common.Pagination;
 using BlogAPI.Application.Common.Validation;
 using FluentValidation;
 using Microsoft.Extensions.Options;
 
-namespace BlogAPI.Application.Validators.Comments;
+namespace BlogAPI.Application.Comments.Validators;
 
 public class CommentQueryParametersValidator : AbstractValidator<CommentQueryParametersDto>
 {

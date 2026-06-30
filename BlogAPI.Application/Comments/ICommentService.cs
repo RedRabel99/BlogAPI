@@ -1,8 +1,8 @@
-﻿using BlogAPI.Application.DTOs.Comments;
+﻿using BlogAPI.Application.Comments.Dtos;
 using BlogAPI.Application.Common.Pagination;
 using BlogAPI.Domain.Abstractions;
 
-namespace BlogAPI.Application.Interfaces;
+namespace BlogAPI.Application.Comments;
 
 public interface ICommentService
 {

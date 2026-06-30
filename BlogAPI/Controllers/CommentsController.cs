@@ -1,5 +1,5 @@
-using BlogAPI.Application.DTOs.Comments;
-using BlogAPI.Application.Interfaces;
+using BlogAPI.Application.Comments.Dtos;
+using BlogAPI.Application.Comments;
 using BlogAPI.Web.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;

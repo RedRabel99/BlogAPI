@@ -1,8 +1,8 @@
-using BlogAPI.Application.DTOs.Comments;
+using BlogAPI.Application.Comments.Dtos;
 using BlogAPI.Domain.Entities;
 using BlogAPI.Application.Common.Querying;
 
-namespace BlogAPI.Application.Shared;
+namespace BlogAPI.Application.Comments;
 
 public class CommentQueryFiltering(CommentQueryParametersDto? parameters) : IQueryFilter<Comment>
 {

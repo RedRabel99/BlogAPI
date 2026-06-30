@@ -1,4 +1,3 @@
-﻿using BlogAPI.Application.Shared;
 
 namespace BlogAPI.Application.UserProfiles.Dtos;
 

@@ -1,4 +1,3 @@
-﻿using BlogAPI.Application.Interfaces;
 using BlogAPI.Application.Common.Persistance;
 using BlogAPI.Domain.Entities;
 using BlogAPI.Infrastructure.Identity;
