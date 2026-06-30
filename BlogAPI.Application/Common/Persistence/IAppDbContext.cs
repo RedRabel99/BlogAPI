@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
-namespace BlogAPI.Application.Interfaces;
+namespace BlogAPI.Application.Common.Persistance;
 
 public interface IAppDbContext
 {

@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Identity;
 using BlogAPI.Infrastructure.Email;
 using BlogAPI.Application.Interfaces;
+using BlogAPI.Application.Common.Persistance;
 using BlogAPI.Application.Interfaces.Auth;
 using BlogAPI.Infrastructure.Options;
 

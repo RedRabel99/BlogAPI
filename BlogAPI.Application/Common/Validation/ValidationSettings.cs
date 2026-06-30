@@ -1,4 +1,4 @@
-﻿namespace BlogAPI.Application.Validators;
+﻿namespace BlogAPI.Application.Common.Validation;
 
 public class ValidationSettings
 {

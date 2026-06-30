@@ -1,13 +1,14 @@
 ﻿using BlogAPI.Application.Interfaces;
+using BlogAPI.Application.Common.Persistance;
 using BlogAPI.Domain.Abstractions;
 using BlogAPI.Domain.Interfaces.Auth;
 using FluentValidation;
-using BlogAPI.Application.Extensions;
+using BlogAPI.Application.Common.Validation;
 using BlogAPI.Application.DTOs.Auth;
 using BlogAPI.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using BlogAPI.Application.Interfaces.Auth;
-using BlogAPI.Application.Errors;
+using BlogAPI.Application.Common.Errors;
 
 namespace BlogAPI.Application.Services;
 

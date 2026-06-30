@@ -1,4 +1,4 @@
-﻿namespace BlogAPI.Application.Constants;
+﻿namespace BlogAPI.Application.Common.Constants;
 
 public class AppClaimTypes
 {

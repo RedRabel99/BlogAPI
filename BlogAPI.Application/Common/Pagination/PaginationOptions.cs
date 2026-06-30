@@ -1,4 +1,4 @@
-﻿namespace BlogAPI.Application.Shared.Pagination;
+﻿namespace BlogAPI.Application.Common.Pagination;
 
 public sealed class PaginationOptions
 {   

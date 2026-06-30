@@ -1,5 +1,5 @@
 ﻿using System.Linq.Expressions;
-using BlogAPI.Application.Extensions;
+using BlogAPI.Application.Common.Querying;
 
 namespace BlogAPI.Application.Shared.UserProfile;
 

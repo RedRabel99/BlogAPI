@@ -1,6 +1,7 @@
 using BlogAPI.Application.DTOs.Auth;
-using BlogAPI.Application.Errors;
+using BlogAPI.Application.Common.Errors;
 using BlogAPI.Application.Interfaces;
+using BlogAPI.Application.Common.Persistance;
 using BlogAPI.Application.Interfaces.Auth;
 using BlogAPI.Application.Services;
 using BlogAPI.Domain.Abstractions;

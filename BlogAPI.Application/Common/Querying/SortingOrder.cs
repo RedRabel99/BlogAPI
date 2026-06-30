@@ -1,7 +1,7 @@
 ﻿using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
-namespace BlogAPI.Application.Shared;
+namespace BlogAPI.Application.Common.Querying;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum SortingOrder

@@ -1,4 +1,4 @@
-﻿namespace BlogAPI.Application.Shared;
+﻿namespace BlogAPI.Application.Common.Querying;
 
 public interface IQuerySorting<T> where T : class
 {

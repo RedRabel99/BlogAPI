@@ -1,5 +1,6 @@
 using BlogAPI.Application.DTOs.Comments;
 using BlogAPI.Domain.Entities;
+using BlogAPI.Application.Common.Querying;
 
 namespace BlogAPI.Application.Shared;
 

@@ -1,6 +1,6 @@
 using BlogAPI.Application.DTOs.Comments;
-using BlogAPI.Application.Shared.Pagination;
-using BlogAPI.Application.Validators.Shared;
+using BlogAPI.Application.Common.Pagination;
+using BlogAPI.Application.Common.Validation;
 using FluentValidation;
 using Microsoft.Extensions.Options;
 

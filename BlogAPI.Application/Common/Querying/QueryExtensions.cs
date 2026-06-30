@@ -2,7 +2,7 @@
 using BlogAPI.Application.Shared;
 
 
-namespace BlogAPI.Application.Extensions;
+namespace BlogAPI.Application.Common.Querying;
 
 public static class QueryExtensions
 {

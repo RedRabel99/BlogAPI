@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 
-namespace BlogAPI.Application.Shared.Pagination;
+namespace BlogAPI.Application.Common.Pagination;
 
 public class PagedListFactory : IPagedListFactory
 {

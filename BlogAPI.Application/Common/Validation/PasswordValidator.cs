@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace BlogAPI.Application.Validators.Shared;
+namespace BlogAPI.Application.Common.Validation;
 
 public static class PasswordValidator
 {

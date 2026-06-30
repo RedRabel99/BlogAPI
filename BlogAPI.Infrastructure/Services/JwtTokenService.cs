@@ -1,4 +1,4 @@
-﻿using BlogAPI.Application.Constants;
+﻿using BlogAPI.Application.Common.Constants;
 using BlogAPI.Application.Interfaces.Auth;
 using BlogAPI.Domain.Interfaces.Auth;
 using BlogAPI.Infrastructure.Options;

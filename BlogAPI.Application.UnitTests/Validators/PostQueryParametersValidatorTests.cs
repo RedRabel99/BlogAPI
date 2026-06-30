@@ -1,5 +1,5 @@
 using BlogAPI.Application.DTOs.Posts;
-using BlogAPI.Application.Shared.Pagination;
+using BlogAPI.Application.Common.Pagination;
 using BlogAPI.Application.Validators.Posts;
 using Microsoft.Extensions.Options;
 

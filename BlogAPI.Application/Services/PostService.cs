@@ -1,7 +1,9 @@
 using BlogAPI.Application.DTOs.Posts;
-using BlogAPI.Application.Extensions;
+using BlogAPI.Application.Common.Querying;
+using BlogAPI.Application.Common.Validation;
 using BlogAPI.Application.Interfaces;
-using BlogAPI.Application.Shared.Pagination;
+using BlogAPI.Application.Common.Persistance;
+using BlogAPI.Application.Common.Pagination;
 using BlogAPI.Domain.Abstractions;
 using BlogAPI.Domain.Entities;
 using BlogAPI.Domain.Interfaces.Auth;
@@ -10,7 +12,7 @@ using BlogAPI.Application.Shared;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Slugify;
-using BlogAPI.Application.Errors;
+using BlogAPI.Application.Common.Errors;
 
 namespace BlogAPI.Application.Services;
 

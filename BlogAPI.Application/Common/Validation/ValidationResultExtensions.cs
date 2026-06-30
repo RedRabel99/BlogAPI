@@ -1,8 +1,8 @@
-﻿using BlogAPI.Application.Errors;
+﻿using BlogAPI.Application.Common.Errors;
 using BlogAPI.Domain.Abstractions;
 using FluentValidation.Results;
 
-namespace BlogAPI.Application.Extensions;
+namespace BlogAPI.Application.Common.Validation;
 
 public static class ValidationResultExtensions
 {

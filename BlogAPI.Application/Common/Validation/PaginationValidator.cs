@@ -1,7 +1,7 @@
-﻿using BlogAPI.Application.Shared.Pagination;
+﻿using BlogAPI.Application.Common.Pagination;
 using FluentValidation;
 
-namespace BlogAPI.Application.Validators.Shared;
+namespace BlogAPI.Application.Common.Validation;
 
 public static class PaginationValidator
 {

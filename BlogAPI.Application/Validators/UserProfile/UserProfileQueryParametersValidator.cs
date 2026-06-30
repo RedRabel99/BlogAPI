@@ -1,8 +1,8 @@
 ﻿using BlogAPI.Application.DTOs.UserProfiles;
-using BlogAPI.Application.Shared.Pagination;
+using BlogAPI.Application.Common.Pagination;
 using FluentValidation;
 using Microsoft.Extensions.Options;
-using BlogAPI.Application.Validators.Shared;
+using BlogAPI.Application.Common.Validation;
 
 namespace BlogAPI.Application.Validators.UserProfile;
 

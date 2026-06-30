@@ -1,6 +1,6 @@
 ﻿using BlogAPI.Application.Interfaces;
 using BlogAPI.Application.Services;
-using BlogAPI.Application.Shared.Pagination;
+using BlogAPI.Application.Common.Pagination;
 using BlogAPI.Application.Validators.Auth;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;

@@ -1,5 +1,5 @@
 ﻿using BlogAPI.Application.DTOs.UserProfile;
-using BlogAPI.Application.Validators.Shared;
+using BlogAPI.Application.Common.Validation;
 using FluentValidation;
 
 namespace BlogAPI.Application.Validators.UserProfile;

@@ -1,11 +1,13 @@
 ﻿
 using BlogAPI.Application.DTOs.UserProfile;
 using BlogAPI.Application.DTOs.UserProfiles;
-using BlogAPI.Application.Errors;
-using BlogAPI.Application.Extensions;
+using BlogAPI.Application.Common.Errors;
+using BlogAPI.Application.Common.Querying;
+using BlogAPI.Application.Common.Validation;
 using BlogAPI.Application.Interfaces;
+using BlogAPI.Application.Common.Persistance;
 using BlogAPI.Application.Mapping;
-using BlogAPI.Application.Shared.Pagination;
+using BlogAPI.Application.Common.Pagination;
 using BlogAPI.Application.Shared.UserProfile;
 using BlogAPI.Domain.Abstractions;
 using BlogAPI.Domain.Interfaces.Auth;

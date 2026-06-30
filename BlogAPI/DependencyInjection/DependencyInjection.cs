@@ -1,4 +1,4 @@
-﻿using BlogAPI.Application.Shared.Pagination;
+﻿using BlogAPI.Application.Common.Pagination;
 using BlogAPI.Web.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
