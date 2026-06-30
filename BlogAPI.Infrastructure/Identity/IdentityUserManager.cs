@@ -1,7 +1,6 @@
-﻿using BlogAPI.Application.DTOs.Auth;
-using BlogAPI.Domain;
+﻿using BlogAPI.Application.Common.Errors;
+using BlogAPI.Application.Auth;
 using BlogAPI.Domain.Abstractions;
-using BlogAPI.Domain.Entities;
 using BlogAPI.Domain.Interfaces.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -208,7 +207,7 @@ public class IdentityUserManager : IUserManager
             //TODO: implement result for invalid new password
             return Result.Failure(
                 result.Errors.Any(x => x.Code.Equals("PasswordMismatch"))
-                    ? AuthErrors.PasswordMissmatch 
+                    ? AuthErrors.PasswordMismatch
                     : AuthErrors.Internal);
         }
 

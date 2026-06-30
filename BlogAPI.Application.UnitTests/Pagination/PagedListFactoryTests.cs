@@ -1,4 +1,4 @@
-using BlogAPI.Application.Shared.Pagination;
+using BlogAPI.Application.Common.Pagination;
 using Microsoft.Extensions.Options;
 using MockQueryable;
 

@@ -1,8 +1,8 @@
-using BlogAPI.Application.DTOs.Auth;
-using BlogAPI.Application.Interfaces;
-using BlogAPI.Application.Interfaces.Auth;
-using BlogAPI.Application.Services;
-using BlogAPI.Domain;
+using BlogAPI.Application.Auth.Dtos;
+using BlogAPI.Application.Common.Errors;
+using BlogAPI.Application.Common.Persistance;
+using BlogAPI.Application.Auth;
+using BlogAPI.Application.Common.Email;
 using BlogAPI.Domain.Abstractions;
 using BlogAPI.Domain.Interfaces.Auth;
 using FluentValidation;

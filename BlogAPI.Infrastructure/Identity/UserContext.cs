@@ -1,4 +1,5 @@
-﻿using BlogAPI.Application.Constants;
+﻿using BlogAPI.Application.Common.Constants;
+using BlogAPI.Application.Auth;
 using BlogAPI.Domain.Interfaces.Auth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;

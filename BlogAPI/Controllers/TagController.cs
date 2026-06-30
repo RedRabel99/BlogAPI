@@ -1,5 +1,5 @@
-﻿using BlogAPI.Application.DTOs.Tags;
-using BlogAPI.Application.Interfaces;
+﻿using BlogAPI.Application.Tags.Dtos;
+using BlogAPI.Application.Tags;
 using BlogAPI.Web.Extensions;
 using Microsoft.AspNetCore.Mvc;
 

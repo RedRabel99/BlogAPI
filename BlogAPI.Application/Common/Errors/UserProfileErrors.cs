@@ -1,0 +1,15 @@
+using BlogAPI.Domain.Abstractions;
+
+namespace BlogAPI.Application.Common.Errors;
+
+public static class UserProfileErrors
+{
+    public static Error NotFound =
+        Error.NotFound("UserProfile.NotFound", "Given user was not found");
+    public static Error Forbidden =
+        Error.Forbidden("UserProfile.Forbidden", "You are not authorized to perform this action");
+    public static Error Internal =
+        Error.Internal("UserProfile.Internal", "Something went wrong");
+    public static Error UsernameAlreadyExists =
+        Error.Validation("UserProfile.UsernameAlreadyExists", "User with this username already exists");
+}

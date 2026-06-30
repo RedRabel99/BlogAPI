@@ -1,7 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using BlogAPI.Infrastructure;
 using BlogAPI.IntegrationTests.TestData;
-using BlogAPI.Application.DTOs.Auth;
+using BlogAPI.Application.Auth.Dtos;
+using BlogAPI.Application.Auth;
 using System.Net.Http.Json;
 using System.Globalization;
 

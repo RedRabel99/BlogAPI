@@ -1,0 +1,18 @@
+﻿using BlogAPI.Domain.Entities;
+using BlogAPI.Application.Common.Querying;
+
+namespace BlogAPI.Application.Tags;
+
+public class TagPostQueryFilter(string? tagName) : IQueryFilter<Tag>
+{
+    private readonly string? _tagName = tagName;
+    public IQueryable<Tag> Apply(IQueryable<Tag> query)
+    {
+        if (!string.IsNullOrWhiteSpace(_tagName))
+        {
+            query = query.Where(t => t.TagName.Contains(_tagName));
+        }
+
+        return query;
+    }
+}

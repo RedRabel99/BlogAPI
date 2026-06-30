@@ -1,6 +1,6 @@
-using BlogAPI.Application.DTOs.Posts;
-using BlogAPI.Application.Shared.Pagination;
-using BlogAPI.Application.Validators.Posts;
+using BlogAPI.Application.Posts.Dtos;
+using BlogAPI.Application.Common.Pagination;
+using BlogAPI.Application.Posts.Validators;
 using Microsoft.Extensions.Options;
 
 namespace BlogAPI.Application.UnitTests.Validators;

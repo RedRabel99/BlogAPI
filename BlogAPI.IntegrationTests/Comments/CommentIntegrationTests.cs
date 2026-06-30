@@ -1,4 +1,4 @@
-using BlogAPI.Application.DTOs.Comments;
+using BlogAPI.Application.Comments.Dtos;
 using BlogAPI.IntegrationTests.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using System.Net;
