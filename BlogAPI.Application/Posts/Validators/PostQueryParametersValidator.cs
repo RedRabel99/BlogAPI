@@ -1,10 +1,10 @@
-using BlogAPI.Application.DTOs.Posts;
+using BlogAPI.Application.Posts.Dtos;
 using BlogAPI.Application.Common.Pagination;
 using FluentValidation;
 using Microsoft.Extensions.Options;
 using BlogAPI.Application.Common.Validation;
 
-namespace BlogAPI.Application.Validators.Posts;
+namespace BlogAPI.Application.Posts.Validators;
 
 public class PostQueryParametersValidator : AbstractValidator<PostQueryParametersDto>
 {

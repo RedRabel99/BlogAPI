@@ -1,8 +1,8 @@
-using BlogAPI.Application.DTOs.Posts;
+using BlogAPI.Application.Posts.Dtos;
 using BlogAPI.Domain.Entities;
 using BlogAPI.Application.Common.Querying;
 
-namespace BlogAPI.Application.Shared;
+namespace BlogAPI.Application.Posts;
 
 public class PostSearchQueryFilter(PostQueryParametersDto? parameters) : IQueryFilter<Post>
 {

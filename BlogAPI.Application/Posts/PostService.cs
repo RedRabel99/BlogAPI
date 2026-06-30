@@ -1,4 +1,4 @@
-using BlogAPI.Application.DTOs.Posts;
+using BlogAPI.Application.Posts.Dtos;
 using BlogAPI.Application.Common.Querying;
 using BlogAPI.Application.Common.Validation;
 using BlogAPI.Application.Interfaces;
@@ -9,13 +9,12 @@ using BlogAPI.Domain.Abstractions;
 using BlogAPI.Domain.Entities;
 using BlogAPI.Domain.Interfaces.Auth;
 using BlogAPI.Application.Mapping;
-using BlogAPI.Application.Shared;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Slugify;
 using BlogAPI.Application.Common.Errors;
 
-namespace BlogAPI.Application.Services;
+namespace BlogAPI.Application.Posts;
 
 public class PostService : IPostService
 {

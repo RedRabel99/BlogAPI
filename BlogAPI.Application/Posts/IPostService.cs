@@ -1,8 +1,8 @@
-﻿using BlogAPI.Application.DTOs.Posts;
+﻿using BlogAPI.Application.Posts.Dtos;
 using BlogAPI.Application.Common.Pagination;
 using BlogAPI.Domain.Abstractions;
 
-namespace BlogAPI.Application.Interfaces;
+namespace BlogAPI.Application.Posts;
 
 public interface IPostService
 {

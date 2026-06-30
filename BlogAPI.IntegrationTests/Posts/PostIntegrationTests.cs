@@ -1,4 +1,4 @@
-﻿using BlogAPI.Application.DTOs.Posts;
+﻿using BlogAPI.Application.Posts.Dtos;
 using BlogAPI.IntegrationTests.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using System.Net;

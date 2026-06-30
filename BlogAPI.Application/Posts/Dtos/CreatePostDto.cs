@@ -1,6 +1,6 @@
 ﻿using BlogAPI.Application.DTOs.Tags;
 
-namespace BlogAPI.Application.DTOs.Posts;
+namespace BlogAPI.Application.Posts.Dtos;
 
 public class CreatePostDto
 {

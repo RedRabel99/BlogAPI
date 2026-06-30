@@ -1,8 +1,8 @@
-﻿using BlogAPI.Application.DTOs.Posts;
+﻿using BlogAPI.Application.Posts.Dtos;
 using BlogAPI.Domain.Entities;
 using System.Linq.Expressions;
 
-namespace BlogAPI.Application.Mapping;
+namespace BlogAPI.Application.Posts;
 
 public static  class PostMappers
 {

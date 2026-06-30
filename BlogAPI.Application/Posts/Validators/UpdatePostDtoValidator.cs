@@ -1,19 +1,24 @@
-﻿using BlogAPI.Application.DTOs.Posts;
+﻿using BlogAPI.Application.Posts.Dtos;
 using FluentValidation;
 
-namespace BlogAPI.Application.Validators.Posts;
+namespace BlogAPI.Application.Posts.Validators;
 
-public class CreatePostDtoValidator : AbstractValidator<CreatePostDto>
+public class UpdatePostDtoValidator : AbstractValidator<UpdatePostDto>
 {
-    public CreatePostDtoValidator()
+    public UpdatePostDtoValidator()
     {
-        RuleFor(x => x.Title)
-            .NotNull()
-            .NotEmpty().WithMessage("Title is required.")
-            .MaximumLength(200).WithMessage("Title cannot exceed 200 characters.");
+        RuleFor(x => x)
+            .Must(x =>
+                x.Title is not null ||
+                x.Content is not null ||
+                x.Excerpt is not null ||
+                x.Tags is not null)
+            .WithMessage("At least one field must be provided.");
 
-        RuleFor(x => x.Content)
-            .NotEmpty().WithMessage("Content is required.");
+        RuleFor(x => x.Title)
+            .NotEmpty()
+            .MaximumLength(200).WithMessage("Title cannot exceed 200 characters.")
+            .When(x => x.Title is not null);
 
         RuleFor(x => x.Slug)
             .NotEmpty()
@@ -37,6 +42,7 @@ public class CreatePostDtoValidator : AbstractValidator<CreatePostDto>
 
         RuleFor(x => x.Tags)
             .Must(tags => tags.Distinct().Count() == tags.Count)
-            .WithMessage("Tags must be unique.");
+            .WithMessage("Tags must be unique.")
+            .When(x => x.Tags is not null);
     }
 }

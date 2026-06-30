@@ -1,4 +1,5 @@
-using BlogAPI.Application.Mapping;
+using BlogAPI.Application.Posts;
+using BlogAPI.Application.Posts.Dtos;
 using BlogAPI.Domain.Entities;
 
 namespace BlogAPI.Application.UnitTests.Mapping;

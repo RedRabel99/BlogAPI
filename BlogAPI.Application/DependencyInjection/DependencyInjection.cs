@@ -1,6 +1,7 @@
 ﻿using BlogAPI.Application.Interfaces;
 using BlogAPI.Application.Auth;
 using BlogAPI.Application.UserProfiles;
+using BlogAPI.Application.Posts;
 using BlogAPI.Application.Services;
 using BlogAPI.Application.Common.Pagination;
 using BlogAPI.Application.Auth.Validators;

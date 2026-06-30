@@ -1,4 +1,4 @@
-﻿using BlogAPI.Application.DTOs.Posts;
+﻿using BlogAPI.Application.Posts.Dtos;
 
 namespace BlogAPI.Application.DTOs.Comments;
 
