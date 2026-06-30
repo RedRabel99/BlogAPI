@@ -1,4 +1,5 @@
-﻿using BlogAPI.Application.DTOs.Auth;
+﻿using BlogAPI.Application.Auth.Dtos;
+using BlogAPI.Application.Auth;
 using BlogAPI.Domain.Entities;
 using BlogAPI.Infrastructure;
 using BlogAPI.Infrastructure.Identity;

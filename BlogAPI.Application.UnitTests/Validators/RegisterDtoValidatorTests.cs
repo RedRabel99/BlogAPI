@@ -1,5 +1,5 @@
-using BlogAPI.Application.DTOs.Auth;
-using BlogAPI.Application.Validators.Auth;
+using BlogAPI.Application.Auth.Dtos;
+using BlogAPI.Application.Auth.Validators;
 
 namespace BlogAPI.Application.UnitTests.Validators;
 

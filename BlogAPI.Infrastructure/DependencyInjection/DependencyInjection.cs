@@ -8,7 +8,8 @@ using Microsoft.AspNetCore.Identity;
 using BlogAPI.Infrastructure.Email;
 using BlogAPI.Application.Interfaces;
 using BlogAPI.Application.Common.Persistance;
-using BlogAPI.Application.Interfaces.Auth;
+using BlogAPI.Application.Auth;
+using BlogAPI.Application.Common.Email;
 using BlogAPI.Infrastructure.Options;
 
 namespace BlogAPI.Infrastructure.DependencyInjection;

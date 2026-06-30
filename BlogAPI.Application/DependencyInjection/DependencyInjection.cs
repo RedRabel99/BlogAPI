@@ -1,7 +1,8 @@
 ﻿using BlogAPI.Application.Interfaces;
+using BlogAPI.Application.Auth;
 using BlogAPI.Application.Services;
 using BlogAPI.Application.Common.Pagination;
-using BlogAPI.Application.Validators.Auth;
+using BlogAPI.Application.Auth.Validators;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Slugify;

@@ -1,5 +1,5 @@
 ﻿using BlogAPI.Application.Common.Constants;
-using BlogAPI.Application.Interfaces.Auth;
+using BlogAPI.Application.Auth;
 using BlogAPI.Domain.Interfaces.Auth;
 using BlogAPI.Infrastructure.Options;
 using Microsoft.Extensions.Options;

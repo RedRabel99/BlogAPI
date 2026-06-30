@@ -1,4 +1,4 @@
-﻿using BlogAPI.Application.DTOs.Auth;
+﻿using BlogAPI.Application.Auth.Dtos;
 using BlogAPI.IntegrationTests.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using System.Net;

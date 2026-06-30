@@ -1,4 +1,5 @@
 ﻿using BlogAPI.Application.Common.Errors;
+using BlogAPI.Application.Auth;
 using BlogAPI.Domain.Abstractions;
 using BlogAPI.Domain.Interfaces.Auth;
 using Microsoft.AspNetCore.Identity;
