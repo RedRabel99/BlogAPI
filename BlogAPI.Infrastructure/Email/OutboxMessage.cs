@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace BlogAPI.Domain.Entities;
+namespace BlogAPI.Infrastructure.Email;
 
 public sealed class OutboxMessage
 {

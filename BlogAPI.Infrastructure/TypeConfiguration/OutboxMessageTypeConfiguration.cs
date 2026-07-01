@@ -1,4 +1,4 @@
-using BlogAPI.Domain.Entities;
+using BlogAPI.Infrastructure.Email;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
