@@ -9,7 +9,7 @@ public sealed class OutboxEmailQueue : IEmailQueue
     private readonly AppDbContext _context;
     
 
-    public OutboxEmailQueue(AppDbContext context, IEmailSender emailSender)
+    public OutboxEmailQueue(AppDbContext context)
     {
         _context = context;
     }
@@ -19,8 +19,7 @@ public sealed class OutboxEmailQueue : IEmailQueue
         var outboxMessage = new OutboxMessage
         {
             Type = message.GetType().FullName!,
-            Content = JsonSerializer.Serialize(message),
-            OccurredOn = DateTime.UtcNow
+            Content = JsonSerializer.Serialize(message)
         };
 
         await _context.OutboxMessages.AddAsync(outboxMessage, ct);

@@ -3,9 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Text.Json;
 
 namespace BlogAPI.Infrastructure.Email;
@@ -13,10 +10,15 @@ namespace BlogAPI.Infrastructure.Email;
 public sealed class OutboxEmailProcessor : BackgroundService
 {
     private const int BatchSize = 100;
-    private const int MaxAttempts = 3;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<OutboxEmailProcessor> _logger;
     private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(5);
+
+    private int _consecutiveFailures;
+    private DateTime _pausedUntil;
+    private const int FailureThreshold = 5;
+    private static readonly TimeSpan PauseDuration = TimeSpan.FromMinutes(2);
+
 
     public OutboxEmailProcessor(IServiceScopeFactory scopeFactory, ILogger<OutboxEmailProcessor> logger)
     {
@@ -54,6 +56,11 @@ public sealed class OutboxEmailProcessor : BackgroundService
 
     private async Task ProcessEmailMessages(CancellationToken ct)
     {
+        if (DateTime.UtcNow < _pausedUntil)
+        {
+            return; //returning while in pause caused by consecutive failures
+        }
+
         await using var scope = _scopeFactory.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var sender = scope.ServiceProvider.GetRequiredService<IEmailSender>();
@@ -67,8 +74,9 @@ public sealed class OutboxEmailProcessor : BackgroundService
             SELECT *
             FROM "OutboxMessages"
             WHERE "ProcessedOn" IS NULL
-              AND "RetryCount" < {MaxAttempts}
+              AND "RetryCount" < {OutboxMessage.MaxAttempts}
               AND "Type" = {emailType}
+              AND ("NextAttemptOn" IS NULL OR "NextAttemptOn" <= {DateTime.UtcNow})
             ORDER BY "OccurredOn"
             LIMIT {BatchSize}
             FOR UPDATE SKIP LOCKED
@@ -82,7 +90,6 @@ public sealed class OutboxEmailProcessor : BackgroundService
 
         foreach(var outboxMessage in outboxMessages)
         {
-            outboxMessage.RetryCount += 1;
             try
             {
                 var email = JsonSerializer.Deserialize<EmailMessage>(outboxMessage.Content)
@@ -90,15 +97,26 @@ public sealed class OutboxEmailProcessor : BackgroundService
                         $"Outbox message {outboxMessage.Id} deserialized to null EmailMessage.");
                 await sender.SendEmailAsync(email, ct);
 
-                outboxMessage.ProcessedOn = DateTime.UtcNow;
-                outboxMessage.Error = null;
+                outboxMessage.MarkProcessed(DateTime.UtcNow);
+                _consecutiveFailures = 0;
             }
             catch(Exception ex) when (ex is not OperationCanceledException)
             {
-                outboxMessage.Error = ex.Message;
-                _logger.LogWarning(ex,
+                outboxMessage.MarkFailed(ex.Message, DateTime.UtcNow);
+
+                _consecutiveFailures++;
+
+                if(_consecutiveFailures >= FailureThreshold)
+                {
+                    _pausedUntil = DateTime.UtcNow.Add(PauseDuration);
+                    _logger.LogWarning("Outbox email processor paused for {PauseDuration} due to {ConsecutiveFailures} consecutive failures.",
+                        PauseDuration, _consecutiveFailures);
+                    break; //stop iterating through messages, will resume after pause
+                }
+
+                _logger.LogError(ex,
                     "Failed to send outbox email {Id} (attempt {Attempt}/{Max}): {Error}",
-                    outboxMessage.Id, outboxMessage.RetryCount, MaxAttempts, outboxMessage.Error);
+                    outboxMessage.Id, outboxMessage.RetryCount, OutboxMessage.MaxAttempts, outboxMessage.Error);
             }
         }
         await context.SaveChangesAsync(ct);
