@@ -23,11 +23,11 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLife
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.ConfigureServices(services => 
+        builder.ConfigureServices(services =>
         {
             var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
 
-            if(descriptor is not null)
+            if (descriptor is not null)
             {
                 services.Remove(descriptor);
             }
@@ -35,6 +35,9 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLife
             services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(_dbcContainer.GetConnectionString())
             );
+
+            services.AddTestEmailSender();
+
         });
     }
     public async Task InitializeAsync()

@@ -34,11 +34,11 @@ public sealed class OutboxEmailProcessor : BackgroundService
             {
                 await ProcessEmailMessages(stoppingToken);
             }
-            catch(OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
-                break; 
+                break;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Outbox processor iteration failed");
             }
@@ -54,7 +54,7 @@ public sealed class OutboxEmailProcessor : BackgroundService
         }
     }
 
-    private async Task ProcessEmailMessages(CancellationToken ct)
+    internal async Task ProcessEmailMessages(CancellationToken ct)
     {
         if (DateTime.UtcNow < _pausedUntil)
         {
@@ -84,11 +84,12 @@ public sealed class OutboxEmailProcessor : BackgroundService
 
         if (outboxMessages.Count == 0)
         {
+            _consecutiveFailures = 0;
             await tx.RollbackAsync(ct);
             return;
         }
 
-        foreach(var outboxMessage in outboxMessages)
+        foreach (var outboxMessage in outboxMessages)
         {
             try
             {
@@ -100,26 +101,37 @@ public sealed class OutboxEmailProcessor : BackgroundService
                 outboxMessage.MarkProcessed(DateTime.UtcNow);
                 _consecutiveFailures = 0;
             }
-            catch(Exception ex) when (ex is not OperationCanceledException)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 outboxMessage.MarkFailed(ex.Message, DateTime.UtcNow);
 
-                _consecutiveFailures++;
-
-                if(_consecutiveFailures >= FailureThreshold)
+                if (outboxMessage.RetryCount >= OutboxMessage.MaxAttempts)
                 {
-                    _pausedUntil = DateTime.UtcNow.Add(PauseDuration);
-                    _logger.LogWarning("Outbox email processor paused for {PauseDuration} due to {ConsecutiveFailures} consecutive failures.",
-                        PauseDuration, _consecutiveFailures);
-                    break; //stop iterating through messages, will resume after pause
+                    _logger.LogError(ex,
+                        "Outbox email {Id} permanently failed after {Max} attempts: {Error}",
+                        outboxMessage.Id, OutboxMessage.MaxAttempts, outboxMessage.Error);
+                }
+                else
+                {
+                    _logger.LogWarning(ex,
+                        "Failed to send outbox email {Id} (attempt {Attempt}/{Max}): {Error}",
+                        outboxMessage.Id, outboxMessage.RetryCount, OutboxMessage.MaxAttempts, outboxMessage.Error);
                 }
 
-                _logger.LogError(ex,
-                    "Failed to send outbox email {Id} (attempt {Attempt}/{Max}): {Error}",
-                    outboxMessage.Id, outboxMessage.RetryCount, OutboxMessage.MaxAttempts, outboxMessage.Error);
+                _consecutiveFailures++;
+
+                if (_consecutiveFailures >= FailureThreshold)
+                {
+                    _pausedUntil = DateTime.UtcNow.Add(PauseDuration);
+                    
+                    _logger.LogWarning("Outbox email processor paused for {PauseDuration} due to {ConsecutiveFailures} consecutive failures.",
+                        PauseDuration, _consecutiveFailures);
+                    _consecutiveFailures = 0; //reset counter after pausing
+                    break; //stop iterating through messages, will resume after pause
+                }
             }
         }
         await context.SaveChangesAsync(ct);
-        await tx.CommitAsync(ct);   
+        await tx.CommitAsync(ct);
     }
 }

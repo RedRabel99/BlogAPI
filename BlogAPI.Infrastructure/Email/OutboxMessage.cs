@@ -11,7 +11,11 @@ public sealed class OutboxMessage
     public string? Error { get; private set; }
     public int RetryCount { get; private set; }
 
-    public const int MaxAttempts = 5;
+    public static int MaxAttempts => RetrySchedule.Length + 1;
+
+    //must match the Error column's HasMaxLength in OutboxMessageTypeConfiguration
+    private const int MaxErrorLength = 4000;
+
     private static readonly TimeSpan[] RetrySchedule = new[]
     {
         TimeSpan.FromMinutes(1),
@@ -24,11 +28,13 @@ public sealed class OutboxMessage
     {
         ProcessedOn = dateTime;
         Error = null;
+        NextAttemptOn = null; //a processed message has no pending retry
     }
 
     public void MarkFailed(string error, DateTime dateTime)
     {
-        Error = error;
+        //a longer message would be rejected by the database and roll back the whole batch
+        Error = error.Length > MaxErrorLength ? error[..MaxErrorLength] : error;
         RetryCount++;
 
         NextAttemptOn = RetryCount < MaxAttempts ? dateTime + RetrySchedule[RetryCount - 1] : null;
