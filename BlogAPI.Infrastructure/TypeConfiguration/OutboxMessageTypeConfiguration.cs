@@ -1,4 +1,4 @@
-using BlogAPI.Domain.Entities;
+using BlogAPI.Infrastructure.Email;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -32,7 +32,9 @@ public class OutboxMessageTypeConfiguration : IEntityTypeConfiguration<OutboxMes
             .IsRequired()
             .HasDefaultValue(0);
 
-        builder.HasIndex(x => new { x.ProcessedOn, x.OccurredOn })
+        builder.Property(x => x.NextAttemptOn);
+
+        builder.HasIndex(x => new { x.NextAttemptOn, x.OccurredOn })
             .HasFilter("\"ProcessedOn\" IS NULL");
     }
 }

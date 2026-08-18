@@ -1,5 +1,6 @@
 using BlogAPI.Application.Common.Persistance;
 using BlogAPI.Domain.Entities;
+using BlogAPI.Infrastructure.Email;
 using BlogAPI.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;

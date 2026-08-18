@@ -44,5 +44,9 @@
     <Folder Include="Email\Templates\" />
     <Folder Include="Migrations\" />
   </ItemGroup>
+	
+  <ItemGroup>
+	<InternalsVisibleTo Include="BlogAPI.IntegrationTests" />
+  </ItemGroup>
 
 </Project>

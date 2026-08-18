@@ -10,7 +10,8 @@
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="BlogAPI.Application.UnitTests/BlogAPI.Application.UnitTests.csproj" />
-    <Project Path="BlogAPI.IntegrationTests/BlogAPI.IntegrationTests.csproj"/>
+    <Project Path="BlogAPI.Infrastructure.UnitTests/BlogAPI.Infrastructure.UnitTests.csproj" Id="33357053-b4dd-46a2-a8f1-cbb9d0ae6a60" />
+    <Project Path="BlogAPI.IntegrationTests/BlogAPI.IntegrationTests.csproj" />
   </Folder>
   <Folder Name="/Web/">
     <Project Path="BlogAPI/BlogAPI.Web.csproj" />
