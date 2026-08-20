@@ -9,21 +9,21 @@ using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Slugify;
 
-namespace BlogAPI.Application.DependencyInjection
+namespace BlogAPI.Application.DependencyInjection;
+
+public static class DependencyInjection
 {
-    public static class DependencyInjection
+    public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        public static IServiceCollection AddApplication(this IServiceCollection services)
-        {
-            services.AddScoped<IAuthService, AuthService>();
-            services.AddScoped<IUserProfileService, UserProfileService>();
-            services.AddScoped<ITagService, TagService>();
-            services.AddScoped<IPostService, PostService>();
-            services.AddScoped<ICommentService, CommentService>();
-            services.AddSingleton<IPagedListFactory, PagedListFactory>();
-            services.AddValidatorsFromAssemblyContaining<RegisterDtoValidator>(ServiceLifetime.Transient);
-            services.AddSingleton<ISlugHelper, SlugHelper>();
-            return services;
-        }
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IUserProfileService, UserProfileService>();
+        services.AddScoped<ITagService, TagService>();
+        services.AddScoped<IPostService, PostService>();
+        services.AddScoped<ICommentService, CommentService>();
+        services.AddSingleton<IPagedListFactory, PagedListFactory>();
+        services.AddValidatorsFromAssemblyContaining<RegisterDtoValidator>(ServiceLifetime.Transient);
+        services.AddSingleton<ISlugHelper, SlugHelper>();
+        
+        return services;
     }
 }
